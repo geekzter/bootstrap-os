@@ -1,0 +1,5 @@
+# Mac files
+.DS_Store
+
+# Config file
+settings.json
