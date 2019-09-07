@@ -40,8 +40,8 @@ function UpdateStoreApps () {
 # Script should be called from stage 1 script
 $stage1Script = "bootstrap_windows.ps1"
 if ((Get-PSCallStack | Select-Object -Skip 1 -First 1 -ExpandProperty Command) -ne $stage1Script) {
-    Write-Host "This script can't be invoked directly, please execute $stage1Script instead. Exiting"
-    exit
+    Write-Host "This script shouldn't be invoked directly, please execute $stage1Script instead."
+    #exit
 }
 
 $startTime = Get-Date
