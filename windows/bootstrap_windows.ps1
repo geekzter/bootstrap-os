@@ -6,7 +6,6 @@
     - Kicks off next stage
 #>
 param ( 
-    [parameter(Mandatory=$false)][switch]$All=$false,
     [parameter(Mandatory=$false)][switch]$Packages=$false,
     [parameter(Mandatory=$false)][switch]$PowerShell=$false,
     [parameter(Mandatory=$false)][switch]$Settings=$false,
@@ -24,10 +23,10 @@ if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Pri
 }
 
 # Provide at least one argument
-if (!($All -or $Packages -or $Powershell -or $Settings)) {
-    Write-Host "Please indicate what to do"
-    Get-Help $MyInvocation.MyCommand.Definition
-    exit
+if (!($Packages -or $Powershell -or $Settings)) {
+    $All = $true
+    Write-Host "No selective switches provided, bootstrapping everything"
+    #Get-Help $MyInvocation.MyCommand.Definition # won't work with script downloaded using System.Net.WebClient.DownloadString()
 }
 
 # Disable IE Enhanced Security Mode
