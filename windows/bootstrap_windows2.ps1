@@ -166,6 +166,7 @@ if ($All -or $Powershell) {
     #AddorUpdateModule AzureAD
     AddorUpdateModule AzureADPreview
     AddorUpdateModule MSOnline
+    AddorUpdateModule SqlServer
     UpdateStoreApps
 
     # Find PowerShell Core
