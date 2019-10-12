@@ -18,8 +18,8 @@ function AddorUpdateModule (
         $azModuleUpdateVersionString = "{0}.{1}.{2}" -f $azModuleVersion.Major, $azModuleVersion.Minor, ($azModuleVersion.Build + 1)
         # Check whether newer module exists
         if (Find-Module $moduleName -MinimumVersion $azModuleUpdateVersionString -ErrorAction SilentlyContinue) {
-            Write-Host "Windows PowerShell $moduleName module $azModuleVersionString is out of date. Updating Az modules..."
-            Update-Module $moduleName -AcceptLicense -Force
+            Write-Host "Windows PowerShell $moduleName module $azModuleVersionString is out of date. Updating $moduleName module..."
+            Update-Module $moduleName -Force #-AcceptLicense
         } else {
             Write-Host "Windows PowerShell $moduleName module $azModuleVersionString is up to date"
         }
@@ -163,9 +163,12 @@ if ($All -or $Powershell) {
 
     # Windows PowerShell modules
     Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ForceBootstrap
-    #AddorUpdateModule AzureAD
-    AddorUpdateModule AzureADPreview
+    AddorUpdateModule PowerShellGet  
+    AddorUpdateModule AzureAD
+    #AddorUpdateModule AzureADPreview
+    AddorUpdateModule AzureRM
     AddorUpdateModule MSOnline
+    AddorUpdateModule SqlServer
     UpdateStoreApps
 
     # Find PowerShell Core
