@@ -42,7 +42,7 @@ if (!(Get-Command "choco.exe" -ErrorAction SilentlyContinue)) {
 }
 
 # Install Chocolatey packages
-choco install git -y
+choco install git.install -y
 refreshenv # This should update the path with changes made by Chocolatey
 
 # Clone (the rest of) the repository
