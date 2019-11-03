@@ -24,9 +24,12 @@ if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Pri
 
 # Provide at least one argument
 if (!($Packages -or $Powershell -or $Settings)) {
-    $All = $true
-    Write-Host "No selective switches provided, bootstrapping everything"
-    #Get-Help $MyInvocation.MyCommand.Definition # won't work with script downloaded using System.Net.WebClient.DownloadString()
+    $Settings = $true
+    Write-Host "No selective switches provided, performing minimal bootstrap with settings only"
+    if ($MyInvocation -and $MyInvocation.MyCommand -and $MyInvocation.MyCommand.Definition) {
+        # Won't work with script downloaded using System.Net.WebClient.DownloadString()
+        Get-Help $MyInvocation.MyCommand.Definition
+    }
 }
 
 # Disable IE Enhanced Security Mode
