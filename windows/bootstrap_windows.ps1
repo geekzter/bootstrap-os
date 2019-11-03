@@ -24,11 +24,13 @@ if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Pri
 
 # Provide at least one argument
 if (!($Packages -or $Powershell -or $Settings)) {
-    $Settings = $true
-    Write-Host "No selective switches provided, performing minimal bootstrap with settings only"
-    if ($MyInvocation -and $MyInvocation.MyCommand -and $MyInvocation.MyCommand.Definition) {
-        # Won't work with script downloaded using System.Net.WebClient.DownloadString()
+    if ($MyInvocation.MyCommand.Name -eq "bootstrap_windows.ps1") {
+        Write-Host "Please indicate what to do by using a switch"
         Get-Help $MyInvocation.MyCommand.Definition
+        exit
+    } else {
+        $Settings = $true
+        Write-Host "No selective switches provided, performing minimal bootstrap with settings only"
     }
 }
 
