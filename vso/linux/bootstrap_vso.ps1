@@ -11,6 +11,9 @@
     - Kicks off next stage
 
 .EXAMPLE
+    ./bootstrap_vso.ps1
+
+.EXAMPLE
     pwsh -noexit -command {Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/geekzter/bootstrap-os/master/vso/linux/bootstrap_vso.ps1')}
 #> 
 param ( 
@@ -50,4 +53,5 @@ if (!(Test-Path $stage2Script)) {
     exit
 }
 $stage2Command = $MyInvocation.line -replace "^.*ps1", $stage2Script -replace "-SkipClone", ""
+$stage2Command
 Invoke-Expression "& ${stage2Command}" 
