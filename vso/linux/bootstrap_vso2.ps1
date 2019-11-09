@@ -16,6 +16,11 @@
 
 $MyInvocation.line
 
+# Add symlink for updates
+#if (Test-Path "./bootstrap_vso0.ps1") {
+#   New-Item -ItemType symboliclink -Path "~/bin/bootstrap" -Value ($(Get-Item "./bootstrap_vso0.ps1").Fullname) -Force
+#}
+
 # Install snap package manager
 if ($(Get-Command "snap" -ErrorAction SilentlyContinue) -eq $null) {
     sudo apt install snapd
