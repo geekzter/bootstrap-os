@@ -43,6 +43,13 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
         $env:PATH = $pathArray -Join ":"
     }
 
+    # Add tfenv to path, if it exists
+    if ((Test-Path ~/.tfenv/bin) -and !$env:PATH.Contains("tfenv/bin")) {
+        [System.Collections.ArrayList]$pathArray = $env:PATH.Split(":")
+        $pathArray.Insert(1,"${env:HOME}/.tfenv/bin")
+        $env:PATH = $pathArray -Join ":"
+    }
+
     # Source environment variables from ~/.config/powershell/environment.ps1
     $environmentPath = (Join-Path (Split-Path $Profile –Parent) "environment.ps1")
     if (Test-Path -Path $environmentPath) {
