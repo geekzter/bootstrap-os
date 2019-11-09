@@ -44,10 +44,10 @@ if (!$SkipClone) {
 }
 
 # Invoke next stage
-$stage2Script = "bootstrap_vso2.ps1"
+$stage2Script = "./bootstrap_vso2.ps1"
 if (!(Test-Path $stage2Script)) {
     Write-Error "Stage 2 script $stage2Script not found, exiting"
     exit
 }
-$stage2Command = $MyInvocation.line -replace ".ps1", "2.ps1" -replace "-SkipClone", ""
+$stage2Command = $MyInvocation.line -replace "^.*ps1", $stage2Script -replace "-SkipClone", ""
 Invoke-Expression "& ${stage2Command}" 
