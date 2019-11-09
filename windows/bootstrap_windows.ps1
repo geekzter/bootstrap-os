@@ -1,10 +1,17 @@
 # No shebang, as Windows only
 <#
+.SYNOPSIS 
+    Script used to bootstrap Windows workstation
+ 
+.DESCRIPTION 
     Pre-git bootstrap stage
     - Installs git
     - Get's latest version of repo
     - Kicks off next stage
-#>
+
+.EXAMPLE
+    cmd.exe /c start PowerShell.exe -ExecutionPolicy Bypass -Noexit -Command "& {Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://github.com/geekzter/bootstrap-os/blob/master/windows/bootstrap_windows.ps1'))}"
+#> 
 param ( 
     [parameter(Mandatory=$false)][switch]$Packages=$false,
     [parameter(Mandatory=$false)][switch]$PowerShell=$false,
@@ -25,7 +32,7 @@ if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Pri
 # Provide at least one argument
 if (!($Packages -or $Powershell -or $Settings)) {
     if ($MyInvocation.MyCommand.Name -eq "bootstrap_windows.ps1") {
-        Write-Host "Please indicate what to do by using a switch"
+        Write-Host "Please indicate what to do by using a command-line switch"
         Get-Help $MyInvocation.MyCommand.Definition
         exit
     } else {
