@@ -52,6 +52,11 @@ if (!(Test-Path $stage2Script)) {
     Write-Error "Stage 2 script $stage2Script not found, exiting"
     exit
 }
-$stage2Command = $MyInvocation.line -replace "^.*ps1", $stage2Script -replace "-SkipClone", ""
+if ($MyInvocation.line -match "ps1") {
+    $stage2Command = $MyInvocation.line -replace "^.*ps1", $stage2Script -replace "-SkipClone", ""
+} else {
+    $stage2Command = $stage2Script
+}
+
 $stage2Command
 Invoke-Expression "& ${stage2Command}" 
