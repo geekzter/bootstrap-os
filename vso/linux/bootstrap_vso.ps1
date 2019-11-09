@@ -11,7 +11,7 @@
     - Kicks off next stage
 
 .EXAMPLE
-    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://github.com/geekzter/bootstrap-os/blob/master/vso/linux/bootstrap_vso.ps1'))
+    pwsh -noexit -command {Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/geekzter/bootstrap-os/master/vso/linux/bootstrap_vso.ps1')}
 #> 
 param ( 
     [parameter(Mandatory=$false)][switch]$SkipClone=$false,
@@ -26,15 +26,13 @@ if (!$SkipClone) {
     }
 
     $bootstrapDirectory = Join-Path $repoDirectory "bootstrap-os"
-    if (!(Test-Path $bootstrapDirectory)) {
-        Set-Location $repoDirectory    
+    if (!(Test-Path $bootstrapDirectory)) {  
         Write-Host "Cloning $Repository into $repoDirectory..."
-        git clone $Repository   
+        git -C $repoDirectory clone $Repository   
     } else {
         # git update if repo already exists
-        Set-Location $bootstrapDirectory
         Write-Host "Pulling $Repository in $bootstrapDirectory..."
-        git pull
+        git -C $bootstrapDirectory pull
     }
     $vsoBootstrapDirectory = Join-Path $bootstrapDirectory "vso/linux"
     if (!(Test-Path $vsoBootstrapDirectory)) {
@@ -46,7 +44,7 @@ if (!$SkipClone) {
 }
 
 # Invoke next stage
-$stage2Script = $MyInvocation.MyCommand.Name -replace ".ps1", "2.ps1"
+$stage2Script = "bootstrap_vso2.ps1"
 if (!(Test-Path $stage2Script)) {
     Write-Error "Stage 2 script $stage2Script not found, exiting"
     exit
