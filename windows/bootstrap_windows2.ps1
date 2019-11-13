@@ -132,13 +132,18 @@ if ($All -or $Settings) {
         $bgInfoCommand = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "BGInfo" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty "BGInfo"
         if (!($bgInfoCommand)) {
             # Configure BGInfo of not already done so (e.g. by VM extension)
-            $bgInfoExe = (Get-command "bginfo.exe").Source
-            $bgInfoConfig = Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) "config.bgi"
-            $bgInfoCommand = "$bgInfoExe $bgInfoConfig /NOLICPROMPT /timer:0"
-            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "BGInfo" $bgInfoCommand
+            $bgInfoExe = Get-command "bginfo.exe"
+            if ($bgInfoExe) {
+                $bgInfoPath = $bgInfoExe.Source
+                $bgInfoConfig = Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) "config.bgi"
+                $bgInfoCommand = "$bgInfoPath $bgInfoConfig /NOLICPROMPT /timer:0"
+                Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "BGInfo" $bgInfoCommand
+            }
         }
         # Execute BGInfo regardless, as we just removed the wallpaper
-        Invoke-Expression $bgInfoCommand
+        if ($bgInfoCommand) {
+            Invoke-Expression $bgInfoCommand
+        }
     }
 }
 
