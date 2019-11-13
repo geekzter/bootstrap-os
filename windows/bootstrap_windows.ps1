@@ -13,6 +13,7 @@
     cmd.exe /c start PowerShell.exe -ExecutionPolicy Bypass -Noexit -Command "& {Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://github.com/geekzter/bootstrap-os/blob/master/windows/bootstrap_windows.ps1'))}"
 #> 
 param ( 
+    [parameter(Mandatory=$false)][switch]$All=$false,
     [parameter(Mandatory=$false)][switch]$Packages=$false,
     [parameter(Mandatory=$false)][switch]$PowerShell=$false,
     [parameter(Mandatory=$false)][switch]$Settings=$false,
