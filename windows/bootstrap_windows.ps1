@@ -31,7 +31,7 @@ if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Pri
 }
 
 # Provide at least one argument
-if (!($Packages -or $Powershell -or $Settings)) {
+if (!($All -or $Packages -or $Powershell -or $Settings)) {
     if ($MyInvocation.MyCommand.Name -eq "bootstrap_windows.ps1") {
         Write-Host "Please indicate what to do by using a command-line switch"
         Get-Help $MyInvocation.MyCommand.Definition
