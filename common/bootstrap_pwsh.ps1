@@ -9,7 +9,7 @@ function AddorUpdateModule (
         $moduleUpdateVersionString = "{0}.{1}.{2}" -f $moduleVersion.Major, $moduleVersion.Minor, ($moduleVersion.Build + 1)
         # Check whether newer module exists
         if (Find-Module $moduleName -MinimumVersion $moduleUpdateVersionString -ErrorAction SilentlyContinue) {
-            Write-Host "PowerShell Core $moduleName module $moduleVersionString is out of date. Updating Az modules..."
+            Write-Host "PowerShell Core $moduleName module $moduleVersionString is out of date. Updating $moduleName modules..."
             Update-Module $moduleName -AcceptLicense -Force
         } else {
             Write-Host "PowerShell Core $moduleName module $moduleVersionString is up to date"
@@ -37,6 +37,9 @@ if (Test-Path $PROFILE) {
 
 # Check whether Az modules have been installed
 AddorUpdateModule Az
+AddorUpdateModule Oh-My-Posh
+AddorUpdateModule Posh-Git
+AddorUpdateModule PSReadLine
 
 if ($IsWindows) {
     AddorUpdateModule WindowsCompatibility
