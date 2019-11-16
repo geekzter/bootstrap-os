@@ -24,7 +24,7 @@ function AddorUpdateModule (
 # Create symbolic link for PowerShell Core profile directory
 $psCoreProfileDirectory = Split-Path -Parent $PROFILE
 if (!(Test-Path $psCoreProfileDirectory)) {
-    mkdir $psCoreProfileDirectory
+    New-Item -ItemType Directory -Path $psCoreProfileDirectory -Force
 }
 if (Test-Path $PROFILE) {
     Write-Host "Powershell Core profile $PROFILE already exists"

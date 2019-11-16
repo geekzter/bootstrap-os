@@ -5,4 +5,5 @@ dotnet-sdk-2.2
 findutils
 jq
 powershell
+snapd
 unzip
