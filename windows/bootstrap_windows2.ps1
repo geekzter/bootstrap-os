@@ -34,7 +34,8 @@ function UpdateStoreApps () {
     $namespaceName = "root\cimv2\mdm\dmmap"
     $className = "MDM_EnterpriseModernAppManagement_AppManagement01"
     $wmiObj = Get-WmiObject -Namespace $namespaceName -Class $className
-    $wmiObj.UpdateScanMethod()
+    Write-Host "Updating Windows store apps using WMI class $($wmiObj.__CLASS)..."
+    $null = $wmiObj.UpdateScanMethod()
 }
 
 # Script should be called from stage 1 script
@@ -84,6 +85,8 @@ if ($All -or $Packages) {
     if (!(Get-ChildItem -Path $installedAppsFolder)) {
         Remove-Item -Path $installedAppsFolder
     }
+
+    UpdateStoreApps
 }
 
 if ($All -or $Settings) {
@@ -167,14 +170,14 @@ if ($All -or $Powershell) {
     }
 
     # Windows PowerShell modules
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ForceBootstrap
+    Write-Host "Installing NuGet package provider..."
+    $null = Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ForceBootstrap
     AddorUpdateModule PowerShellGet  
     AddorUpdateModule AzureAD
     #AddorUpdateModule AzureADPreview
     AddorUpdateModule AzureRM
     AddorUpdateModule MSOnline
     AddorUpdateModule SqlServer
-    UpdateStoreApps
 
     # Find PowerShell Core
     if (!(Get-Command "pwsh.exe" -ErrorAction SilentlyContinue)) {
