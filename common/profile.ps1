@@ -44,19 +44,19 @@ if ($host.Name -eq 'ConsoleHost')
 }
 
 $bootstrapDirectory = Split-Path -Parent (Split-Path -Parent (Get-Item $PROFILE).Target)
-Write-Host "To update configuration, run: " -NoNewline
+Write-Host "To update configuration, run " -NoNewline
 if ($IsWindows) {
-    Write-Host "(Windows PowerShell)`n`"$bootstrapDirectory\windows\bootstrap_windows.ps1`""
+    Write-Host "(Windows PowerShell)`n$bootstrapDirectory\windows\bootstrap_windows.ps1"
 }
 if ($IsMacOS) {
-    Write-Host "`"$bootstrapDirectory/macOS/bootstrap_mac.sh`""
+    Write-Host "$bootstrapDirectory/macOS/bootstrap_mac.sh"
 }
 if ($IsLinux) {
     if ($env:VSONLINE_BUILD) {
-        Write-Host "`"$bootstrapDirectory/vso/linux/bootstrap_vso.ps1`""
+        Write-Host "$bootstrapDirectory/vso/linux/bootstrap_vso.ps1"
     } else {
         if ($DISTRIB_ID -eq "Ubuntu") {
-            Write-Host "`"$bootstrapDirectory/ubuntu/bootstrap_ubuntu.sh`""
+            Write-Host "$bootstrapDirectory/ubuntu/bootstrap_ubuntu.sh"
         }
     }
 }
