@@ -21,14 +21,21 @@ param (
 ) 
 
 # Validation
-if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and !$IsWindows) {
-    Write-Output "Not running on Windows"
-    exit
-}
+if ($PSVersionTable.PSEdition -eq "Core") {
+    if ($IsWindows) {
+        Write-Output "Not running on Windows PowerShell"
+        #Write-Output "Running PowerShell Core, invoking Windows PowerShell..."
+        #PowerShell.exe -Command $MyInvocation.Line
+        exit
+    } else {
+        Write-Output "Not running on Windows"
+        exit
+    }
+}    
 if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
     Write-Output "Not running as Administrator"
     exit
-}
+}        
 
 # Provide at least one argument
 if (!($All -or $Packages -or $Powershell -or $Settings)) {

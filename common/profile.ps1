@@ -46,7 +46,7 @@ if ($host.Name -eq 'ConsoleHost')
 $bootstrapDirectory = Split-Path -Parent (Split-Path -Parent (Get-Item $PROFILE).Target)
 Write-Host "To update configuration, run: " -NoNewline
 if ($IsWindows) {
-    Write-Host "`"PowerShell.exe -File $bootstrapDirectory\windows\bootstrap_windows.ps1`""
+    Write-Host "(Windows PowerShell)`n`"$bootstrapDirectory\windows\bootstrap_windows.ps1`""
 }
 if ($IsMacOS) {
     Write-Host "`"$bootstrapDirectory/macOS/bootstrap_mac.sh`""
