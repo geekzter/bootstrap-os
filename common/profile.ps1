@@ -52,7 +52,7 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     }
 
     # Add tfenv to path, if it exists
-    if ((Test-Path ~/.tfenv/bin) -and !$env:PATH.Contains("tfenv/bin")) {
+    if (!($(Get-Command tfenv -ErrorAction SilentlyContinue)) -and (Test-Path ~/.tfenv/bin) -and !$env:PATH.Contains("tfenv/bin")) {
         [System.Collections.ArrayList]$pathArray = $env:PATH.Split(":")
         $pathArray.Insert(1,"${env:HOME}/.tfenv/bin")
         $env:PATH = $pathArray -Join ":"

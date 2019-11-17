@@ -43,6 +43,15 @@ function AddorUpdateModule (
     }
 }
 
+# Check whether Az modules have been installed
+AddorUpdateModule Az
+AddorUpdateModule Oh-My-Posh
+AddorUpdateModule Posh-Git
+AddorUpdateModule PSReadLine 2.0.0-beta6 # Waiting for 2.0.0 to be released
+if ($IsWindows) {
+    AddorUpdateModule WindowsCompatibility
+}
+
 # Create symbolic link for PowerShell Core profile directory
 $psCoreProfileDirectory = Split-Path -Parent $PROFILE
 if (!(Test-Path $psCoreProfileDirectory)) {
@@ -56,13 +65,10 @@ if (Test-Path $PROFILE) {
     Write-Host "Creating symbolic link from $PROFILE to $psProfileJunctionTarget"
     New-Item -ItemType symboliclink -path "$PROFILE" -value "$psProfileJunctionTarget"
 }  
+. $PROFILE
 
-# Check whether Az modules have been installed
-AddorUpdateModule Az
-AddorUpdateModule Oh-My-Posh
-AddorUpdateModule Posh-Git
-AddorUpdateModule PSReadLine 2.0.0-beta6 # Waiting for 2.0.0 to be released
-
-if ($IsWindows) {
-    AddorUpdateModule WindowsCompatibility
+if (Get-Command tfenv -ErrorAction SilentlyContinue) {
+    tfenv install latest
+} else {
+    Write-Host "tfenv not found" -ForegroundColor Red
 }
