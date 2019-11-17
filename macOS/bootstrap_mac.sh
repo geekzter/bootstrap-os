@@ -5,12 +5,17 @@ if [ "$(uname)" != "Darwin" ]; then
     exit
 fi
 
+pushd `dirname $0`
+
 # Homebrew package management
 if test ! $(which brew); then
     echo "Installing homebrew..."
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 brew bundle
+if test ! $(which tfenv); then
+    brew link tfenv
+fi
 tfenv install latest
 
 # Git
@@ -31,3 +36,5 @@ if test ! $(which pwsh); then
 else
     pwsh -nop -file ../common/bootstrap_pwsh.ps1
 fi
+
+popd

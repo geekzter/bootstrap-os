@@ -33,13 +33,23 @@ function global:Prompt {
 	}
     $host.ui.rawui.WindowTitle += "$($executionContext.SessionState.Path.CurrentLocation.Path)"
 }
-# Wait until PSReadLine 2.0.0 is released
+
 if ($host.Name -eq 'ConsoleHost')
 {
     Import-Module posh-git
     Import-Module oh-my-posh
+    # Wait until PSReadLine 2.0.0 is released
     #Set-Theme Agnoster
     #Set-Theme Paradox
+}
+
+$bootstrapDirectory = Split-Path -Parent (Split-Path -Parent (Get-Item $PROFILE).Target)
+Write-Host "To update configuration, run: " -NoNewline
+if ($IsWindows) {
+    Write-Host "$bootstrapDirectory\windows\bootstrap_windows.ps1 -All"
+}
+if ($IsMacOS) {
+    Write-Host "$bootstrapDirectory/macOS/bootstrap_mac.sh"
 }
 
 # Linux & macOS only:
@@ -85,4 +95,3 @@ if (IsElevated) {
         } 
     }
 }
-
