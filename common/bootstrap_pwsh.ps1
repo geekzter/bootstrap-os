@@ -28,10 +28,16 @@ function AddorUpdateModule (
         }
     } else {
         # Install module if not present
-        Write-Host "Installing PowerShell Core $moduleName module..."
         if ($desiredVersion) {
-            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -MinimumVersion $desiredVersion -AllowPrerelease        
+            $newModule = Find-Module $moduleName -MinimumVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
+            if ($newModule) {
+                Write-Host "Installing PowerShell Core $moduleName module (pre-release $($newModule.Version))..."
+                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -MinimumVersion $desiredVersion -AllowPrerelease
+            } else {
+                Write-Host "PowerShell Core $moduleName module version $desiredVersion is not available on $($PSVersionTable.Platform)" -ForegroundColor Red
+            }
         } else {
+            Write-Host "Installing PowerShell Core $moduleName module..."
             Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense
         }
     }
