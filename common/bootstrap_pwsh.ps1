@@ -64,11 +64,4 @@ if (Test-Path $PROFILE) {
 
     Write-Host "Creating symbolic link from $PROFILE to $psProfileJunctionTarget"
     New-Item -ItemType symboliclink -path "$PROFILE" -value "$psProfileJunctionTarget"
-}  
-. $PROFILE
-
-if (Get-Command tfenv -ErrorAction SilentlyContinue) {
-    tfenv install latest
-} else {
-    Write-Host "tfenv not found" -ForegroundColor Red
 }
