@@ -28,7 +28,7 @@ if (!(Test-Path ~/.tfenv)) {
 } else {
     git -C ~/.tfenv pull
 }
-tfenv install latest
+~/.tfenv/bin/tfenv install latest
 
 # Configure PowerShell Core
 pwsh -nop -file ../../common/bootstrap_pwsh.ps1

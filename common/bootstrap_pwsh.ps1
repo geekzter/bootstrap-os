@@ -7,7 +7,7 @@ function AddorUpdateModule (
     if (Get-InstalledModule $moduleName -ErrorAction SilentlyContinue) {
         $moduleVersionString = Get-InstalledModule $moduleName | Sort-Object -Descending Version | Select-Object -First 1 -ExpandProperty Version
         if ($desiredVersion) {
-            $newModule = Find-Module $moduleName -MinimumVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
+            $newModule = Find-Module $moduleName -RequiredVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
             $allowPrerelease = $true
         } else {
             $moduleVersion = New-Object System.Version($moduleVersionString)
@@ -29,12 +29,12 @@ function AddorUpdateModule (
     } else {
         # Install module if not present
         if ($desiredVersion) {
-            $newModule = Find-Module $moduleName -MinimumVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
+            $newModule = Find-Module $moduleName -RequiredVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
             if ($newModule) {
-                Write-Host "Installing PowerShell Core $moduleName module (pre-release $($newModule.Version))..."
-                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -MinimumVersion $desiredVersion -AllowPrerelease
+                Write-Host "Installing PowerShell Core $moduleName module $desiredVersion..."
+                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -RequiredVersion $desiredVersion -AllowPrerelease
             } else {
-                Write-Host "PowerShell Core $moduleName module version $desiredVersion is not available on $($PSVersionTable.Platform)" -ForegroundColor Red
+                Write-Host "PowerShell Core $moduleName module version $desiredVersion is not available on $($PSVersionTable.OS)" -ForegroundColor Red
             }
         } else {
             Write-Host "Installing PowerShell Core $moduleName module..."
