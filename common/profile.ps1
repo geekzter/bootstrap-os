@@ -33,10 +33,14 @@ function global:Prompt {
 	}
     $host.ui.rawui.WindowTitle += "$($executionContext.SessionState.Path.CurrentLocation.Path)"
 }
-Import-Module posh-git
-Import-Module oh-my-posh
-#Set-Theme Agnoster
-#Set-Theme Paradox
+# Wait until PSReadLine 2.0.0 is released
+if ($host.Name -eq 'ConsoleHost')
+{
+    Import-Module posh-git
+    Import-Module oh-my-posh
+    #Set-Theme Agnoster
+    #Set-Theme Paradox
+}
 
 # Linux & macOS only:
 if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and ($IsLinux -or $IsMacOS)) {

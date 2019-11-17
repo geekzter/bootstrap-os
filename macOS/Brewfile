@@ -2,6 +2,7 @@
 # Taps
 tap "azure/functions"
 tap "caskroom/cask"
+tap "homebrew/cask-fonts"
 tap "cloudfoundry/tap"
 tap "microsoft/mssql-release"
 

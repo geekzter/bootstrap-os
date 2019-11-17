@@ -1,23 +1,39 @@
 #!/usr/bin/env pwsh
 
 function AddorUpdateModule (
-    [string]$moduleName
+    [string]$moduleName,
+    [string]$desiredVersion
 ) {
     if (Get-InstalledModule $moduleName -ErrorAction SilentlyContinue) {
         $moduleVersionString = Get-InstalledModule $moduleName | Sort-Object -Descending Version | Select-Object -First 1 -ExpandProperty Version
-        $moduleVersion = New-Object System.Version($moduleVersionString)
-        $moduleUpdateVersionString = "{0}.{1}.{2}" -f $moduleVersion.Major, $moduleVersion.Minor, ($moduleVersion.Build + 1)
+        if ($desiredVersion) {
+            $newModule = Find-Module $moduleName -MinimumVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
+            $allowPrerelease = $true
+        } else {
+            $moduleVersion = New-Object System.Version($moduleVersionString)
+            $desiredVersion = "{0}.{1}.{2}" -f $moduleVersion.Major, $moduleVersion.Minor, ($moduleVersion.Build + 1)
+            $newModule = Find-Module $moduleName -MinimumVersion $desiredVersion -ErrorAction SilentlyContinue
+        }
+        
         # Check whether newer module exists
-        if (Find-Module $moduleName -MinimumVersion $moduleUpdateVersionString -ErrorAction SilentlyContinue) {
-            Write-Host "PowerShell Core $moduleName module $moduleVersionString is out of date. Updating $moduleName modules..."
-            Update-Module $moduleName -AcceptLicense -Force
+        if ($newModule -and ($($newModule.Version) -ne $moduleVersionString)) {
+            Write-Host "PowerShell Core $moduleName module $moduleVersionString is out of date. Updating $moduleName module to $($newModule.Version)..."
+            if ($allowPrerelease) {
+                Update-Module $moduleName -AcceptLicense -Force -RequiredVersion ${newModule.Version} -AllowPrerelease
+            } else {
+                Update-Module $moduleName -AcceptLicense -Force -RequiredVersion ${newModule.Version}
+            }
         } else {
             Write-Host "PowerShell Core $moduleName module $moduleVersionString is up to date"
         }
     } else {
         # Install module if not present
         Write-Host "Installing PowerShell Core $moduleName module..."
-        Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense 
+        if ($desiredVersion) {
+            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -MinimumVersion $desiredVersion -AllowPrerelease        
+        } else {
+            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense
+        }
     }
 }
 
@@ -39,7 +55,7 @@ if (Test-Path $PROFILE) {
 AddorUpdateModule Az
 AddorUpdateModule Oh-My-Posh
 AddorUpdateModule Posh-Git
-AddorUpdateModule PSReadLine
+AddorUpdateModule PSReadLine 2.0.0-beta6 # Waiting for 2.0.0 to be released
 
 if ($IsWindows) {
     AddorUpdateModule WindowsCompatibility
