@@ -45,6 +45,7 @@ function AddorUpdateModule (
 
 # Check whether Az modules have been installed
 AddorUpdateModule Az
+#AddorUpdateModule AzureADPreview
 AddorUpdateModule Oh-My-Posh
 AddorUpdateModule Posh-Git
 AddorUpdateModule PSReadLine 2.0.0-beta6 # Waiting for 2.0.0 to be released
