@@ -20,6 +20,9 @@ $MyInvocation.line
 if ($(Get-Command "snap" -ErrorAction SilentlyContinue) -eq $null) {
     sudo apt install snapd
 }
+# Install packages
+$scriptPath = Split-Path $MyInvocation.MyCommand.Path -Parent
+xargs -a ${scriptPath}/apt-packages.txt sudo apt-get install -y
 
 # Set up terraform with tfenv
 if (!(Test-Path ~/.tfenv)) {
