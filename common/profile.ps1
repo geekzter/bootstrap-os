@@ -96,11 +96,14 @@ Get-Module Az -ListAvailable | Select-Object -First 1 -Property Name, Version
 
 # Go to home (not automatic for elevated prompt)
 if (IsElevated) {
-    if ($home -and (Test-Path $home)) {
-        Set-Location $home
-    } else {
-        if ($env:USERPROFILE -and (Test-Path $env:USERPROFILE)) {
-            Set-Location $env:USERPROFILE
-        } 
+    # But only if not a nested shell
+    if ((Get-Process -id $pid).Parent.Parent.ProcessName -ne "pwsh") {        
+        if ($home -and (Test-Path $home)) {
+            Set-Location $home
+        } else {
+            if ($env:USERPROFILE -and (Test-Path $env:USERPROFILE)) {
+                Set-Location $env:USERPROFILE
+            } 
+        }
     }
 }
