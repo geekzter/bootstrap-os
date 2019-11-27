@@ -43,7 +43,7 @@ if ($host.Name -eq 'ConsoleHost')
     #Set-Theme Paradox
 }
 
-$bootstrapDirectory = Split-Path -Parent (Split-Path -Parent (Get-Item $PROFILE).Target)
+$bootstrapDirectory = Split-Path -Parent (Split-Path -Parent (Get-Item $MyInvocation.MyCommand.Path).Target)
 Write-Host "To update configuration, run " -NoNewline
 if ($IsWindows) {
     Write-Host "(Windows PowerShell)`n$bootstrapDirectory\windows\bootstrap_windows.ps1"
@@ -72,7 +72,7 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     }
 
     # Source environment variables from ~/.config/powershell/environment.ps1
-    $environmentPath = (Join-Path (Split-Path $Profile –Parent) "environment.ps1")
+    $environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
     if (Test-Path -Path $environmentPath) {
         Write-Output "Sourcing $environmentPath"
         . $environmentPath
