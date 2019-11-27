@@ -43,6 +43,18 @@ function AddorUpdateModule (
     }
 }
 
+function CreateProfileDirectoryLink () {
+    # Fix some case inconcistencies with PSCore on Linux
+    if ($IsLinux) {
+        if ((Test-Path ~/.config/PowerShell) -and !(Test-Path ~/.config/powershell)) {
+            New-Item -ItemType symboliclink -path ~/.config/powershell -value ~/.config/PowerShell
+        }
+        if ((Test-Path ~/.config/powershell) -and !(Test-Path ~/.config/PowerShell)) {
+            New-Item -ItemType symboliclink -path ~/.config/PowerShell -value ~/.config/powershell
+        }
+    }
+}
+
 # Check whether Az modules have been installed
 AddorUpdateModule Az
 #AddorUpdateModule AzureADPreview
@@ -54,6 +66,7 @@ if ($IsWindows) {
 }
 
 # Create symbolic link for PowerShell Core profile directory
+CreateProfileDirectoryLink
 if (Test-Path $PROFILE) {
     Write-Host "Powershell Core profile $PROFILE already exists"
 } else {
@@ -61,6 +74,7 @@ if (Test-Path $PROFILE) {
     if (!(Test-Path $psCoreProfileDirectory)) {
         Write-Host "Creating profile directory $psCoreProfileDirectory"
         New-Item -ItemType Directory -Path $psCoreProfileDirectory -Force
+        CreateProfileDirectoryLink
     }
 
     $psProfileJunctionTarget = $(Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "profile.ps1")

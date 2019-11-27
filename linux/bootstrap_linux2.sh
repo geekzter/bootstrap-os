@@ -18,7 +18,7 @@ fi
 if test ! $(which git); then
     echo $'\nPowerShell Core (pwsh) not found, skipping setup'
 else
-    echo $'\nSetting up PowerShell Core..'
+    echo $'\nSetting up PowerShell Core...'
     pwsh -nop -file $SCRIPTPATH/../common/bootstrap_pwsh.ps1
 fi
 
