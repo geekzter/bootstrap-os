@@ -1,9 +1,0 @@
-ansible
-azure-cli
-dos2unix
-dotnet-sdk-2.2
-findutils
-jq
-powershell
-snapd
-unzip

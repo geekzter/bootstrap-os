@@ -9,8 +9,12 @@ else
     if test ! $(which sudo); then
         echo $'\nsudo not found, skipping packages'
     else
-        echo $'\nInstalling/updating packages...'
+        echo $'\nUpdating package list...'
+        sudo apt-get update
+        echo $'\nInstalling packages...'
         xargs -a ${SCRIPTPATH}/apt-packages.txt sudo apt-get install -y
+        echo $'\nUpdating packages...'
+        sudo apt-get upgrade -y
     fi
 fi
 

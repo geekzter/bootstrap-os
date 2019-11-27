@@ -4,7 +4,6 @@
 # curl -sk https://raw.githubusercontent.com/geekzter/bootstrap-os/master/linux/bootstrap_linux.sh | bash
 
 SCRIPTPATH=`dirname $0`
-echo "SCRIPTPATH=$SCRIPTPATH"
 
 if test ! $(which git); then
     echo $'\nGit not found, exiting'
@@ -12,10 +11,10 @@ if test ! $(which git); then
 fi
 echo $'\nLooking for repository'
 
-if [[ "$SCRIPTPATH" != "." ]]; then
+if [ -t 0 ]; then
     # Not invoked using cat/curl/wget
     # Test whether we are part of a cloned repository
-    descriptionFile=$(dirname $SCRIPTPATH)/.git/description
+    descriptionFile=$(dirname $SCRIPTDIR)/.git/description
     if [ -f $descriptionFile ]; then
         if grep -q bootstrap-os "$descriptionFile"; then
             echo "Repository exists at $(cd $SCRIPTPATH/.. && pwd), updating..."
