@@ -46,12 +46,14 @@ function AddorUpdateModule (
 function CreateProfileDirectoryLink () {
     # Fix some case inconcistencies with PSCore on Linux
     if ($IsLinux) {
-        if ((Test-Path ~/.config/PowerShell) -and !(Test-Path ~/.config/powershell)) {
-            New-Item -ItemType symboliclink -path ~/.config/powershell -value ~/.config/PowerShell
+        Push-Location ~/.config
+        if ((Test-Path PowerShell) -and !(Test-Path powershell)) {
+            New-Item -ItemType SymbolicLink -path powershell -value PowerShell
         }
-        if ((Test-Path ~/.config/powershell) -and !(Test-Path ~/.config/PowerShell)) {
-            New-Item -ItemType symboliclink -path ~/.config/PowerShell -value ~/.config/powershell
+        if ((Test-Path powershell) -and !(Test-Path PowerShell)) {
+            New-Item -ItemType SymbolicLink -path PowerShell -value powershell
         }
+        Pop-Location
     }
 }
 
