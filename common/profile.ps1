@@ -52,13 +52,7 @@ if ($IsMacOS) {
     Write-Host "$bootstrapDirectory/macOS/bootstrap_mac.sh"
 }
 if ($IsLinux) {
-    if ($env:VSONLINE_BUILD) {
-        Write-Host "$bootstrapDirectory/vso/linux/bootstrap_vso.ps1"
-    } else {
-        if ($DISTRIB_ID -eq "Ubuntu") {
-            Write-Host "$bootstrapDirectory/ubuntu/bootstrap_ubuntu.sh"
-        }
-    }
+    Write-Host "$bootstrapDirectory/linux/bootstrap_linux.sh"
 }
 
 # Linux & macOS only:
