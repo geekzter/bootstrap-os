@@ -54,15 +54,16 @@ if ($IsWindows) {
 }
 
 # Create symbolic link for PowerShell Core profile directory
-$psCoreProfileDirectory = Split-Path -Parent $PROFILE
-if (!(Test-Path $psCoreProfileDirectory)) {
-    New-Item -ItemType Directory -Path $psCoreProfileDirectory -Force
-}
 if (Test-Path $PROFILE) {
     Write-Host "Powershell Core profile $PROFILE already exists"
 } else {
-    $psProfileJunctionTarget = $(Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "profile.ps1")
+    $psCoreProfileDirectory = Split-Path -Parent $PROFILE
+    if (!(Test-Path $psCoreProfileDirectory)) {
+        Write-Host "Creating profile directory $psCoreProfileDirectory"
+        New-Item -ItemType Directory -Path $psCoreProfileDirectory -Force
+    }
 
+    $psProfileJunctionTarget = $(Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "profile.ps1")
     Write-Host "Creating symbolic link from $PROFILE to $psProfileJunctionTarget"
     New-Item -ItemType symboliclink -path "$PROFILE" -value "$psProfileJunctionTarget"
 }
