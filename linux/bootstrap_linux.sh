@@ -7,12 +7,13 @@ if test ! $(which git); then
     echo $'\nGit not found, exiting'
     exit 1
 fi
+echo $'\nLooking for repository'
 
 # Test whether we are part of a cloned repository
 descriptionFile=$(dirname $SCRIPTPATH)/../.git/description
 if [ -f $descriptionFile ]; then
     if grep -q bootstrap-os "$descriptionFile"; then
-        echo "Repository exists at $(cd $SCRIPTPATH/.. && pwd)"
+        echo "Repository exists at $(cd $SCRIPTPATH/.. && pwd), updating..."
         git -C .. pull
 
         # Done, spawn 2nd stage
@@ -21,14 +22,16 @@ if [ -f $descriptionFile ]; then
     fi
 fi
 
-echo "Repository does not exist, creating at ~/src/bootstrap-os..."
 if [ ! -d ~/src ]; then
     mkdir ~/src
 fi
 if [ ! -d ~/src/bootstrap-os ]; then
+    echo "Repository does not exist, creating at ~/src/bootstrap-os..."
     git clone https://github.com/geekzter/bootstrap-os ~/src/bootstrap-os
 else 
+    echo "Repository exists at $(cd ~/src/bootstrap-os && pwd), updating..."
     git -C ~/src/bootstrap-os pull
 fi
-
-. ${SCRIPTPATH}/bootstrap_linux2.sh $0
+pushd ~/src/bootstrap-os/linux
+. ./bootstrap_linux2.sh $0
+popd
