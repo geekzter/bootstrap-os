@@ -6,7 +6,7 @@ SCRIPTPATH=`dirname $0`
 if test ! $(which apt-get); then
     echo $'\napt-get not found, skipping packages'
 else
-    if test ! $(which apt-get); then
+    if test ! $(which sudo); then
         echo $'\nsudo not found, skipping packages'
     else
         echo $'\nInstalling/updating packages...'
