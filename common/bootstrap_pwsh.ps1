@@ -68,7 +68,7 @@ if ($IsWindows) {
 }
 
 # Create symbolic link for PowerShell Core profile directory
-CreateProfileDirectoryLink
+#CreateProfileDirectoryLink
 if (Test-Path $PROFILE) {
     Write-Host "Powershell Core profile $PROFILE already exists"
 } else {
@@ -76,7 +76,7 @@ if (Test-Path $PROFILE) {
     if (!(Test-Path $psCoreProfileDirectory)) {
         Write-Host "Creating profile directory $psCoreProfileDirectory"
         New-Item -ItemType Directory -Path $psCoreProfileDirectory -Force
-        CreateProfileDirectoryLink
+        #CreateProfileDirectoryLink
     }
 
     $psProfileJunctionTarget = $(Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "profile.ps1")
