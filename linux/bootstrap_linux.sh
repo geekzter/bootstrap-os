@@ -27,6 +27,8 @@ if [ ! -d ~/src ]; then
 fi
 if [ ! -d ~/src/bootstrap-os ]; then
     git clone https://github.com/geekzter/bootstrap-os ~/src/bootstrap-os
+else 
+    git -C ~/src/bootstrap-os pull
 fi
 
 . ${SCRIPTPATH}/bootstrap_linux2.sh $0
