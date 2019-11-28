@@ -14,7 +14,7 @@ echo $'\nLooking for repository'
 if [ -t 0 ]; then
     # Not invoked using cat/curl/wget
     # Test whether we are part of a cloned repository
-    descriptionFile=$(dirname $SCRIPTDIR)/.git/description
+    descriptionFile=$SCRIPTPATH/../.git/description
     if [ -f $descriptionFile ]; then
         if grep -q bootstrap-os "$descriptionFile"; then
             echo "Repository exists at $(cd $SCRIPTPATH/.. && pwd), updating..."
