@@ -3,17 +3,23 @@
 SCRIPTPATH=`dirname $0`
 
 # Packages
-if test ! $(which apt-get); then
-    echo $'\napt-get not found, skipping packages'
+if test ! $(which sudo); then
+    echo $'\nsudo not found, skipping packages'
 else
-    if test ! $(which sudo); then
-        echo $'\nsudo not found, skipping packages'
+    if test ! $(which apt-get); then
+        echo $'\napt-get not found, skipping packages'
     else
+        # kubectl requirement
+        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+        echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+
+        curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+
         echo $'\nUpdating package list...'
         sudo apt-get update
         echo $'\nInstalling packages...'
         xargs -a ${SCRIPTPATH}/apt-packages.txt sudo apt-get install -y
-        echo $'\nUpdating packages...'
+        echo $'\nUpgrading packages...'
         sudo apt-get upgrade -y
     fi
 fi
