@@ -24,14 +24,22 @@ function global:Prompt {
         $path = $executionContext.SessionState.Path.CurrentLocation.Path
     }
 
+    $branch = $(git rev-parse --abbrev-ref HEAD 2>$null)
+    $prompt = $path
+    if ($branch) {
+        $prompt += ":$branch"
+    }
     if (IsElevated) {
         $host.ui.rawui.WindowTitle += " # "
-        "$path$('#' * ($nestedPromptLevel + 1)) ";
+        $prompt += "$('#' * ($nestedPromptLevel + 1)) ";
 	} else {
         $host.ui.rawui.WindowTitle += " - "
-        "$path$('>' * ($nestedPromptLevel + 1)) ";
+        $prompt += "$('>' * ($nestedPromptLevel + 1)) ";
 	}
+
     $host.ui.rawui.WindowTitle += "$($executionContext.SessionState.Path.CurrentLocation.Path)"
+
+    $prompt
 }
 
 if ($host.Name -eq 'ConsoleHost')
