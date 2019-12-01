@@ -1,5 +1,10 @@
-ansible
 apt-transport-https
+ca-certificates
+curl
+gnupg
+lsb-release
+wget
+ansible
 azure-cli
 coreutils
 docker

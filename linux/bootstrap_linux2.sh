@@ -9,11 +9,17 @@ else
     if test ! $(which apt-get); then
         echo $'\napt-get not found, skipping packages'
     else
-        # kubectl requirement
+        # Kubernetes requirement
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-        echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+        cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
 
+        # Microsoft package repo
         curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+        if [ "$DISTRIB_ID" == "Ubuntu" ]; then
+            sudo apt-add-repository https://packages.microsoft.com/ubuntu/${DISTRIB_RELEASE}/prod
+        fi
 
         echo $'\nUpdating package list...'
         sudo apt-get update
