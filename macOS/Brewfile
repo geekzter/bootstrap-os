@@ -4,6 +4,7 @@ tap "azure/functions"
 tap "caskroom/cask"
 tap "homebrew/cask-fonts"
 tap "cloudfoundry/tap"
+tap "microsoft/azdata-cli-release"
 tap "microsoft/mssql-release"
 
 # Casks
@@ -29,6 +30,7 @@ cask "visual-studio-code"
 # Packages
 brew "ansible"
 #brew "awscli"
+brew "azdata-cli"
 brew "azure-cli"
 brew "azure-functions-core-tools"
 brew "bash" # macOS bash version is outdated
