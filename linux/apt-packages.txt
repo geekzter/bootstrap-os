@@ -6,11 +6,13 @@ lsb-release
 wget
 ansible
 azure-cli
+blobfuse
 coreutils
 docker
 dos2unix
 dotnet-sdk-3.0
 findutils
+fuse
 git
 jq
 kubectl
