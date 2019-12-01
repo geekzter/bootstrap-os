@@ -51,9 +51,9 @@ if ((Get-Location).ToString().StartsWith($env:SystemRoot,'CurrentCultureIgnoreCa
 }
 
 $bootstrapDirectory = Split-Path -Parent (Get-Item (Split-Path -Parent $PROFILE)).Target
-$bootStrapCommand = "$bootstrapDirectory\windows\bootstrap_windows.ps1"
+$bootStrapCommand = "$bootstrapDirectory\bootstrap_windows.ps1"
 Write-Host "To update configuration, run" -NoNewline
 if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
 	Write-Host " (as Administrator)" -NoNewline
 }
-Write-Host ": `"$bootStrapCommand`""
+Write-Host ": $bootStrapCommand"
