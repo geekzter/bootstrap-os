@@ -10,7 +10,7 @@ blobfuse
 coreutils
 docker
 dos2unix
-dotnet-sdk-3.0
+dotnet-sdk-3.1
 findutils
 fuse
 git
