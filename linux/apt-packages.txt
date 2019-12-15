@@ -6,6 +6,7 @@ lsb-release
 wget
 ansible
 azure-cli
+azure-functions-core-tools
 blobfuse
 coreutils
 docker
@@ -17,10 +18,12 @@ git
 jq
 kubectl
 msodbcsql17
+mssql-cli
 mssql-tools
 nano
 node-typescript
 powershell
 snapd
+telnet
 unzip
 whois
