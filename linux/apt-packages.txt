@@ -21,6 +21,7 @@ msodbcsql17
 mssql-cli
 mssql-tools
 nano
+nmap
 node-typescript
 powershell
 snapd
