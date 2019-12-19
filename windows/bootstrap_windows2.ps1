@@ -59,6 +59,8 @@ try {
 if ($All -or $Packages) {
     # Install Chocolatey packages
     choco install chocolatey-developer.config -r -y
+    choco install chocolatey-windows-developer.config -r -y -s windowsfeatures
+ 
     if ($metadataContent) {
         if ($osType -ieq "Client") {
             # Cloud hosted Client OS, install desktop (productivity) apps
