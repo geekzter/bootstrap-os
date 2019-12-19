@@ -80,8 +80,8 @@ if ($All -or $Packages) {
     if (!(Test-Path $installedAppsFolder)) {
         mkdir $installedAppsFolder
     }
-    Get-ChildItem -Path $desktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder
-    Get-ChildItem -Path $allUsersDesktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder
+    Get-ChildItem -Path $desktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
+    Get-ChildItem -Path $allUsersDesktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
     if (!(Get-ChildItem -Path $installedAppsFolder)) {
         Remove-Item -Path $installedAppsFolder
     }
