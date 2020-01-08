@@ -129,6 +129,7 @@ Set-Alias debug- Disable-Debug
 
 function  Enable-Warning {
 	$global:ErrorPreference = "Continue"
+	Write-Host `$ErrorPreference = $global:ErrorPreference
 	$global:WarningPreference = "Continue"
 	Write-Host `$WarningPreference = $global:WarningPreference
 	Write-Warning "Warning tracing enabled"
@@ -140,12 +141,12 @@ function  Enable-Information {
 
 	$global:InformationPreference = "Continue"
 	Write-Host `$InformationPreference = $global:InformationPreference
-	Write-Warning "Information tracing enabled"
+	Write-Information "Information tracing enabled"
 }
 Set-Alias information Enable-Information
 
 function  Enable-Verbose {
-	Enable-Warning
+	Enable-Information
 
 	$global:VerbosePreference = "Continue"
 	Write-Host `$VerbosePreference = $global:VerbosePreference
