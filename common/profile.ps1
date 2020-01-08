@@ -96,6 +96,72 @@ if (!(Get-Module Az -ListAvailable)) {
 }
 Get-Module Az -ListAvailable | Select-Object -First 1 -Property Name, Version
 
+# Functions
+function Disable-Warning {
+	Disable-Information
+
+	$global:WarningPreference = "SilentlyContinue"
+	Write-Host `$WarningPreference = $global:WarningPreference
+}
+Set-Alias warning- Disable-Warning
+
+function Disable-Information {
+	Disable-Verbose
+
+	$global:InformationPreference = "SilentlyContinue"
+	Write-Host `$InformationPreference = $global:InformationPreference
+}
+Set-Alias information- Disable-Information
+
+function Disable-Verbose {
+	Disable-Debug
+
+	$global:VerbosePreference = "SilentlyContinue"
+	Write-Host `$VerbosePreference = $global:VerbosePreference
+}
+Set-Alias verbose- Disable-Verbose
+
+function Disable-Debug {
+	$global:DebugPreference = "SilentlyContinue"
+	Write-Host `$DebugPreference = $global:DebugPreference
+}
+Set-Alias debug- Disable-Debug
+
+function  Enable-Warning {
+	$global:ErrorPreference = "Continue"
+	$global:WarningPreference = "Continue"
+	Write-Host `$WarningPreference = $global:WarningPreference
+	Write-Warning "Warning tracing enabled"
+}
+Set-Alias warning Enable-Warning
+
+function  Enable-Information {
+	Enable-Warning
+
+	$global:InformationPreference = "Continue"
+	Write-Host `$InformationPreference = $global:InformationPreference
+	Write-Warning "Information tracing enabled"
+}
+Set-Alias information Enable-Information
+
+function  Enable-Verbose {
+	Enable-Warning
+
+	$global:VerbosePreference = "Continue"
+	Write-Host `$VerbosePreference = $global:VerbosePreference
+	Write-Verbose "Verbose tracing enabled"
+}
+Set-Alias verbose Enable-Verbose
+
+function  Enable-Debug {
+	Enable-Verbose
+	
+	$global:DebugPreference = "Continue"
+	Write-Host `$DebugPreference = $global:DebugPreference
+	Write-Debug "Debug tracing enabled"
+}
+Set-Alias debug Enable-Debug
+
 # Go to home (not automatic for elevated prompt)
 if (IsElevated) {
     # But only if not a nested shell
