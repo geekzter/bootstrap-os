@@ -180,6 +180,7 @@ if ($All -or $Powershell) {
     AddorUpdateModule AzureRM
     AddorUpdateModule MSOnline
     AddorUpdateModule SqlServer
+    AddorUpdateModule VSTeam
 
     # Find PowerShell Core
     if (!(Get-Command "pwsh.exe" -ErrorAction SilentlyContinue)) {
