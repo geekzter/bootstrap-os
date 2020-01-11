@@ -9,6 +9,7 @@ azure-cli
 azure-functions-core-tools
 blobfuse
 coreutils
+dnsutils
 docker
 dos2unix
 dotnet-sdk-3.1
