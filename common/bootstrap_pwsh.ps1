@@ -84,3 +84,7 @@ if (Test-Path $PROFILE) {
     Write-Host "Creating symbolic link from $PROFILE to $psProfileJunctionTarget"
     New-Item -ItemType symboliclink -path "$PROFILE" -value "$psProfileJunctionTarget"
 }
+
+# Non-pwsh common tasks
+Write-Host "`nUpdating az-cli extensions"
+az extension add --name azure-devops

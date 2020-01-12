@@ -75,9 +75,6 @@ if ($All -or $Packages) {
     choco upgrade all -r -y 
     refreshenv # This should update the path with changes made by Chocolatey
 
-    # Miscellaneous developer tools
-    az extension add --name azure-devops
-
     # Move shortcuts of installed applications
     $desktopFolder = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Desktop"    
     $allUsersDesktopFolder = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "common Desktop"    
