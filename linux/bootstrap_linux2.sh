@@ -30,7 +30,7 @@ EOF
         # TODO: xargs will quit installing subsequent packages after a package fails
         #xargs -a ${SCRIPT_PATH}/apt-packages.txt sudo apt-get install -y
         while read package; do 
-            sudo apt-get install -y $package
+            sudo env ACCEPT_EULA=Y apt-get install -y $package
         done < ${SCRIPT_PATH}/apt-packages.txt
         echo $'\nUpgrading packages...'
         sudo apt-get upgrade -y
