@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 SCRIPTPATH=`dirname $0`
+DISTRIB_ID=$(lsb_release -i -s)
+DISTRIB_RELEASE=$(lsb_release -r -s)
 
 # Packages
 if test ! $(which sudo); then
