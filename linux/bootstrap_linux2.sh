@@ -20,7 +20,8 @@ EOF
         # Microsoft package repo
         curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
-            sudo apt-add-repository https://packages.microsoft.com/ubuntu/${DISTRIB_RELEASE}/prod
+            curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+            #sudo apt-add-repository https://packages.microsoft.com/ubuntu/${DISTRIB_RELEASE}/prod
             sudo apt-add-repository ppa:cpick/hub 
             sudo add-apt-repository ppa:git-core/ppa 
         fi

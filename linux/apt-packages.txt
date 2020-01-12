@@ -28,5 +28,6 @@ node-typescript
 powershell
 snapd
 telnet
+unixodbc-dev
 unzip
 whois
