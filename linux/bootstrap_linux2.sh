@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SCRIPTPATH=`dirname $0`
+SCRIPT_PATH=`dirname $0`
 DISTRIB_ID=$(lsb_release -i -s)
 DISTRIB_RELEASE=$(lsb_release -r -s)
 
@@ -22,14 +22,16 @@ EOF
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
             curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
             #sudo apt-add-repository https://packages.microsoft.com/ubuntu/${DISTRIB_RELEASE}/prod
-            sudo apt-add-repository ppa:cpick/hub 
-            sudo add-apt-repository ppa:git-core/ppa 
         fi
 
         echo $'\nUpdating package list...'
         sudo apt-get update
         echo $'\nInstalling packages...'
-        xargs -a ${SCRIPTPATH}/apt-packages.txt sudo apt-get install -y
+        # TODO: xargs will quit installing subsequent packages after a package fails
+        #xargs -a ${SCRIPT_PATH}/apt-packages.txt sudo apt-get install -y
+        while read package; do 
+            sudo apt-get install -y $package
+        done < ${SCRIPT_PATH}/apt-packages.txt
         echo $'\nUpgrading packages...'
         sudo apt-get upgrade -y
     fi
@@ -40,7 +42,7 @@ if test ! $(which git); then
     echo $'\nPowerShell Core (pwsh) not found, skipping setup'
 else
     echo $'\nSetting up PowerShell Core...'
-    pwsh -nop -file $SCRIPTPATH/../common/bootstrap_pwsh.ps1
+    pwsh -nop -file $SCRIPT_PATH/../common/bootstrap_pwsh.ps1
 fi
 
 # Set up terraform with tfenv
@@ -60,5 +62,5 @@ if [ -f ../common/settings.json ]; then
     git config --global user.name "$(cat ../common/settings.json | jq '.GitName')"
 else
     echo $'\n'
-    echo "Settings file $(cd $SCRIPTPATH/../common/ && pwd)/settings.json not found, skipping personalization"
+    echo "Settings file $(cd $SCRIPT_PATH/../common/ && pwd)/settings.json not found, skipping personalization"
 fi
