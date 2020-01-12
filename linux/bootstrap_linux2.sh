@@ -21,17 +21,19 @@ EOF
         curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
             curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
-            #sudo apt-add-repository https://packages.microsoft.com/ubuntu/${DISTRIB_RELEASE}/prod
         fi
 
         echo $'\nUpdating package list...'
         sudo apt-get update
-        echo $'\nInstalling packages...'
-        # TODO: xargs will quit installing subsequent packages after a package fails
-        #xargs -a ${SCRIPT_PATH}/apt-packages.txt sudo apt-get install -y
-        while read package; do 
-            sudo env ACCEPT_EULA=Y apt-get install -y $package
-        done < ${SCRIPT_PATH}/apt-packages.txt
+
+        echo $'\nInstalling new packages...'
+        INSTALLED_PACKAGES=$(mktemp)
+        NEW_PACKAGES=$(mktemp)
+        dpkg -l | grep ^ii | awk '{print $2}' >$INSTALLED_PACKAGES
+        grep -Fvx -f $INSTALLED_PACKAGES ${SCRIPT_PATH}/apt-packages.txt >$NEW_PACKAGES
+        sudo env ACCEPT_EULA=Y apt-get install -y $(grep -vE "^\s*#" $NEW_PACKAGES | tr "\n" " ")
+        rm $INSTALLED_PACKAGES $NEW_PACKAGES
+
         echo $'\nUpgrading packages...'
         sudo apt-get upgrade -y
     fi
