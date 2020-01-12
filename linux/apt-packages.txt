@@ -20,7 +20,6 @@ git
 jq
 kubectl
 msodbcsql17
-mssql-cli
 mssql-tools
 nano
 nmap
