@@ -6,10 +6,18 @@
 SCRIPT_PATH=`dirname $0`
 
 if test ! $(which git); then
-    echo $'\nGit not found, exiting'
-    exit 1
+    if test $(which apt-get); then
+        sudo apt-get install git -y
+    elif test $(which yum); then
+        sudo yum install git -y
+    elif test $(which zypper); then
+        sudo zypper install git -y
+    else
+        echo $'\nGit not found, exiting'
+        exit 1
+    fi
 fi
-echo $'\nLooking for repository'
+echo $'\nLooking for repository...'
 
 if [ -t 0 ]; then
     # Not invoked using cat/curl/wget
@@ -22,7 +30,7 @@ if [ -t 0 ]; then
 
             # Done, spawn 2nd stage
             . ${SCRIPT_PATH}/bootstrap_linux2.sh $0
-            exit 1
+            exit
         fi
     fi
 fi
