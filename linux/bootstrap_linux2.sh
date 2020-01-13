@@ -43,7 +43,7 @@ EOF
 fi
 
 # PowerShell
-if test ! $(which git); then
+if test ! $(which pwsh); then
     echo $'\nPowerShell Core (pwsh) not found, skipping setup'
 else
     echo $'\nSetting up PowerShell Core...'

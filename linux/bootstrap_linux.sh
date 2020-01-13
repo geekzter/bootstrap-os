@@ -3,7 +3,7 @@
 # Installs in ~/src/bootstrap-os
 # curl -sk https://raw.githubusercontent.com/geekzter/bootstrap-os/master/linux/bootstrap_linux.sh | bash
 
-SCRIPTPATH=`dirname $0`
+SCRIPT_PATH=`dirname $0`
 
 if test ! $(which git); then
     echo $'\nGit not found, exiting'
@@ -14,14 +14,14 @@ echo $'\nLooking for repository'
 if [ -t 0 ]; then
     # Not invoked using cat/curl/wget
     # Test whether we are part of a cloned repository
-    descriptionFile=$SCRIPTPATH/../.git/description
+    descriptionFile=$SCRIPT_PATH/../.git/description
     if [ -f $descriptionFile ]; then
         if grep -q bootstrap-os "$descriptionFile"; then
-            echo "Repository exists at $(cd $SCRIPTPATH/.. && pwd), updating..."
-            git -C $SCRIPTPATH/.. pull
+            echo "Repository exists at $(cd $SCRIPT_PATH/.. && pwd), updating..."
+            git -C $SCRIPT_PATH/.. pull
 
             # Done, spawn 2nd stage
-            . ${SCRIPTPATH}/bootstrap_linux2.sh $0
+            . ${SCRIPT_PATH}/bootstrap_linux2.sh $0
             exit 1
         fi
     fi
