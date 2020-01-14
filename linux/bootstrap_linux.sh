@@ -29,7 +29,7 @@ if [ -t 0 ]; then
             git -C $SCRIPT_PATH/.. pull
 
             # Done, spawn 2nd stage
-            . ${SCRIPT_PATH}/bootstrap_linux2.sh $0
+            . ${SCRIPT_PATH}/bootstrap_linux2.sh "$@"
             exit
         fi
     fi
@@ -46,5 +46,5 @@ else
     git -C ~/src/bootstrap-os pull
 fi
 pushd ~/src/bootstrap-os/linux
-. ./bootstrap_linux2.sh $0
+. ./bootstrap_linux2.sh "$@"
 popd
