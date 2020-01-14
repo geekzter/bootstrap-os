@@ -3,8 +3,8 @@ Every time you set up a new (virtual) machine, you always need to go through the
 
 ## Usage
 - macOS: Clone this repo and run bootstrap script from OS directory. Review [manual steps](./Mac/README.md) not automated
-- Ubuntu: Clone this repo and run bootstrap script from OS directory
-- Windows: Copy/download `bootstrap_windows.cmd` & `bootstrap_windows.ps1`, and run `bootstrap_windows.cmd` (this also installs Git, as this not on a vanilla Windows install)
+- Debian/Ubuntu: `curl -sk https://raw.githubusercontent.com/geekzter/bootstrap-os/master/linux/bootstrap_linux.sh | bash`
+- Windows: `PowerShell -ExecutionPolicy Bypass -Command "& {Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/geekzter/bootstrap-os/master/windows/bootstrap_windows.ps1'))}"`
 
 ## Limitations & Known Issues
 - No Bash profile set up
