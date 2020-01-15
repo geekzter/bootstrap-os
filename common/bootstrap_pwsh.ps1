@@ -62,7 +62,7 @@ AddorUpdateModule Az
 #AddorUpdateModule AzureADPreview
 AddorUpdateModule Oh-My-Posh
 AddorUpdateModule Posh-Git
-AddorUpdateModule PSReadLine 2.0.0-rc1 # Waiting for 2.0.0 to be released
+AddorUpdateModule PSReadLine 2.0.0-rc2 # Waiting for 2.0.0 to be released
 AddorUpdateModule VSTeam
 if ($IsWindows) {
     AddorUpdateModule WindowsCompatibility
@@ -84,3 +84,7 @@ if (Test-Path $PROFILE) {
     Write-Host "Creating symbolic link from $PROFILE to $psProfileJunctionTarget"
     New-Item -ItemType symboliclink -path "$PROFILE" -value "$psProfileJunctionTarget"
 }
+
+# Non-pwsh common tasks
+Write-Host "`nUpdating az-cli extensions"
+az extension add --name azure-devops

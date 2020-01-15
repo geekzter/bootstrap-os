@@ -1,6 +1,28 @@
 #!/usr/bin/env bash
 
-SCRIPTPATH=`dirname $0`
+SCRIPT_PATH=`dirname $0`
+
+# Detect Linux distribution
+if test ! $(which lsb_release); then
+    if test $(which apt-get); then
+        # Debian/Ubuntu
+        sudo apt-get install lsb-release -y
+    elif test $(which yum); then
+        # CentOS/Red Hat
+        sudo yum install redhat-lsb-core -y
+    elif test $(which zypper); then
+        # (Open)SUSE
+        sudo zypper install lsb-release -y
+    else
+        echo $'\nlsb_release not found, not able to detect distribution'
+        exit 1
+    fi
+fi
+if test $(which lsb_release); then
+    DISTRIB_ID=$(lsb_release -i -s)
+    DISTRIB_RELEASE=$(lsb_release -r -s)
+    lsb_release -a
+fi
 
 # Packages
 if test ! $(which sudo); then
@@ -18,28 +40,37 @@ EOF
         # Microsoft package repo
         curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
-            sudo apt-add-repository https://packages.microsoft.com/ubuntu/${DISTRIB_RELEASE}/prod
+            curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
         fi
 
         echo $'\nUpdating package list...'
         sudo apt-get update
-        echo $'\nInstalling packages...'
-        xargs -a ${SCRIPTPATH}/apt-packages.txt sudo apt-get install -y
+
+        echo $'\nInstalling new packages...'
+        INSTALLED_PACKAGES=$(mktemp)
+        NEW_PACKAGES=$(mktemp)
+        dpkg -l | grep ^ii | awk '{print $2}' >$INSTALLED_PACKAGES
+        grep -Fvx -f $INSTALLED_PACKAGES ${SCRIPT_PATH}/apt-packages.txt >$NEW_PACKAGES
+        while read package; do 
+            sudo env ACCEPT_EULA=Y apt-get install -y $package
+        done < $NEW_PACKAGES
+        #sudo env ACCEPT_EULA=Y apt-get install -m -y $(grep -vE "^\s*#" $NEW_PACKAGES | tr "\n" " ") # All or nothing approach, i.e. fails when a single package is missing
+        rm $INSTALLED_PACKAGES $NEW_PACKAGES
+
         echo $'\nUpgrading packages...'
         sudo apt-get upgrade -y
     fi
 fi
 
 # PowerShell
-if test ! $(which git); then
+if test ! $(which pwsh); then
     echo $'\nPowerShell Core (pwsh) not found, skipping setup'
 else
     echo $'\nSetting up PowerShell Core...'
-    pwsh -nop -file $SCRIPTPATH/../common/bootstrap_pwsh.ps1
+    pwsh -nop -file $SCRIPT_PATH/../common/bootstrap_pwsh.ps1
 fi
 
 # Set up terraform with tfenv
-### Check if a directory does not exist ###
 if [ ! -d ~/.tfenv ]; then
     echo $'\nInstalling tfenv...'
     git clone https://github.com/tfutils/tfenv.git ~/.tfenv
@@ -55,5 +86,5 @@ if [ -f ../common/settings.json ]; then
     git config --global user.name "$(cat ../common/settings.json | jq '.GitName')"
 else
     echo $'\n'
-    echo "Settings file $(cd $SCRIPTPATH/../common/ && pwd)/settings.json not found, skipping personalization"
+    echo "Settings file $(cd $SCRIPT_PATH/../common/ && pwd)/settings.json not found, skipping personalization"
 fi

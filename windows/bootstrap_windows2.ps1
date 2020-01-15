@@ -88,6 +88,11 @@ if ($All -or $Packages) {
         Remove-Item -Path $installedAppsFolder
     }
 
+    # Windows capabilities
+    Write-Host "Installing Windows Capabilities e.g. Language Packs..."
+    Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"} | Add-WindowsCapability -Online
+    Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"} | Add-WindowsCapability -Online
+
     UpdateStoreApps
 }
 

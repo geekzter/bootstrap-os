@@ -14,12 +14,12 @@ docker
 dos2unix
 dotnet-sdk-3.1
 findutils
+fish
 fuse
 git
 jq
 kubectl
 msodbcsql17
-mssql-cli
 mssql-tools
 nano
 nmap
@@ -27,5 +27,6 @@ node-typescript
 powershell
 snapd
 telnet
+unixodbc-dev
 unzip
 whois
