@@ -2,8 +2,9 @@
 # Taps
 tap "azure/functions"
 tap "caskroom/cask"
-tap "homebrew/cask-fonts"
 tap "cloudfoundry/tap"
+tap "homebrew/cask-fonts"
+tap "isen-ng/dotnet-sdk-versions"
 tap "microsoft/azdata-cli-release"
 tap "microsoft/mssql-release"
 

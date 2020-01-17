@@ -12,7 +12,12 @@ if test ! $(which brew); then
     echo "Installing homebrew..."
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
+brew update
 brew bundle
+brew upgrade
+brew cask upgrade
+
+dotnet tool install --global dotnet-ef
 if test ! $(which tfenv); then
     brew link tfenv
 fi

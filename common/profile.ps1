@@ -65,19 +65,21 @@ if ($IsLinux) {
 
 # Linux & macOS only:
 if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and ($IsLinux -or $IsMacOS)) {
-    # Path variable
-    if (!$env:PATH.Contains("/usr/local/bin")) {
-        [System.Collections.ArrayList]$pathArray = $env:PATH.Split(":")
-        $pathArray.Insert(1,"/usr/local/bin")
-        $env:PATH = $pathArray -Join ":"
+    # Manage PATH environment variable
+    [System.Collections.ArrayList]$pathList = $env:PATH.Split(":")
+    if (!$pathList.Contains("/usr/local/bin")) {
+        $pathList.Insert(1,"/usr/local/bin")
     }
-
-    # Add tfenv to path, if it exists
+    if (!$pathList.Contains("~/.dotnet/tools")) {
+        $null = $pathList.Add("~/.dotnet/tools")
+    }
+    if (!$pathList.Contains("/usr/local/share/dotnet")) {
+        $null = $pathList.Add("/usr/local/share/dotnet")
+    }
     if (!($(Get-Command tfenv -ErrorAction SilentlyContinue)) -and (Test-Path ~/.tfenv/bin) -and !$env:PATH.Contains("tfenv/bin")) {
-        [System.Collections.ArrayList]$pathArray = $env:PATH.Split(":")
-        $pathArray.Insert(1,"${env:HOME}/.tfenv/bin")
-        $env:PATH = $pathArray -Join ":"
+        $null = $pathList.Add("${env:HOME}/.tfenv/bin")
     }
+    $env:PATH = $pathList -Join ":"
 
     # Source environment variables from ~/.config/powershell/environment.ps1
     $environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
