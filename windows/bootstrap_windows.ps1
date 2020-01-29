@@ -14,9 +14,9 @@
 #> 
 param ( 
     [parameter(Mandatory=$false)][switch]$All=$false,
-    [parameter(Mandatory=$false)][switch]$Packages=$false,
-    [parameter(Mandatory=$false)][switch]$PowerShell=$false,
-    [parameter(Mandatory=$false)][switch]$Settings=$false,
+    [parameter(Mandatory=$false)][string[]]$Packages=@("Minimal"),
+    [parameter(Mandatory=$false)][bool]$PowerShell=$true,
+    [parameter(Mandatory=$false)][bool]$Settings=$true,
     [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os"
 ) 
 
@@ -36,18 +36,6 @@ if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Pri
     Write-Output "Not running as Administrator"
     exit
 }        
-
-# Provide at least one argument
-if (!($All -or $Packages -or $Powershell -or $Settings)) {
-    if ($MyInvocation.MyCommand.Name -eq "bootstrap_windows.ps1") {
-        Write-Host "Please indicate what to do by using a command-line switch"
-        Get-Help $MyInvocation.MyCommand.Definition
-        exit
-    } else {
-        $Settings = $true
-        Write-Host "No selective switches provided, performing minimal bootstrap with settings only"
-    }
-}
 
 # Disable IE Enhanced Security Mode
 $ieSecMode = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IsInstalled
