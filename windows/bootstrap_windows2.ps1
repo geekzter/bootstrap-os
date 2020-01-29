@@ -65,6 +65,14 @@ if ($All -or ($Packages.Count -gt 0)) {
  
     if (($All -and $osType -ieq "Client") -or $Packages.Contains("Desktop")) {
         choco install chocolatey-desktop.config -r -y
+
+        # Windows capabilities
+        $capabilities  = Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"}
+        $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
+        foreach ($capability in $capabilities) {
+            Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
+            $capability | Add-WindowsCapability -Online
+        }
     }
 
     if ($All -or $Packages.Contains("Developer")) {
@@ -85,14 +93,6 @@ if ($All -or ($Packages.Count -gt 0)) {
     Get-ChildItem -Path $allUsersDesktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
     if (!(Get-ChildItem -Path $installedAppsFolder)) {
         Remove-Item -Path $installedAppsFolder
-    }
-
-    # Windows capabilities
-    $capabilities  = Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"}
-    $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
-    if ($capabilities.Count -gt 0) {
-        Write-Host "Installing Windows Capabilities e.g. Language Packs..."
-        $capabilities | Add-WindowsCapability -Online
     }
 
     UpdateStoreApps
