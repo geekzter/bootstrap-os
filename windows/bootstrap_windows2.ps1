@@ -90,7 +90,7 @@ if ($All -or ($Packages.Count -gt 0)) {
     # Windows capabilities
     $capabilities  = Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"}
     $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
-    if ($capabilities -gt 0) {
+    if ($capabilities.Count -gt 0) {
         Write-Host "Installing Windows Capabilities e.g. Language Packs..."
         $capabilities | Add-WindowsCapability -Online
     }
@@ -175,7 +175,7 @@ if ($All -or $Powershell) {
     if (!(Test-Path $windowsPowerShellFolder)) {
         $windowsPowerShellJunctionTarget = $(Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "WindowsPowerShell")
         Write-Host "Creating symbolic link from $windowsPowerShellFolder to $windowsPowerShellJunctionTarget"
-        New-Item -ItemType symboliclink -path "$windowsPowerShellFolder" -value "$windowsPowerShellJunctionTarget"
+        $null = New-Item -ItemType symboliclink -path "$windowsPowerShellFolder" -value "$windowsPowerShellJunctionTarget"
     }
 
     # Windows PowerShell modules

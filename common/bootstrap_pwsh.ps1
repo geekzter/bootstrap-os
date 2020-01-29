@@ -76,7 +76,7 @@ if (Test-Path $PROFILE) {
     $psCoreProfileDirectory = Split-Path -Parent $PROFILE
     if (!(Test-Path $psCoreProfileDirectory)) {
         Write-Host "Creating profile directory $psCoreProfileDirectory"
-        New-Item -ItemType Directory -Path $psCoreProfileDirectory -Force
+        $null = New-Item -ItemType Directory -Path $psCoreProfileDirectory -Force
         #CreateProfileDirectoryLink
     }
 
@@ -86,5 +86,7 @@ if (Test-Path $PROFILE) {
 }
 
 # Non-pwsh common tasks
-Write-Host "`nUpdating az-cli extensions"
-az extension add --name azure-devops
+if (Get-Command az -ErrorAction SilentlyContinue) {
+    Write-Host "`nUpdating az-cli extensions"
+    az extension add --name azure-devops
+}
