@@ -5,7 +5,7 @@
 param ( 
     [parameter(Mandatory=$false)][switch]$All=$false,
     [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal")][string[]]$Packages=@("Minimal"),
-    [parameter(Mandatory=$false)][bool]$PowerShell=$true,
+    [parameter(Mandatory=$false)][bool]$PowerShell=$false,
     [parameter(Mandatory=$false)][bool]$Settings=$true
 ) 
 
