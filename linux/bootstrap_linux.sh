@@ -46,5 +46,5 @@ else
     git -C ~/src/bootstrap-os pull
 fi
 pushd ~/src/bootstrap-os/linux
-. ./bootstrap_linux2.sh "$@"
+. & ./bootstrap_linux2.sh "$@"
 popd

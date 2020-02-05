@@ -4,9 +4,9 @@
 #>
 param ( 
     [parameter(Mandatory=$false)][switch]$All=$false,
-    [parameter(Mandatory=$false)][switch]$Packages=$false,
-    [parameter(Mandatory=$false)][switch]$PowerShell=$false,
-    [parameter(Mandatory=$false)][switch]$Settings=$false
+    [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal")][string[]]$Packages=@("Minimal"),
+    [parameter(Mandatory=$false)][bool]$PowerShell=$false,
+    [parameter(Mandatory=$false)][bool]$Settings=$true
 ) 
 
 function AddorUpdateModule (
@@ -56,20 +56,27 @@ try {
     $metadataContent = $null
 }
 
-if ($All -or $Packages) {
+if ($All -or ($Packages.Count -gt 0)) {
     # Install Chocolatey packages
-    choco install chocolatey-developer.config -r -y
+
+    # Always setup Minimal set of packages
+    choco install chocolatey-minimal.config -r -y
     choco install chocolatey-windows-developer.config -r -y -s windowsfeatures
  
-    if ($metadataContent) {
-        if ($osType -ieq "Client") {
-            # Cloud hosted Client OS, install desktop (productivity) apps
-            choco install chocolatey-desktop.config -r -y
-        } else {
-            Write-Host "Not a client OS, skipping desktop config"
+    if (($All -and $osType -ieq "Client") -or $Packages.Contains("Desktop")) {
+        choco install chocolatey-desktop.config -r -y
+
+        # Windows capabilities
+        $capabilities  = Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"}
+        $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
+        foreach ($capability in $capabilities) {
+            Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
+            $capability | Add-WindowsCapability -Online
         }
-    } else {
-        Write-Host "Not a cloud hosted computer, skipping desktop config"
+    }
+
+    if ($All -or $Packages.Contains("Developer")) {
+        choco install chocolatey-developer.config -r -y
     }
 
     choco upgrade all -r -y 
@@ -80,18 +87,13 @@ if ($All -or $Packages) {
     $allUsersDesktopFolder = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "common Desktop"    
     $installedAppsFolder = Join-Path $desktopFolder "Installed"
     if (!(Test-Path $installedAppsFolder)) {
-        mkdir $installedAppsFolder
+        $null = mkdir $installedAppsFolder
     }
     Get-ChildItem -Path $desktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
     Get-ChildItem -Path $allUsersDesktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
     if (!(Get-ChildItem -Path $installedAppsFolder)) {
         Remove-Item -Path $installedAppsFolder
     }
-
-    # Windows capabilities
-    Write-Host "Installing Windows Capabilities e.g. Language Packs..."
-    Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"} | Add-WindowsCapability -Online
-    Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"} | Add-WindowsCapability -Online
 
     UpdateStoreApps
 }
@@ -173,7 +175,7 @@ if ($All -or $Powershell) {
     if (!(Test-Path $windowsPowerShellFolder)) {
         $windowsPowerShellJunctionTarget = $(Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "WindowsPowerShell")
         Write-Host "Creating symbolic link from $windowsPowerShellFolder to $windowsPowerShellJunctionTarget"
-        New-Item -ItemType symboliclink -path "$windowsPowerShellFolder" -value "$windowsPowerShellJunctionTarget"
+        $null = New-Item -ItemType symboliclink -path "$windowsPowerShellFolder" -value "$windowsPowerShellJunctionTarget"
     }
 
     # Windows PowerShell modules
