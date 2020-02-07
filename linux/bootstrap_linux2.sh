@@ -46,19 +46,18 @@ EOF
         echo $'\nUpdating package list...'
         sudo apt-get update
 
+        echo $'\nUpgrading packages...'
+        sudo ACCEPT_EULA=Y apt-get upgrade -y
+
         echo $'\nInstalling new packages...'
         INSTALLED_PACKAGES=$(mktemp)
         NEW_PACKAGES=$(mktemp)
         dpkg -l | grep ^ii | awk '{print $2}' >$INSTALLED_PACKAGES
         grep -Fvx -f $INSTALLED_PACKAGES ${SCRIPT_PATH}/apt-packages.txt >$NEW_PACKAGES
         while read package; do 
-            sudo env ACCEPT_EULA=Y apt-get install -y $package
+            sudo ACCEPT_EULA=Y apt-get install -y $package
         done < $NEW_PACKAGES
-        #sudo env ACCEPT_EULA=Y apt-get install -m -y $(grep -vE "^\s*#" $NEW_PACKAGES | tr "\n" " ") # All or nothing approach, i.e. fails when a single package is missing
         rm $INSTALLED_PACKAGES $NEW_PACKAGES
-
-        echo $'\nUpgrading packages...'
-        sudo apt-get upgrade -y
     fi
 fi
 
