@@ -70,14 +70,14 @@ else
 fi
 
 # Set up terraform with tfenv
-if [ ! -d ~/.tfenv ]; then
+if [ ! -d $HOME/.tfenv ]; then
     echo $'\nInstalling tfenv...'
-    git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+    git clone https://github.com/tfutils/tfenv.git $HOME/.tfenv
 else
     echo $'\nUpdating tfenv...'
-    git -C ~/.tfenv pull
+    git -C $HOME/.tfenv pull
 fi
-~/.tfenv/bin/tfenv install latest
+$HOME/.tfenv/bin/tfenv install latest
 
 # Git settings
 if [ -f ../common/settings.json ]; then

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Installs in ~/src/bootstrap-os
+# Installs in $HOME/src/bootstrap-os
 # curl -sk https://raw.githubusercontent.com/geekzter/bootstrap-os/master/linux/bootstrap_linux.sh | bash
 
 SCRIPT_PATH=`dirname $0`
@@ -17,8 +17,8 @@ if test ! $(which git); then
         exit 1
     fi
 fi
-echo $'\nLooking for repository...'
 
+echo $'\nLooking for repository...'
 if [ -t 0 ]; then
     # Not invoked using cat/curl/wget
     # Test whether we are part of a cloned repository
@@ -35,16 +35,16 @@ if [ -t 0 ]; then
     fi
 fi
 
-if [ ! -d ~/src ]; then
-    mkdir ~/src
+if [ ! -d $HOME/src ]; then
+    mkdir $HOME/src
 fi
-if [ ! -d ~/src/bootstrap-os ]; then
-    echo "Repository does not exist, creating at ~/src/bootstrap-os..."
-    git clone https://github.com/geekzter/bootstrap-os ~/src/bootstrap-os
+if [ ! -d $HOME/src/bootstrap-os ]; then
+    echo "Repository does not exist, creating at $HOME/src/bootstrap-os..."
+    git clone https://github.com/geekzter/bootstrap-os $HOME/src/bootstrap-os
 else 
-    echo "Repository exists at $(cd ~/src/bootstrap-os && pwd), updating..."
-    git -C ~/src/bootstrap-os pull
+    echo "Repository exists at $(cd $HOME/src/bootstrap-os && pwd), updating..."
+    git -C $HOME/src/bootstrap-os pull
 fi
-pushd ~/src/bootstrap-os/linux
+pushd $HOME/src/bootstrap-os/linux
 . & ./bootstrap_linux2.sh "$@"
 popd
