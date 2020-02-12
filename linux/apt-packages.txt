@@ -25,6 +25,7 @@ nano
 nmap
 node-typescript
 powershell
+sed
 snapd
 telnet
 unixodbc-dev
