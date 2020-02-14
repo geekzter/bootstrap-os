@@ -62,7 +62,7 @@ AddorUpdateModule Az
 #AddorUpdateModule AzureADPreview
 AddorUpdateModule Oh-My-Posh
 AddorUpdateModule Posh-Git
-AddorUpdateModule PSReadLine 2.0.0-rc2 # Waiting for 2.0.0 to be released
+AddorUpdateModule PSReadLine
 AddorUpdateModule VSTeam
 if ($IsWindows) {
     AddorUpdateModule WindowsCompatibility
