@@ -6,6 +6,10 @@ function AddorUpdateModule (
 ) {
     if (Get-InstalledModule $moduleName -ErrorAction SilentlyContinue) {
         $moduleVersionString = Get-InstalledModule $moduleName | Sort-Object -Descending Version | Select-Object -First 1 -ExpandProperty Version
+        if ($moduleVersionString -Match "-") {
+            # Installed module is pre-release, but we did not request a pre-release. So remove the pre-release moniker to get the desired version
+            $desiredVersion = $moduleVersionString -Replace "-.*$",""
+        }
         if ($desiredVersion) {
             $newModule = Find-Module $moduleName -RequiredVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
             $allowPrerelease = $true
