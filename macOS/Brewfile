@@ -24,6 +24,7 @@ cask "keepassxc"
 cask "microsoft-azure-storage-explorer"
 cask "microsoft-edge"
 cask "minikube"
+cask "mono-mdk" # Required for Xamarin -> Visual Studio
 cask "postman"
 cask "powershell"
 cask "visual-studio"
