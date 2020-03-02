@@ -83,16 +83,19 @@ if ($All -or ($Packages.Count -gt 0)) {
     refreshenv # This should update the path with changes made by Chocolatey
 
     # Move shortcuts of installed applications
-    $desktopFolder = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Desktop"    
-    $allUsersDesktopFolder = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "common Desktop"    
-    $installedAppsFolder = Join-Path $desktopFolder "Installed"
-    if (!(Test-Path $installedAppsFolder)) {
-        $null = mkdir $installedAppsFolder
-    }
-    Get-ChildItem -Path $desktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
-    Get-ChildItem -Path $allUsersDesktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
-    if (!(Get-ChildItem -Path $installedAppsFolder)) {
-        Remove-Item -Path $installedAppsFolder
+    $desktopFolder = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Desktop" -ErrorAction SilentlyContinue  
+    # $desktopFolder may be emoty when executing before first logon
+    if ($desktopFolder) {
+        $allUsersDesktopFolder = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "common Desktop"    
+        $installedAppsFolder = Join-Path $desktopFolder "Installed"
+        if (!(Test-Path $installedAppsFolder)) {
+            $null = mkdir $installedAppsFolder
+        }
+        Get-ChildItem -Path $desktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
+        Get-ChildItem -Path $allUsersDesktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
+        if (!(Get-ChildItem -Path $installedAppsFolder)) {
+            Remove-Item -Path $installedAppsFolder
+        }
     }
 
     UpdateStoreApps
