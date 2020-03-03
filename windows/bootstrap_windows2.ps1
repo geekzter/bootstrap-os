@@ -69,6 +69,7 @@ if ($All -or ($Packages.Count -gt 0)) {
         # Windows capabilities
         $capabilities  = Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"}
         $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
+        $capabilities += Get-WindowsCapability -Online -Name OpenSSH.Client     | Where-Object {$_.State -ne "Installed"}
         foreach ($capability in $capabilities) {
             Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
             $capability | Add-WindowsCapability -Online
@@ -83,7 +84,10 @@ if ($All -or ($Packages.Count -gt 0)) {
     refreshenv # This should update the path with changes made by Chocolatey
 
     # Move shortcuts of installed applications
-    $desktopFolder = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Desktop" -ErrorAction SilentlyContinue  
+    Invoke-Command -ScriptBlock {
+        $private:ErrorActionPreference = "Continue"
+        $script:desktopFolder = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Desktop" -ErrorAction SilentlyContinue  
+    }
     # $desktopFolder may be emoty when executing before first logon
     if ($desktopFolder) {
         $allUsersDesktopFolder = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "common Desktop"    
