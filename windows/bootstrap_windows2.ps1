@@ -85,7 +85,7 @@ if ($All -or ($Packages.Count -gt 0)) {
 
     # Move shortcuts of installed applications
     Invoke-Command -ScriptBlock {
-        $private:ErrorActionPreference = "Continue"
+        $private:ErrorActionPreference = "SilentlyContinue"
         $script:desktopFolder = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Desktop" -ErrorAction SilentlyContinue  
     }
     # $desktopFolder may be emoty when executing before first logon

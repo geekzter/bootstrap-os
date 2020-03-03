@@ -61,7 +61,7 @@ refreshenv # This should update the path with changes made by Chocolatey
 # Clone (the rest of) the repository
 $repoDirectory = Join-Path $HOME "Source\Public"
 if (!(Test-Path $repoDirectory)) {
-    New-Item -ItemType Directory -Force -Path $repoDirectory
+    $null = New-Item -ItemType Directory -Force -Path $repoDirectory
 }
 $bootstrapDirectory = Join-Path $repoDirectory "bootstrap-os"
 $gitPath = (Get-Command "git.exe" -ErrorAction SilentlyContinue).Source
