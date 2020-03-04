@@ -198,9 +198,10 @@ if ($All -or $Powershell) {
     Write-Host "Installing NuGet package provider..."
     $null = Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ForceBootstrap
     AddorUpdateModule PowerShellGet  
+    AddorUpdateModule Az
     AddorUpdateModule AzureAD
     #AddorUpdateModule AzureADPreview
-    AddorUpdateModule AzureRM
+    #AddorUpdateModule AzureRM
     AddorUpdateModule MSOnline
     AddorUpdateModule SqlServer
     AddorUpdateModule VSTeam
