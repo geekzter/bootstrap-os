@@ -4,6 +4,11 @@ function AddorUpdateModule (
     [string]$moduleName,
     [string]$desiredVersion
 ) {
+    if (IsElevated) {
+        $scope = "AllUsers"
+    } else {
+        $scope = "CurrentUser"
+    }
     if (Get-InstalledModule $moduleName -ErrorAction SilentlyContinue) {
         $moduleVersionString = Get-InstalledModule $moduleName | Sort-Object -Descending Version | Select-Object -First 1 -ExpandProperty Version
         if ($moduleVersionString -Match "-") {
@@ -23,9 +28,9 @@ function AddorUpdateModule (
         if ($newModule -and ($($newModule.Version) -ne $moduleVersionString)) {
             Write-Host "PowerShell Core $moduleName module $moduleVersionString is out of date. Updating $moduleName module to $($newModule.Version)..."
             if ($allowPrerelease) {
-                Update-Module $moduleName -AcceptLicense -Force -RequiredVersion ${newModule.Version} -AllowPrerelease
+                Update-Module $moduleName -AcceptLicense -Force -RequiredVersion ${newModule.Version} -AllowPrerelease -Scope $scope
             } else {
-                Update-Module $moduleName -AcceptLicense -Force -RequiredVersion ${newModule.Version}
+                Update-Module $moduleName -AcceptLicense -Force -RequiredVersion ${newModule.Version} -Scope $scope
             }
         } else {
             Write-Host "PowerShell Core $moduleName module $moduleVersionString is up to date"
@@ -36,13 +41,13 @@ function AddorUpdateModule (
             $newModule = Find-Module $moduleName -RequiredVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
             if ($newModule) {
                 Write-Host "Installing PowerShell Core $moduleName module $desiredVersion..."
-                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -RequiredVersion $desiredVersion -AllowPrerelease
+                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -RequiredVersion $desiredVersion -AllowPrerelease -Scope $scope
             } else {
                 Write-Host "PowerShell Core $moduleName module version $desiredVersion is not available on $($PSVersionTable.OS)" -ForegroundColor Red
             }
         } else {
             Write-Host "Installing PowerShell Core $moduleName module..."
-            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense
+            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -Scope $scope
         }
     }
 }
@@ -59,6 +64,20 @@ function CreateProfileDirectoryLink () {
         }
         Pop-Location
     }
+}
+
+function global:IsElevated {
+	if ($IsWindows -and (New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
+        return $true
+    }
+    
+    if ($PSVersionTable.Platform -eq 'Unix') {
+        if ((id -u) -eq 0) {
+            return $true
+        }
+    }
+
+    return $false
 }
 
 # Check whether Az modules have been installed

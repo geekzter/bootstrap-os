@@ -12,6 +12,11 @@ param (
 function AddorUpdateModule (
     [string]$moduleName
 ) {
+    if (IsElevated) {
+        $scope = "AllUsers"
+    } else {
+        $scope = "CurrentUser"
+    }
     if (Get-InstalledModule $moduleName -ErrorAction SilentlyContinue) {
         $azModuleVersionString = Get-InstalledModule $moduleName | Sort-Object -Descending Version | Select-Object -First 1 -ExpandProperty Version
         $azModuleVersion = New-Object System.Version($azModuleVersionString)
@@ -19,15 +24,19 @@ function AddorUpdateModule (
         # Check whether newer module exists
         if (Find-Module $moduleName -MinimumVersion $azModuleUpdateVersionString -ErrorAction SilentlyContinue) {
             Write-Host "Windows PowerShell $moduleName module $azModuleVersionString is out of date. Updating $moduleName module..."
-            Update-Module $moduleName -Force #-AcceptLicense
+            Update-Module $moduleName -Force -Scope $scope #-AcceptLicense
         } else {
             Write-Host "Windows PowerShell $moduleName module $azModuleVersionString is up to date"
         }
     } else {
         # Install module if not present
         Write-Host "Installing Windows PowerShell $moduleName module..."
-        Install-Module $moduleName -Force -SkipPublisherCheck # -AcceptLicense 
+        Install-Module $moduleName -Force -SkipPublisherCheck -Scope $scope # -AcceptLicense 
     }
+}
+
+function global:IsElevated {
+    return (New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")
 }
 
 function UpdateStoreApps () {
