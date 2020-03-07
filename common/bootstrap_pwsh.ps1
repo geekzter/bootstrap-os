@@ -90,7 +90,7 @@ if (Test-Path $targetProfile) {
 
     $psProfileJunctionTarget = $(Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "profile.ps1")
     Write-Host "Creating symbolic link from $targetProfile to $psProfileJunctionTarget"
-    New-Item -ItemType symboliclink -path "$targetProfile" -value "$psProfileJunctionTarget"
+    $null = New-Item -ItemType symboliclink -path "$targetProfile" -value "$psProfileJunctionTarget"
 }
 
 # Non-pwsh common tasks
