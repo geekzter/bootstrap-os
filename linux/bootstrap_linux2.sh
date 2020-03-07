@@ -21,6 +21,7 @@ fi
 if test $(which lsb_release); then
     DISTRIB_ID=$(lsb_release -i -s)
     DISTRIB_RELEASE=$(lsb_release -r -s)
+    DISTRIB_RELEASE_MAJOR=$(lsb_release -s -r | cut -d '.' -f 1)
     lsb_release -a
 fi
 
@@ -36,9 +37,20 @@ else
         cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
+        # Installs Azure CLI including dependencies
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
         # Microsoft package repo
         curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+        if [ "$DISTRIB_ID" == "Debian" ]; then
+            # Source: https://github.com/Azure/azure-functions-core-tools
+            wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
+            sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
+            wget -q https://packages.microsoft.com/config/debian/${DISTRIB_RELEASE_MAJOR}/prod.list
+            sudo mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
+            sudo chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+            sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+        fi
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
             curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
         fi
