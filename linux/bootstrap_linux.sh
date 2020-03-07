@@ -21,17 +21,14 @@ fi
 echo $'\nLooking for repository...'
 if [ -t 0 ]; then
     # Not invoked using cat/curl/wget
-    # Test whether we are part of a cloned repository
-    descriptionFile=$SCRIPT_PATH/../.git/description
-    if [ -f $descriptionFile ]; then
-        if grep -q bootstrap-os "$descriptionFile"; then
-            echo "Repository exists at $(cd $SCRIPT_PATH/.. && pwd), updating..."
-            git -C $SCRIPT_PATH/.. pull
+    # Test whether we are part of a repository
+    if [ -d $SCRIPT_PATH/../.git ]; then
+        echo "We're in repository at $(cd $SCRIPT_PATH/.. && pwd), updating..."
+        git -C $SCRIPT_PATH/.. pull
 
-            # Done, spawn 2nd stage
-            . ${SCRIPT_PATH}/bootstrap_linux2.sh "$@"
-            exit
-        fi
+        # Done, spawn 2nd stage
+        . ${SCRIPT_PATH}/bootstrap_linux2.sh "$@"
+        exit
     fi
 fi
 
@@ -42,9 +39,9 @@ if [ ! -d $HOME/src/bootstrap-os ]; then
     echo "Repository does not exist, creating at $HOME/src/bootstrap-os..."
     git clone https://github.com/geekzter/bootstrap-os $HOME/src/bootstrap-os
 else 
-    echo "Repository exists at $(cd $HOME/src/bootstrap-os && pwd), updating..."
+    echo "Repository found at $(cd $HOME/src/bootstrap-os && pwd), updating..."
     git -C $HOME/src/bootstrap-os pull
 fi
 pushd $HOME/src/bootstrap-os/linux
-. & ./bootstrap_linux2.sh "$@"
+. ./bootstrap_linux2.sh "$@"
 popd
