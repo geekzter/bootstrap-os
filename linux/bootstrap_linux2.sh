@@ -40,10 +40,10 @@ EOF
         # Installs Azure CLI including dependencies
         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-        # Microsoft package repo
+        # Microsoft dependencies
+        # Source: https://github.com/Azure/azure-functions-core-tools
         curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
         if [ "$DISTRIB_ID" == "Debian" ]; then
-            # Source: https://github.com/Azure/azure-functions-core-tools
             wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
             sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
             wget -q https://packages.microsoft.com/config/debian/${DISTRIB_RELEASE_MAJOR}/prod.list
@@ -53,6 +53,7 @@ EOF
         fi
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
             curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+            sudo dpkg -i packages-microsoft-prod.deb
         fi
 
         echo $'\nUpdating package list...'
