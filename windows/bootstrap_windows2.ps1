@@ -202,7 +202,8 @@ if ($All -or $Powershell) {
     AddorUpdateModule AzureAD
     #AddorUpdateModule AzureADPreview
     #AddorUpdateModule AzureRM
-    AddorUpdateModule MSOnline
+    #AddorUpdateModule MSOnline
+    AddorUpdateModule Posh-Git
     AddorUpdateModule SqlServer
     AddorUpdateModule VSTeam
 
