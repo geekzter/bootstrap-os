@@ -16,30 +16,35 @@ function global:IsElevated {
 
 # Define prompt
 function global:Prompt {
-    $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"
-
-    if ($executionContext.SessionState.Path.CurrentLocation.Path.StartsWith($home)) {
-        $path = $executionContext.SessionState.Path.CurrentLocation.Path.Replace($home,"~")
+    if ($GitPromptScriptBlock) {
+        # Use Posh-Git: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
+        $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
+        & $GitPromptScriptBlock
     } else {
-        $path = $executionContext.SessionState.Path.CurrentLocation.Path
+        $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"
+
+        if ($executionContext.SessionState.Path.CurrentLocation.Path.StartsWith($home)) {
+            $path = $executionContext.SessionState.Path.CurrentLocation.Path.Replace($home,"~")
+        } else {
+            $path = $executionContext.SessionState.Path.CurrentLocation.Path
+        }
+
+        $host.ui.rawui.WindowTitle += "$($executionContext.SessionState.Path.CurrentLocation.Path)"
+        $branch = $(git rev-parse --abbrev-ref HEAD 2>$null)
+        $prompt = $path
+        if ($branch) {
+            $prompt += ":$branch"
+        }
+        if (IsElevated) {
+            $host.ui.rawui.WindowTitle += " # "
+            $prompt += "$('#' * ($nestedPromptLevel + 1)) ";
+        } else {
+            $host.ui.rawui.WindowTitle += " - "
+            $prompt += "$('>' * ($nestedPromptLevel + 1)) ";
+        }
+
+        $prompt
     }
-
-    $branch = $(git rev-parse --abbrev-ref HEAD 2>$null)
-    $prompt = $path
-    if ($branch) {
-        $prompt += ":$branch"
-    }
-    if (IsElevated) {
-        $host.ui.rawui.WindowTitle += " # "
-        $prompt += "$('#' * ($nestedPromptLevel + 1)) ";
-	} else {
-        $host.ui.rawui.WindowTitle += " - "
-        $prompt += "$('>' * ($nestedPromptLevel + 1)) ";
-	}
-
-    $host.ui.rawui.WindowTitle += "$($executionContext.SessionState.Path.CurrentLocation.Path)"
-
-    $prompt
 }
 
 if ($host.Name -eq 'ConsoleHost')
