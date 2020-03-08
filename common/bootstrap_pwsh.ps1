@@ -72,6 +72,7 @@ AddorUpdateModule Az
 AddorUpdateModule Oh-My-Posh
 AddorUpdateModule Posh-Git
 AddorUpdateModule PSReadLine
+AddorUpdateModule SqlServer
 AddorUpdateModule VSTeam
 if ($IsWindows) {
     AddorUpdateModule WindowsCompatibility
