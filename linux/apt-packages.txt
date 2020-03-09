@@ -19,6 +19,7 @@ fuse
 git
 jq
 kubectl
+mc
 msodbcsql17
 mssql-tools
 nano
