@@ -38,6 +38,10 @@ function prompt
 }
 #endregion
 
+if (Get-InstalledModule Posh-Git) {
+	Import-Module Posh-Git
+}
+
 if ((Get-Location).ToString().StartsWith($env:SystemRoot,'CurrentCultureIgnoreCase')) {
 	if (Test-Path $home) {
 		Push-Location $home
