@@ -198,14 +198,16 @@ if ($All -or $Powershell) {
     Write-Host "Installing NuGet package provider..."
     $null = Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ForceBootstrap
     AddorUpdateModule PowerShellGet  
-    AddorUpdateModule Az
+    #AddorUpdateModule Az
     AddorUpdateModule AzureAD
     #AddorUpdateModule AzureADPreview
     #AddorUpdateModule AzureRM
+    #AddorUpdateModule MicrosoftPowerBIMgmt
+    #AddorUpdateModule MicrosoftTeams
     #AddorUpdateModule MSOnline
     AddorUpdateModule Posh-Git
-    AddorUpdateModule SqlServer
-    AddorUpdateModule VSTeam
+    #AddorUpdateModule SqlServer
+    #AddorUpdateModule VSTeam
 
     # Find PowerShell Core
     if (!(Get-Command "pwsh.exe" -ErrorAction SilentlyContinue)) {
