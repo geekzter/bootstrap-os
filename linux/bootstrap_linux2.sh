@@ -34,6 +34,9 @@ else
     else
         # pre-requisites
         sudo apt-get install -y apt-transport-https curl
+
+        # Required for Midnight Commander
+        sudo add-apt-repository universe
         
         # Kubernetes requirement
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
