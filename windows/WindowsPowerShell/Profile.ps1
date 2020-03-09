@@ -1,14 +1,4 @@
 ﻿#  Powershell Profile Script
-#  
-#  Eric van Wijk <eric@van-wijk.com>
-#return
-#region Prepare Environment & Variables
-if (Test-Path HKLM:\SOFTWARE\Classes\Applications\Quest.PowerGUI.ScriptEditor.exe\shell\open\command) {
-	$__Editor = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Classes\Applications\Quest.PowerGUI.ScriptEditor.exe\shell\open\command" -Name "(default)" | Select-Object "(default)" | ForEach-Object {Write-Output $_."(default)"}).Split('"')[1]
-} else {
-	$__Editor = "notepad.exe"
-}
-#endregion
 
 
 #region Load Functions
@@ -25,22 +15,32 @@ if (Test-Path HKLM:\SOFTWARE\Classes\Applications\Quest.PowerGUI.ScriptEditor.ex
 
 function prompt
 {
-	$host.ui.rawui.WindowTitle = "Windows PowerShell $($host.Version.ToString())"
+    if ($GitPromptScriptBlock) {
+        # Use Posh-Git: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
+        $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
+        & $GitPromptScriptBlock
+    } else {
+		$host.ui.rawui.WindowTitle = "Windows PowerShell $($host.Version.ToString())"
 
-	$path = $(Get-Location).Path
+		$path = $(Get-Location).Path
 
-	Write-Host $path "" -NoNewline
-	if ((New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
-        $host.ui.rawui.WindowTitle += " # "
-		Write-Host "#" -nonewline
-	} else {
-		$host.ui.rawui.WindowTitle += " - "
-    	Write-Host "$" -nonewline
-	}
-    $host.ui.rawui.WindowTitle += $path
-    return " "
+		Write-Host $path "" -NoNewline
+		if ((New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
+			$host.ui.rawui.WindowTitle += " # "
+			Write-Host "#" -nonewline
+		} else {
+			$host.ui.rawui.WindowTitle += " - "
+			Write-Host "$" -nonewline
+		}
+		$host.ui.rawui.WindowTitle += $path
+		return " "
+    }
 }
 #endregion
+
+if (Get-InstalledModule Posh-Git) {
+	Import-Module Posh-Git
+}
 
 if ((Get-Location).ToString().StartsWith($env:SystemRoot,'CurrentCultureIgnoreCase')) {
 	if (Test-Path $home) {

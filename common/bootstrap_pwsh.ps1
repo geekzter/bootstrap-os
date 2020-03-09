@@ -69,9 +69,12 @@ function global:IsElevated {
 # Check whether Az modules have been installed
 AddorUpdateModule Az
 #AddorUpdateModule AzureADPreview
+#AddorUpdateModule MicrosoftPowerBIMgmt
+#AddorUpdateModule MicrosoftTeams
 AddorUpdateModule Oh-My-Posh
 AddorUpdateModule Posh-Git
 AddorUpdateModule PSReadLine
+AddorUpdateModule SqlServer
 AddorUpdateModule VSTeam
 if ($IsWindows) {
     AddorUpdateModule WindowsCompatibility

@@ -29,6 +29,7 @@ powershell
 sed
 snapd
 telnet
+tmux
 unixodbc-dev
 unzip
 whois
