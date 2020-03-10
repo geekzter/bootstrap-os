@@ -9,6 +9,19 @@
     This uses PowerShell Core, so we can use it on Windows too
 #>
 
+function IsElevated {
+	if ($IsWindows -and (New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
+        return $true
+    }
+    
+    if ($PSVersionTable.Platform -eq 'Unix') {
+        if ((id -u) -eq 0) {
+            return $true
+        }
+    }
+
+    return $false
+}
 function CopyFileToHome (
     [string]$File,
     [string]$DotfilesDirectory
@@ -41,22 +54,27 @@ function LinkFileToHome (
 } 
 
 # Link files from dotfiles
-$dotFilesDirectory = $(Join-Path (Split-Path -parent (Split-Path -parent -Path $MyInvocation.MyCommand.Path)) "dotfiles")
-Write-Information "Creating dotfiles in $HOME by linking them to ${dotFilesDirectory}..."
-$dotFiles = Get-ChildItem -Path (Join-Path $dotFilesDirectory .*) -Hidden
-foreach ($dotFile in $dotFiles) {
-    LinkFileToHome -File $dotFile.Name -DotfilesDirectory $dotFilesDirectory
+# This works on Windows only when elevated
+if ((!$IsWindows) -or (IsElevated)) {
+    $dotFilesDirectory = $(Join-Path (Split-Path -parent (Split-Path -parent -Path $MyInvocation.MyCommand.Path)) "dotfiles")
+    Write-Information "Creating dotfiles in $HOME by linking them to ${dotFilesDirectory}..."
+    $dotFiles = Get-ChildItem -Path (Join-Path $dotFilesDirectory .*) -Force
+    foreach ($dotFile in $dotFiles) {
+        LinkFileToHome -File $dotFile.Name -DotfilesDirectory $dotFilesDirectory
+    }
 }
 
 # Copy files from dotfiles/templates
 $dotTemplatesDirectory = Join-Path $dotFilesDirectory templates
 Write-Information "Creating dotfiles in $HOME by copying them from ${dotTemplatesDirectory}..."
-$dotFiles = Get-ChildItem -Path (Join-Path $dotTemplatesDirectory .*) -Hidden
+$dotFiles = Get-ChildItem -Path (Join-Path $dotTemplatesDirectory .*) -Force
 foreach ($dotFile in $dotFiles) {
     CopyFileToHome -File $dotFile.Name -DotfilesDirectory $dotTemplatesDirectory
 }
 
 # Updated copied dotfiles as needed
 $tmuxConf = Join-Path $HOME .tmux.conf
-Write-Host "Configure $tmuxConf"
-(Get-Content $tmuxConf) -replace "^set-option.*default-shell.*$","set-option -g default-shell $((Get-Command pwsh).Source)" | Out-File $tmuxConf
+if (Test-Path $tmuxConf) {
+    Write-Host "Configure $tmuxConf"
+    (Get-Content $tmuxConf) -replace "^set-option.*default-shell.*$","set-option -g default-shell $((Get-Command pwsh).Source)" | Out-File $tmuxConf
+}
