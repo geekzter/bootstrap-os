@@ -12,7 +12,7 @@ function DisplayLink (
     [object]$Link
 ) {
     if ($Link.Target) {
-        Write-Host "$($Link.FullName) -> $($Link.Target) link created"
+        Write-Host "$($Link.FullName) -> $($Link.Target)"
     } else {
         Write-Host "$($Link.FullName) already exists as file"
     }
@@ -34,7 +34,7 @@ function LinkFileToHome (
 } 
 
 $dotFilesDirectory = $(Join-Path (Split-Path -parent (Split-Path -parent -Path $MyInvocation.MyCommand.Path)) "dotfiles")
-Write-Verbose "dotfiles directory: $dotFilesDirectory"
+Write-Host "Creating dotfiles in $HOME by linking them to ${dotFilesDirectory}..."
 $dotFiles = Get-ChildItem -Path (Join-Path $dotFilesDirectory .*) -Hidden
 foreach ($dotFile in $dotFiles) {
     LinkFileToHome -File $dotFile.Name -DotfilesDirectory $dotFilesDirectory
