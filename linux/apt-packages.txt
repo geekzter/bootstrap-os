@@ -17,6 +17,7 @@ findutils
 fish
 fuse
 git
+htop
 jq
 kubectl
 mc
