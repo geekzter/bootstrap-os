@@ -18,7 +18,10 @@ function global:IsElevated {
 function global:Prompt {
     if ($GitPromptScriptBlock) {
         # Use Posh-Git: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
+        # Use ~ for home directory in prompt
         $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
+        # Don't overwrite the title set in iTerm2/Windows Terminal
+        $GitPromptSettings.EnableWindowTitle = $null
         & $GitPromptScriptBlock
     } else {
         $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"
