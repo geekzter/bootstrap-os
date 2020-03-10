@@ -101,6 +101,3 @@ if (Get-Command az -ErrorAction SilentlyContinue) {
     Write-Host "`nUpdating az-cli extensions"
     az extension add --name azure-devops
 }
-
-# Set up dotfiles
-& (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "link_dotfiles.ps1")

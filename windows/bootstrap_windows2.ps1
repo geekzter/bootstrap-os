@@ -222,6 +222,6 @@ if ($All -or $Powershell) {
     }
  
     # Let PowerShell Core configure itself
-    $psCoreSetupScript = $(Join-Path (Get-Item (Split-Path -parent -Path $MyInvocation.MyCommand.Path)).Parent.FullName "common\bootstrap_pwsh.ps1")
+    $psCoreSetupScript = $(Join-Path (Get-Item (Split-Path -parent -Path $MyInvocation.MyCommand.Path)).Parent.FullName "common\common_setup.ps1")
     pwsh.exe -nop -File $psCoreSetupScript
 }

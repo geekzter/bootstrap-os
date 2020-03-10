@@ -85,7 +85,10 @@ if test ! $(which pwsh); then
     echo $'\nPowerShell Core (pwsh) not found, skipping setup'
 else
     echo $'\nSetting up PowerShell Core...'
-    pwsh -nop -file ${SCRIPT_PATH}/../common/bootstrap_pwsh.ps1
+    pwsh -nop -file ${SCRIPT_PATH}/../common/common_setup.ps1
+
+    echo "Configure PowerShell Core as default shell"
+    sudo chsh -s $(which pwsh)
 fi
 
 # Set up terraform with tfenv

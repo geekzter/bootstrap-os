@@ -39,7 +39,10 @@ git config --global core.excludesfile ~/.gitignore
 if test ! $(which pwsh); then
     echo "PowerShell Core (pwsh) not found, skipping setup"
 else
-    pwsh -nop -file ../common/bootstrap_pwsh.ps1
+    echo $'\nSetting up PowerShell Core...'
+    pwsh -nop -file ../common/common_setup.ps1
+    echo "Configure PowerShell Core as default shell"
+    sudo chsh -s $(which pwsh)
 fi
 
 popd
