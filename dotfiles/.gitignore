@@ -1,5 +1,7 @@
 # Mac files
 .DS_Store
 
+*.lock.json
+
 # Config file
 settings.json

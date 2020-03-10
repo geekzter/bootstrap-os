@@ -86,9 +86,6 @@ if test ! $(which pwsh); then
 else
     echo $'\nSetting up PowerShell Core...'
     pwsh -nop -file ${SCRIPT_PATH}/../common/common_setup.ps1
-
-    echo "Configure PowerShell Core as default shell"
-    sudo chsh -s $(which pwsh)
 fi
 
 # Set up terraform with tfenv
