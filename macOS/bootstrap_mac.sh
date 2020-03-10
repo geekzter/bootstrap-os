@@ -7,6 +7,12 @@ fi
 
 pushd `dirname $0`
 
+# Get latest
+if [ -d ../.git ]; then
+    echo "We're in repository at $(cd .. && pwd), updating..."
+    git -C .. pull
+fi
+
 # Homebrew package management
 if test ! $(which brew); then
     echo "Installing homebrew..."
@@ -30,16 +36,13 @@ if [ -f ../common/settings.json ]; then
 else
     echo "Settings file ../common/settings.json not found, skipping personalization"
 fi
-if [ ! -f ~/.gitignore ]; then
-    echo .DS_Store > ~/.gitignore
-fi
-git config --global core.excludesfile ~/.gitignore
 
 # Let PowerShell Core configure itself
 if test ! $(which pwsh); then
     echo "PowerShell Core (pwsh) not found, skipping setup"
 else
-    pwsh -nop -file ../common/bootstrap_pwsh.ps1
+    echo $'\nSetting up PowerShell Core...'
+    pwsh -nop -file ../common/common_setup.ps1
 fi
 
 popd
