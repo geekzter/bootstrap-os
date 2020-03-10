@@ -22,6 +22,11 @@ function global:Prompt {
         $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
         # Don't overwrite the title set in iTerm2/Windows Terminal
         $GitPromptSettings.EnableWindowTitle = $null
+        if (IsElevated) {
+            $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
+        } else {
+            $GitPromptSettings.DefaultPromptSuffix = "`$('$' * (`$nestedPromptLevel + 1)) "
+        }
         & $GitPromptScriptBlock
     } else {
         $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"

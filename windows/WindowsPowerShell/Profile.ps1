@@ -13,11 +13,22 @@
 #}
 #endregion
 
+function global:IsElevated {
+    return (New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")
+}
 function prompt
 {
     if ($GitPromptScriptBlock) {
         # Use Posh-Git: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
+        # Use ~ for home directory in prompt
         $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
+        # Don't overwrite the title set in iTerm2/Windows Terminal
+        $GitPromptSettings.EnableWindowTitle = $null
+        if (IsElevated) {
+            $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
+        } else {
+            $GitPromptSettings.DefaultPromptSuffix = "`$('$' * (`$nestedPromptLevel + 1)) "
+        }
         & $GitPromptScriptBlock
     } else {
 		$host.ui.rawui.WindowTitle = "Windows PowerShell $($host.Version.ToString())"
@@ -25,7 +36,7 @@ function prompt
 		$path = $(Get-Location).Path
 
 		Write-Host $path "" -NoNewline
-		if ((New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
+		if (IsElevated) {
 			$host.ui.rawui.WindowTitle += " # "
 			Write-Host "#" -nonewline
 		} else {
