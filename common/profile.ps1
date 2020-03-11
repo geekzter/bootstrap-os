@@ -25,7 +25,7 @@ function global:Prompt {
         if (IsElevated) {
             $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
         } else {
-            $GitPromptSettings.DefaultPromptSuffix = "`$('$' * (`$nestedPromptLevel + 1)) "
+            $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
         }
         & $GitPromptScriptBlock
     } else {
