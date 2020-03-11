@@ -20,6 +20,8 @@ git
 htop
 jq
 kubectl
+less
+man
 mc
 msodbcsql17
 mssql-tools
