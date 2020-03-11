@@ -173,6 +173,9 @@ if ($All -or $Settings) {
             Invoke-Expression $bgInfoCommand
         }
     }
+
+    # Set up application settings
+    & (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "create_settings.ps1")
 }
 
 if ($All -or $Powershell) {

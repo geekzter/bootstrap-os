@@ -49,7 +49,7 @@ function LinkFileToHome (
     if ($link.Target) {
         Write-Host "$($link.FullName) -> $($link.Target)"
     } else {
-        Write-Information "$($link.FullName) already exists as file"
+        Write-Information "$($link.FullName) already exists as file" -ForegroundColor Yellow
     }
 } 
 
