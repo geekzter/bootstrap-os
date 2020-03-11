@@ -24,3 +24,9 @@ if ($IsLinux -or $IsMacos) {
 
 # Configure git
 git config --global core.excludesfile (Join-Path $HOME .gitignore)
+
+# Non-pwsh common tasks
+if (Get-Command az -ErrorAction SilentlyContinue) {
+    Write-Host "`nUpdating az-cli extensions"
+    az extension add --name azure-devops
+}

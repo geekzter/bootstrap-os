@@ -26,9 +26,3 @@ $profileName = Split-Path -Leaf $profile.CurrentUserAllHosts
 
 LinkFile -File $profileName -SourceDirectory $scriptDirectory -TargetDirectory $profileDirectory
 LinkFile -File functions.ps1 -SourceDirectory $scriptDirectory -TargetDirectory $profileDirectory
-
-# Non-pwsh common tasks
-if (Get-Command az -ErrorAction SilentlyContinue) {
-    Write-Host "`nUpdating az-cli extensions"
-    az extension add --name azure-devops
-}
