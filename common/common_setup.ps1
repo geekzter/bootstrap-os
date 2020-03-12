@@ -13,7 +13,7 @@
 # Configure PowerShell as default shell on Linux & macOS
 if ($IsLinux -or $IsMacos) {
     $pwshPath = (Get-Command pwsh).Source
-    if ($pwshPath -ne $env:SHELL) {
+    if (($pwshPath -ne $env:SHELL) -and (Get-Command sudo -ErrorAction SilentlyContinue)) {
         Write-Host "Replacing $env:SHELL with $pwshPath as default shell"
         sudo chsh -s $pwshPath
     }
