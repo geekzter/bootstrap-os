@@ -23,18 +23,10 @@ if ((!$IsWindows) -or (IsElevated)) {
     }
 }
 
-# Copy files from dotfiles/templates
-$dotTemplatesDirectory = Join-Path $dotFilesDirectory templates
-Write-Information "Creating dotfiles in $HOME by copying them from ${dotTemplatesDirectory}..."
-$dotFiles = Get-ChildItem -Path (Join-Path $dotTemplatesDirectory .*) -Force
-foreach ($dotFile in $dotFiles) {
-    CopyFile -File $dotFile.Name -SourceDirectory $dotTemplatesDirectory -TargetDirectory $HOME
-}
-
-# Updated copied dotfiles as needed
-$tmuxConf = Join-Path $HOME .tmux.conf
-if (Test-Path $tmuxConf) {
-    Write-Information "${tmuxConf}: configuring..."
-    (Get-Content $tmuxConf) -replace "^set-option.*default-shell.*$","set-option -g default-shell $((Get-Command pwsh).Source)" | Out-File $tmuxConf
-    Write-Host "${tmuxConf}: configured"
-}
+# # Copy files from dotfiles/templates
+# $dotTemplatesDirectory = Join-Path $dotFilesDirectory templates
+# Write-Information "Creating dotfiles in $HOME by copying them from ${dotTemplatesDirectory}..."
+# $dotFiles = Get-ChildItem -Path (Join-Path $dotTemplatesDirectory .*) -Force
+# foreach ($dotFile in $dotFiles) {
+#     CopyFile -File $dotFile.Name -SourceDirectory $dotTemplatesDirectory -TargetDirectory $HOME
+# }

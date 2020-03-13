@@ -44,13 +44,14 @@ function global:Prompt {
     }
 }
 
-$printMessages = $($env:TERM -ine "screen")
+# Only print when not in a nested or tmux session
+$printMessages = (($nestedPromptLevel -eq 0) -and $($env:TERM -notmatch "^screen") -and $($env:TERM -notmatch "^tmux"))
 
 if ($host.Name -eq 'ConsoleHost')
 {
     Import-Module posh-git
     Import-Module oh-my-posh
-    # Wait until PSReadLine 2.0.0 is released
+    # Requires PSReadLine 2.0
     #Set-Theme Agnoster
     #Set-Theme Paradox
 }
@@ -77,12 +78,12 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     $environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
     if (Test-Path -Path $environmentPath) {
         if ($printMessages) {
-            Write-Output "Sourcing $environmentPath"
+            Write-Host "Sourcing $environmentPath"
         }
         . $environmentPath
     } else {
         if ($printMessages) {
-        Write-Output "$environmentPath not found"
+            Write-Information "$environmentPath not found"
         }
     }
 }
@@ -93,12 +94,12 @@ if (!(Get-Module Az -ListAvailable)) {
     Install-Module Az
 }
 
-# Print message on bootstrap configuration
-
 if ($printMessages) {
-    # Only print when not in a tmux session
-    Get-Module Az -ListAvailable | Select-Object -First 1 -Property Name, Version
 
+    $azModule = Get-Module Az -ListAvailable | Select-Object -First 1     
+    Write-Host "PowerShell $($azModule.Name) v$($azModule.Version)"
+ 
+    # Print message on bootstrap configuration
     $bootstrapDirectory = Split-Path -Parent (Split-Path -Parent (Get-Item $MyInvocation.MyCommand.Path).Target)
     Write-Host "To update configuration, run " -NoNewline
     if ($IsWindows) {
@@ -112,8 +113,12 @@ if ($printMessages) {
     }
 
     # Show tmux sessions
-    if ($IsLinux) {
-        tmux ls 2>/dev/null
+    if ($IsLinux -or $IsMacOS) {
+        $tmuxSessions = $(tmux ls 2>/dev/null)
+        if ($tmuxSessions) {
+            Write-Host "Active tmux sessions:"
+            $tmuxSessions
+        }
     }
 }
 
@@ -130,3 +135,6 @@ if (IsElevated) {
         }
     }
 }
+
+# Set environment variables
+$env:SHELL = (Get-Command pwsh).Source

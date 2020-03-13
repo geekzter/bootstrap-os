@@ -160,7 +160,7 @@ if ($All -or $Settings) {
         $bgInfoCommand = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "BGInfo" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty "BGInfo"
         if (!($bgInfoCommand)) {
             # Configure BGInfo of not already done so (e.g. by VM extension)
-            $bgInfoExe = Get-command "bginfo.exe" -ErrorAction SilentlyContinue
+            $bgInfoExe = Get-Command "bginfo.exe" -ErrorAction SilentlyContinue
             if ($bgInfoExe) {
                 $bgInfoPath = $bgInfoExe.Source
                 $bgInfoConfig = Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) "config.bgi"
