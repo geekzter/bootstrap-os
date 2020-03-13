@@ -113,6 +113,10 @@ if ($All -or $minimal) {
     }
 
     UpdateStoreApps
+} else {
+    if ($Powershell) {
+        choco install powershell-core -y
+    }
 }
 
 if ($All -or $Settings) {
