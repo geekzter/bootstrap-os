@@ -14,7 +14,7 @@
 #> 
 param ( 
     [parameter(Mandatory=$false)][switch]$All=$false,
-    [parameter(Mandatory=$false)][string[]]$Packages=@("Minimal"),
+    [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal", "None")][string[]]$Packages=@("Minimal"),
     [parameter(Mandatory=$false)][bool]$PowerShell=$false,
     [parameter(Mandatory=$false)][bool]$Settings=$true,
     [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os"

@@ -4,7 +4,7 @@
 #>
 param ( 
     [parameter(Mandatory=$false)][switch]$All=$false,
-    [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal")][string[]]$Packages=@("Minimal"),
+    [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal", "None")][string[]]$Packages=@("Minimal"),
     [parameter(Mandatory=$false)][bool]$PowerShell=$false,
     [parameter(Mandatory=$false)][bool]$Settings=$true
 ) 
@@ -65,7 +65,8 @@ try {
     $metadataContent = $null
 }
 
-if ($All -or ($Packages.Count -gt 0)) {
+$minimal = ($Packages.Contains("Desktop") -or $Packages.Contains("Developer") -or $Packages.Contains("Minimal"))
+if ($All -or $minimal) {
     # Install Chocolatey packages
 
     # Always setup Minimal set of packages
