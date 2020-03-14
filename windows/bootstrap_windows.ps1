@@ -35,18 +35,14 @@ if ($PSVersionTable.PSEdition -eq "Core") {
 if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
     Write-Output "Not running as Administrator"
     exit
-}        
+}
 
 # Disable IE Enhanced Security Mode
 $ieSecMode = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IsInstalled
-if ($ieSecMode -and ($ieSecMode -ne 0)) {
-    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}" -Name "IsInstalled" -Value 0 
-    Stop-Process -Name Explorer -Force # Should spawn a new process
-}
 $ieSecMode = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IsInstalled
 if ($ieSecMode -and ($ieSecMode -ne 0)) {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}" -Name "IsInstalled" -Value 0 
-    Stop-Process -Name Explorer -Force # Should spawn a new process
+    Stop-Process -Name Explorer -Force -ErrorAction SilentlyContinue # Should spawn a new process
 }
 
 # Install Chocolatey
