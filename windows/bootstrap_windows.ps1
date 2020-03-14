@@ -56,9 +56,9 @@ if (!(Get-Command "choco.exe" -ErrorAction SilentlyContinue)) {
 
 # Install Chocolatey packages
 choco install git.install -y
-# if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
-#     refreshenv # This should update the path with changes made by Chocolatey
-# }
+if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
+    refreshenv # This should update the path with changes made by Chocolatey
+}
 
 # Clone (the rest of) the repository
 $repoDirectory = Join-Path $HOME "Source\Public"
