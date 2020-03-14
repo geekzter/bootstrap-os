@@ -91,7 +91,9 @@ if ($All -or $minimal) {
     }
 
     choco upgrade all -r -y 
-    refreshenv # This should update the path with changes made by Chocolatey
+    if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
+        refreshenv # This should update the path with changes made by Chocolatey
+    }
 
     # Move shortcuts of installed applications
     Invoke-Command -ScriptBlock {
