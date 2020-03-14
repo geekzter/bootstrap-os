@@ -23,6 +23,7 @@ if ($IsWindows) {
 # Create symbolic link for PowerShell Core profile directory
 $profileDirectory = Split-Path -Parent $profile.CurrentUserAllHosts
 $profileName = Split-Path -Leaf $profile.CurrentUserAllHosts
+$null = New-Item -ItemType Directory -Force -Path $profileDirectory 
 
 LinkFile -File $profileName -SourceDirectory $scriptDirectory -TargetDirectory $profileDirectory
 LinkFile -File functions.ps1 -SourceDirectory $scriptDirectory -TargetDirectory $profileDirectory
