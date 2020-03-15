@@ -10,7 +10,7 @@
 #>
 
 # Load Functions
-. (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "functions.ps1")
+. (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) functions functions.ps1)
 
 # Link files from dotfiles
 # This works on Windows only when elevated

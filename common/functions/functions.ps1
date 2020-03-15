@@ -51,34 +51,6 @@ function AddorUpdateModule (
     }
 }
 
-function Connect-TmuxSession (
-    [string]$Workspace
-) {
-    if (!$Workspace -and (Get-Command terraform)) {
-        $Workspace = $(terraform workspace show)
-    }
-
-    $prexistingSession = $(tmux ls -F "#S") -match "^${Workspace}$"
-    if ($prexistingSession) {
-        tmux attach-session -d -t $Workspace
-    } else {
-        tmux new -s $Workspace
-    }
-
-}
-Set-Alias ct Connect-TmuxSession
-
-function End-TmuxSession (
-    [string]$Workspace
-) {
-    if ($Workspace) {
-        tmux kill-session -t $Workspace
-    } else {
-        pkill -f tmux
-    }
-}
-Set-Alias et End-TmuxSession
-
 function Disable-Warning {
 	Disable-Information
 
@@ -171,11 +143,28 @@ function CopyFile (
     $item = Copy-Item -LiteralPath $source -Destination $target -Force -PassThru
     Write-Host "$($item.FullName) <= $source"
 } 
+function LinkDirectory (
+    [string]$SourceDirectory,
+    [string]$TargetDirectory
+) {
+    if (!(Test-Path $SourceDirectory)) {
+        Write-Information "Creating symbolic link $SourceDirectory -> $TargetDirectory"
+        $link = New-Item -ItemType symboliclink -path "$SourceDirectory" -value "$TargetDirectory"
+    } else {
+        $link = Get-Item $SourceDirectory -Force
+    }
+    if ($link.Target) {
+        Write-Host "$($link.FullName) -> $($link.Target)"
+    } else {
+        Write-Information "$($link.FullName) already exists as directory"
+    }
+} 
 function LinkFile (
     [string]$File,
     [string]$SourceDirectory,
     [string]$TargetDirectory
 ) {
+    # Reverse
     $linkSource = $(Join-Path $TargetDirectory $File)
     $linkTarget = $(Join-Path $SourceDirectory $File)
 

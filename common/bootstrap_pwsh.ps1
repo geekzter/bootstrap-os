@@ -1,9 +1,9 @@
 #!/usr/bin/env pwsh
 
 $scriptDirectory = Split-Path -Parent -Path $MyInvocation.MyCommand.Path
-
+$functionsDirectory = Join-Path $scriptDirectory functions
 # Load Functions
-. (Join-Path $scriptDirectory "functions.ps1")
+. (Join-Path $functionsDirectory functions.ps1)
 
 
 # Check whether Az modules have been installed
@@ -26,4 +26,4 @@ $profileName = Split-Path -Leaf $profile.CurrentUserAllHosts
 $null = New-Item -ItemType Directory -Force -Path $profileDirectory 
 
 LinkFile -File $profileName -SourceDirectory $scriptDirectory -TargetDirectory $profileDirectory
-LinkFile -File functions.ps1 -SourceDirectory $scriptDirectory -TargetDirectory $profileDirectory
+LinkDirectory -SourceDirectory (Join-Path $profileDirectory functions) -TargetDirectory $functionsDirectory

@@ -1,7 +1,11 @@
 #!/usr/bin/env pwsh
 
 # Define Functions
-. (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "functions.ps1")
+$functionsPath = (Join-Path (Split-Path $Profile –Parent) "functions")
+Get-ChildItem $functionsPath -filter "*.ps1" | ForEach-Object {
+    Write-Host "$($_.FullName) : loaded"
+    . $_.FullName
+}
 
 # Define prompt
 function global:Prompt {
@@ -78,7 +82,7 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     $environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
     if (Test-Path -Path $environmentPath) {
         if ($printMessages) {
-            Write-Host "Sourcing $environmentPath"
+            Write-Host "${environmentPath}: sourced"
         }
         . $environmentPath
     } else {
