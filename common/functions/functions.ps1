@@ -180,3 +180,13 @@ function LinkFile (
         Write-Information "$($link.FullName) already exists as file"
     }
 } 
+
+function global:Load-Functions {
+    $functionsPath = (Join-Path (Split-Path $Profile –Parent) "functions")
+    Get-ChildItem $functionsPath -filter "*.ps1" | ForEach-Object {
+        Write-Host "$($_.FullName) : loaded"
+		. $_.FullName
+	}
+}
+Set-Alias lf Load-Functions
+Set-Alias rlf Load-Functions

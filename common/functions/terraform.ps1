@@ -5,10 +5,14 @@ Set-Alias tfa Apply-Terraform
 
 function CD-Terraform {
     $depth = 2
-    $main = Get-ChildItem -Path .. -Filter main.tf -Recurse -Depth $depth | Select-Object -First 1
+
+    $main = Get-ChildItem -Path . -Filter main.tf -Recurse -Depth $depth | Select-Object -First 1
+    if (!$main) {
+        # Go one level below current directory
+        $main = Get-ChildItem -Path .. -Filter main.tf -Recurse -Depth $depth | Select-Object -First 1
+    }
     if ($main) {
-        $terraformDirectory = Split-Path -Parent $main.FullName
-        Push-Location $terraformDirectory
+        Push-Location $main.Directory.FullName
     } else {
         Write-Warning "Terraform directory not found"
     }
