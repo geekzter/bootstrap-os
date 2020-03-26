@@ -72,62 +72,64 @@ function Find-TerraformDirectory {
 function Get-TerraformInfo {
     $directory = ChangeTo-TerraformDirectory
     try {
-        $data = @{
-            directory = $directory
-            branch = $(git rev-parse --abbrev-ref HEAD 2>$null)
-            resources = $((terraform state list).Count)
-            workspace = $(terraform workspace show)
-        }
-        $stateFile = Join-Path $directory .terraform terraform.tfstate
-        if (Test-Path $stateFile) {
-            Write-Information "Reading Terraform settings from ${stateFile}..."
-            $tfConfig = $(Get-Content $stateFile | ConvertFrom-Json)
-            if ($tfConfig.backend.type -ne "azurerm") {
-                throw "This script only works with azurerm provider"
+        if ($directory) {
+            $data = @{
+                directory = $directory
+                branch = $(git rev-parse --abbrev-ref HEAD 2>$null)
+                resources = $((terraform state list).Count)
+                workspace = $(terraform workspace show)
             }
-            $data["storageaccount"] = $tfConfig.backend.config.storage_account_name
-            $data["storagecontainer"] = $tfConfig.backend.config.container_name
-        }
+            $stateFile = Join-Path $directory .terraform terraform.tfstate
+            if (Test-Path $stateFile) {
+                Write-Information "Reading Terraform settings from ${stateFile}..."
+                $tfConfig = $(Get-Content $stateFile | ConvertFrom-Json)
+                if ($tfConfig.backend.type -ne "azurerm") {
+                    throw "This script only works with azurerm provider"
+                }
+                $data["storageaccount"] = $tfConfig.backend.config.storage_account_name
+                $data["storagecontainer"] = $tfConfig.backend.config.container_name
+            }
 
-        Write-Host "`nGeneral information:" -ForegroundColor Green
-        $data.GetEnumerator() | Sort-Object -Property Name | Format-Table -HideTableHeaders
+            Write-Host "`nGeneral information:" -ForegroundColor Green
+            $data.GetEnumerator() | Sort-Object -Property Name | Format-Table -HideTableHeaders
 
-        if (Test-Path $stateFile) {
-            Write-Information "Checking lease status of backend blobs..."
-            
-            $backendStorageAccountName = $tfConfig.backend.config.storage_account_name
-            $backendStorageContainerName = $tfConfig.backend.config.container_name
-            $backendStateKey = $tfConfig.backend.config.key
-            if ($env:ARM_ACCESS_KEY) {
-                $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -StorageAccountKey $env:ARM_ACCESS_KEY
-            } else {
-                if ($env:ARM_SAS_TOKEN) {
-                    $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -SasToken $env:ARM_SAS_TOKEN
+            if (Test-Path $stateFile) {
+                Write-Information "Checking lease status of backend blobs..."
+                
+                $backendStorageAccountName = $tfConfig.backend.config.storage_account_name
+                $backendStorageContainerName = $tfConfig.backend.config.container_name
+                $backendStateKey = $tfConfig.backend.config.key
+                if ($env:ARM_ACCESS_KEY) {
+                    $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -StorageAccountKey $env:ARM_ACCESS_KEY
                 } else {
-                    Write-Warning "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN needs to be set, exiting"
-                    return
+                    if ($env:ARM_SAS_TOKEN) {
+                        $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -SasToken $env:ARM_SAS_TOKEN
+                    } else {
+                        Write-Warning "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN needs to be set, exiting"
+                        return
+                    }
+                }
+                Write-Information "Retrieving blobs from https://${backendStorageAccountName}.blob.core.windows.net/${backendStorageContainerName}..."
+                $tfStateBlobs = Get-AzStorageBlob -Context $backendstorageContext -Container $backendStorageContainerName 
+                $tfStateBlobs | ForEach-Object {
+                    $storageWorkspaceName = $($_.Name -Replace "${backendStateKey}env:","" -Replace $backendStateKey,"default")
+                    $leaseStatus = $_.ICloudBlob.Properties.LeaseStatus
+                    if ($leaseStatus -ine "Unlocked") {
+                        Write-Host "Workspace '${storageWorkspaceName}' has status '${leaseStatus}'`n" -ForegroundColor Yellow
+                    }
                 }
             }
-            Write-Information "Retrieving blobs from https://${backendStorageAccountName}.blob.core.windows.net/${backendStorageContainerName}..."
-            $tfStateBlobs = Get-AzStorageBlob -Context $backendstorageContext -Container $backendStorageContainerName 
-            $tfStateBlobs | ForEach-Object {
-                $storageWorkspaceName = $($_.Name -Replace "${backendStateKey}env:","" -Replace $backendStateKey,"default")
-                $leaseStatus = $_.ICloudBlob.Properties.LeaseStatus
-                if ($leaseStatus -ine "Unlocked") {
-                    Write-Host "Workspace '${storageWorkspaceName}' has status '${leaseStatus}'`n" -ForegroundColor Yellow
-                }
-            }
+
+            # Environment variables
+            Write-Host "Environment variables:" -ForegroundColor Green
+            Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_* | Sort-Object -Property Name
+
+            # Azure resources
+            $resourceQuery = "Resources | where tags['provisioner']=='terraform' | summarize ResourceCount=count() by Application=tostring(tags['application']), Environment=tostring(tags['environment']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) | order by Application asc, Environment asc, Workspace asc, Suffix asc"
+            Write-Information "Executing graph query:`n$resourceQuery"
+            Write-Host "`nAzure resources:" -NoNewline -ForegroundColor Green
+            Search-AzGraph -Query $resourceQuery | Format-Table
         }
-
-        # Environment variables
-        Write-Host "Environment variables:" -ForegroundColor Green
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_* | Sort-Object -Property Name
-
-        # Azure resources
-        $resourceQuery = "Resources | where tags['provisioner']=='terraform' | summarize ResourceCount=count() by Application=tostring(tags['application']), Environment=tostring(tags['environment']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) | order by Application asc, Environment asc, Workspace asc, Suffix asc"
-        Write-Information "Executing graph query:`n$resourceQuery"
-        Write-Host "`nAzure resources:" -NoNewline -ForegroundColor Green
-        Search-AzGraph -Query $resourceQuery | Format-Table
     } finally {
         PopFrom-TerraformDirectory 
     }
@@ -183,61 +185,63 @@ function Unlock-TerraformState (
     $tfdirectory = ChangeTo-TerraformDirectory
 
     try {
-        if (!$Workspace) {
-            $Workspace = $(terraform workspace show)
-        }
+        if ($tfdirectory) {
+            if (!$Workspace) {
+                $Workspace = $(terraform workspace show)
+            }
 
-        # Access Terraform (Azure) backend to get leases for each workspace
-        Write-Information "Reading Terraform settings from ${tfdirectory}/.terraform/terraform.tfstate..."
-        $tfConfig = $(Get-Content ${tfdirectory}/.terraform/terraform.tfstate | ConvertFrom-Json)
-        if ($tfConfig.backend.type -ine "azurerm") {
-            throw "This script only works with azurerm provider"
-        }
-        $backendStorageAccountName = $tfConfig.backend.config.storage_account_name
-        $backendStorageContainerName = $tfConfig.backend.config.container_name
-        $backendStateKey = $tfConfig.backend.config.key
-        if ($env:ARM_ACCESS_KEY) {
-            $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -StorageAccountKey $env:ARM_ACCESS_KEY
-        } else {
-            if ($env:ARM_SAS_TOKEN) {
-                $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -SasToken $env:ARM_SAS_TOKEN
+            # Access Terraform (Azure) backend to get leases for each workspace
+            Write-Information "Reading Terraform settings from ${tfdirectory}/.terraform/terraform.tfstate..."
+            $tfConfig = $(Get-Content ${tfdirectory}/.terraform/terraform.tfstate | ConvertFrom-Json)
+            if ($tfConfig.backend.type -ine "azurerm") {
+                throw "This script only works with azurerm provider"
+            }
+            $backendStorageAccountName = $tfConfig.backend.config.storage_account_name
+            $backendStorageContainerName = $tfConfig.backend.config.container_name
+            $backendStateKey = $tfConfig.backend.config.key
+            if ($env:ARM_ACCESS_KEY) {
+                $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -StorageAccountKey $env:ARM_ACCESS_KEY
             } else {
-                Write-Warning "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN needs to be set, exiting"
+                if ($env:ARM_SAS_TOKEN) {
+                    $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -SasToken $env:ARM_SAS_TOKEN
+                } else {
+                    Write-Warning "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN needs to be set, exiting"
+                    return
+                }
+            }
+            if ($Workspace -eq "default") {
+                $blobName = $backendStateKey
+            } else {
+                $blobName = "${backendStateKey}env:${Workspace}"
+            }
+
+            Write-Information "Retrieving blob https://${backendStorageAccountName}.blob.core.windows.net/${backendStorageContainerName}/${blobName}..."
+            $tfStateBlob = Get-AzStorageBlob -Context $backendstorageContext -Container $backendStorageContainerName -Blob $blobName -ErrorAction SilentlyContinue
+            if (!($tfStateBlob)) {
+                Write-Host "{$tfdirectory}: Workspace '${Workspace}' state not found" -ForegroundColor Red
                 return
             }
-        }
-        if ($Workspace -eq "default") {
-            $blobName = $backendStateKey
-        } else {
-            $blobName = "${backendStateKey}env:${Workspace}"
-        }
 
-        Write-Information "Retrieving blob https://${backendStorageAccountName}.blob.core.windows.net/${backendStorageContainerName}/${blobName}..."
-        $tfStateBlob = Get-AzStorageBlob -Context $backendstorageContext -Container $backendStorageContainerName -Blob $blobName -ErrorAction SilentlyContinue
-        if (!($tfStateBlob)) {
-            Write-Host "{$tfdirectory}: Workspace '${Workspace}' state not found" -ForegroundColor Red
-            return
-        }
-
-        if ($tfStateBlob.ICloudBlob.Properties.LeaseStatus -ieq "Unlocked") {
-            Write-Host "{$tfdirectory}: Workspace '${Workspace}' is not locked" -ForegroundColor Yellow
-            return
-        } else {
-            # Prompt to continue
-            Write-Host "{$tfdirectory}: If you wish to proceed to unlock workspace '${Workspace}', please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-            $proceedanswer = Read-Host
-
-            if ($proceedanswer -ne "yes") {
-                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+            if ($tfStateBlob.ICloudBlob.Properties.LeaseStatus -ieq "Unlocked") {
+                Write-Host "{$tfdirectory}: Workspace '${Workspace}' is not locked" -ForegroundColor Yellow
                 return
-            }
-            Write-Host "Unlocking workspace '${Workspace}' by breaking lease on blob $($tfStateBlob.ICloudBlob.Uri.AbsoluteUri)..."
-            $lease = $tfStateBlob.ICloudBlob.BreakLease()
-            if ($lease.Ticks -eq 0) {
-                Write-Host "Unlocked workspace '${Workspace}'"
             } else {
-                Write-Host "Lease has unexpected value for 'Ticks'" -ForegroundColor Yellow
-                $lease
+                # Prompt to continue
+                Write-Host "{$tfdirectory}: If you wish to proceed to unlock workspace '${Workspace}', please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+                $proceedanswer = Read-Host
+
+                if ($proceedanswer -ne "yes") {
+                    Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+                    return
+                }
+                Write-Host "Unlocking workspace '${Workspace}' by breaking lease on blob $($tfStateBlob.ICloudBlob.Uri.AbsoluteUri)..."
+                $lease = $tfStateBlob.ICloudBlob.BreakLease()
+                if ($lease.Ticks -eq 0) {
+                    Write-Host "Unlocked workspace '${Workspace}'"
+                } else {
+                    Write-Host "Lease has unexpected value for 'Ticks'" -ForegroundColor Yellow
+                    $lease
+                }
             }
         }
     } finally {
