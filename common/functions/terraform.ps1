@@ -150,6 +150,11 @@ function Invoke-TerraformCommand (
     }
 }
 
+function List-TerraformOutput {
+    Invoke-TerraformCommand "terraform output"
+}
+Set-Alias tfo List-TerraformOutput
+
 function List-TerraformState {
     Invoke-TerraformCommand "terraform state list"
 }
