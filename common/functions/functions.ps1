@@ -156,7 +156,7 @@ function LinkDirectory (
     if ($link.Target) {
         Write-Host "$($link.FullName) -> $($link.Target)"
     } else {
-        Write-Information "$($link.FullName) already exists as directory"
+        Write-Host "$($link.FullName) already exists as directory" -ForegroundColor Yellow
     }
 } 
 function LinkFile (
@@ -177,7 +177,7 @@ function LinkFile (
     if ($link.Target) {
         Write-Host "$($link.FullName) -> $($link.Target)"
     } else {
-        Write-Information "$($link.FullName) already exists as file"
+        Write-Host "$($link.FullName) already exists as file" -ForegroundColor Yellow
     }
 } 
 
