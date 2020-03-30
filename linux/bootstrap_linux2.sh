@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-SCRIPT_PATH=`dirname $0`
-
 # Detect Linux distribution
 if test ! $(which lsb_release); then
     if test $(which apt-get); then
@@ -72,7 +70,7 @@ EOF
         INSTALLED_PACKAGES=$(mktemp)
         NEW_PACKAGES=$(mktemp)
         dpkg -l | grep ^ii | awk '{print $2}' >$INSTALLED_PACKAGES
-        grep -Fvx -f $INSTALLED_PACKAGES ${SCRIPT_PATH}/apt-packages.txt >$NEW_PACKAGES
+        grep -Fvx -f $INSTALLED_PACKAGES ./apt-packages.txt >$NEW_PACKAGES
         while read package; do 
             sudo ACCEPT_EULA=Y apt-get install -y $package
         done < $NEW_PACKAGES
@@ -85,7 +83,7 @@ if test ! $(which pwsh); then
     echo $'\nPowerShell Core (pwsh) not found, skipping setup'
 else
     echo $'\nSetting up PowerShell Core...'
-    pwsh -nop -file ${SCRIPT_PATH}/../common/common_setup.ps1
+    pwsh -nop -file ../common/common_setup.ps1
 fi
 
 # Set up terraform with tfenv
@@ -104,5 +102,5 @@ if [ -f ../common/settings.json ]; then
     git config --global user.name "$(cat ../common/settings.json | jq '.GitName')"
 else
     echo $'\n'
-    echo "Settings file $(cd $SCRIPT_PATH/../common/ && pwd)/settings.json not found, skipping personalization"
+    echo "Settings file $(cd ../common/ && pwd)/settings.json not found, skipping personalization"
 fi
