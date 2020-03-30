@@ -28,5 +28,6 @@ git config --global core.excludesfile (Join-Path $HOME .gitignore)
 # Non-pwsh common tasks
 if (Get-Command az -ErrorAction SilentlyContinue) {
     Write-Host "`nUpdating az-cli extensions"
-    az extension add --name azure-devops
+    az extension add -y -n azure-devops
+    az extension add -y -n resource-graph
 }

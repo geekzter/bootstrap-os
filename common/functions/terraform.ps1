@@ -115,8 +115,9 @@ function Get-TerraformInfo {
             # Azure resources
             $resourceQuery = "Resources | where tags['provisioner']=='terraform' | summarize ResourceCount=count() by Application=tostring(tags['application']), Environment=tostring(tags['environment']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) | order by Application asc, Environment asc, Workspace asc, Suffix asc"
             Write-Information "Executing graph query:`n$resourceQuery"
-            Write-Host "`nAzure resources:" -NoNewline -ForegroundColor Green
-            Search-AzGraph -Query $resourceQuery | Format-Table
+            Write-Host "`nAzure resources:`n" -ForegroundColor Green
+            az extension add --name resource-graph 2>$null
+            az graph query -q $resourceQuery -o table
         }
     } finally {
         PopFrom-TerraformDirectory 
