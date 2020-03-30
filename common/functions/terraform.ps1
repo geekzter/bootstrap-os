@@ -99,24 +99,12 @@ function Get-TerraformInfo {
                 $backendStorageAccountName = $tfConfig.backend.config.storage_account_name
                 $backendStorageContainerName = $tfConfig.backend.config.container_name
                 $backendStateKey = $tfConfig.backend.config.key
-                if ($env:ARM_ACCESS_KEY) {
-                    $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -StorageAccountKey $env:ARM_ACCESS_KEY
-                } else {
-                    if ($env:ARM_SAS_TOKEN) {
-                        $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -SasToken $env:ARM_SAS_TOKEN
-                    } else {
-                        Write-Warning "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN needs to be set, exiting"
-                        return
-                    }
-                }
-                Write-Information "Retrieving blobs from https://${backendStorageAccountName}.blob.core.windows.net/${backendStorageContainerName}..."
-                $tfStateBlobs = Get-AzStorageBlob -Context $backendstorageContext -Container $backendStorageContainerName 
-                $tfStateBlobs | ForEach-Object {
-                    $storageWorkspaceName = $($_.Name -Replace "${backendStateKey}env:","" -Replace $backendStateKey,"default")
-                    $leaseStatus = $_.ICloudBlob.Properties.LeaseStatus
-                    if ($leaseStatus -ine "Unlocked") {
-                        Write-Host "Workspace '${storageWorkspaceName}' has status '${leaseStatus}'`n" -ForegroundColor Yellow
-                    }
+                $jmesPath = "[?properties.lease.status != 'unlocked']" 
+
+                $lockedBlobs = Get-Blobs -BackendStorageAccountName $backendStorageAccountName -BackendStorageContainerName $backendStorageContainerName -JmesPath $jmesPath
+                $lockedBlobs | ForEach-Object {
+                    $lockedWorkspace = $_.name -replace "${backendStateKey}env:","" -replace "${backendStateKey}","default"
+                    Write-Host "Workspace '${lockedWorkspace}' has status '$($_.properties.lease.status)'`n" -ForegroundColor Yellow
                 }
             }
 
@@ -135,6 +123,29 @@ function Get-TerraformInfo {
     }
 }
 Set-Alias tfi Get-TerraformInfo
+
+function Get-Blobs (
+    [parameter(Mandatory=$true)][string]$BackendStorageAccountName,
+    [parameter(Mandatory=$true)][string]$BackendStorageContainerName,
+    [parameter(Mandatory=$true)][string]$JmesPath
+) {
+    Write-Information "Retrieving blobs from https://${BackendStorageAccountName}.blob.core.windows.net/${BackendStorageContainerName}..."
+    if ($env:ARM_ACCESS_KEY) {
+        $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --account-key $env:ARM_ACCESS_KEY --query $JmesPath | ConvertFrom-Json
+    } else {
+        if ($env:ARM_SAS_TOKEN) {
+            $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --sas-token $env:ARM_SAS_TOKEN --query $JmesPath | ConvertFrom-Json
+        } else {
+            Write-Information "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
+            $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --auth-mode login --query $JmesPath | ConvertFrom-Json
+            if (!$blobs) {
+                Write-Warning "Insufficient permissions (use variable ARM_ACCESS_KEY or ARM_SAS_TOKEN)"
+                return
+            }
+        }
+    }
+    return $blobs
+}
 
 function Invoke-TerraformCommand (
     [parameter(Mandatory=$true)][string]$cmd
@@ -199,48 +210,43 @@ function Unlock-TerraformState (
             $backendStorageAccountName = $tfConfig.backend.config.storage_account_name
             $backendStorageContainerName = $tfConfig.backend.config.container_name
             $backendStateKey = $tfConfig.backend.config.key
-            if ($env:ARM_ACCESS_KEY) {
-                $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -StorageAccountKey $env:ARM_ACCESS_KEY
-            } else {
-                if ($env:ARM_SAS_TOKEN) {
-                    $backendstorageContext = New-AzStorageContext -StorageAccountName $backendStorageAccountName -SasToken $env:ARM_SAS_TOKEN
-                } else {
-                    Write-Warning "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN needs to be set, exiting"
-                    return
-                }
-            }
+
             if ($Workspace -eq "default") {
                 $blobName = $backendStateKey
             } else {
                 $blobName = "${backendStateKey}env:${Workspace}"
             }
 
-            Write-Information "Retrieving blob https://${backendStorageAccountName}.blob.core.windows.net/${backendStorageContainerName}/${blobName}..."
-            $tfStateBlob = Get-AzStorageBlob -Context $backendstorageContext -Container $backendStorageContainerName -Blob $blobName -ErrorAction SilentlyContinue
-            if (!($tfStateBlob)) {
-                Write-Host "{$tfdirectory}: Workspace '${Workspace}' state not found" -ForegroundColor Red
-                return
-            }
+            $jmesPath = "[?properties.lease.status != 'unlocked' && name == '${blobName}']"
 
-            if ($tfStateBlob.ICloudBlob.Properties.LeaseStatus -ieq "Unlocked") {
-                Write-Host "{$tfdirectory}: Workspace '${Workspace}' is not locked" -ForegroundColor Yellow
+            $lockedBlob = Get-Blobs -BackendStorageAccountName $backendStorageAccountName -BackendStorageContainerName $backendStorageContainerName -JmesPath $jmesPath
+            if (!$lockedBlob) {
+                Write-Host "${tfdirectory}: Workspace '${Workspace}' is not locked" -ForegroundColor Yellow
                 return
             } else {
                 # Prompt to continue
-                Write-Host "{$tfdirectory}: If you wish to proceed to unlock workspace '${Workspace}', please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+                Write-Host "${tfdirectory}: If you wish to proceed to unlock workspace '${Workspace}', please reply 'yes' - null or N aborts" -ForegroundColor Cyan
                 $proceedanswer = Read-Host
 
                 if ($proceedanswer -ne "yes") {
                     Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
                     return
                 }
-                Write-Host "Unlocking workspace '${Workspace}' by breaking lease on blob $($tfStateBlob.ICloudBlob.Uri.AbsoluteUri)..."
-                $lease = $tfStateBlob.ICloudBlob.BreakLease()
-                if ($lease.Ticks -eq 0) {
+                Write-Host "Unlocking workspace '${Workspace}' by breaking lease on blob '${blobName}'..."
+                if ($env:ARM_ACCESS_KEY) {
+                    $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --account-key $env:ARM_ACCESS_KEY
+                } else {
+                    if ($env:ARM_SAS_TOKEN) {
+                        $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --sas-token $env:ARM_SAS_TOKEN
+                    } else {
+                        Write-Information "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
+                        $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --auth-mode login
+                    }
+                }
+                if ($ticks -eq 0) {
                     Write-Host "Unlocked workspace '${Workspace}'"
                 } else {
-                    Write-Host "Lease has unexpected value for 'Ticks'" -ForegroundColor Yellow
-                    $lease
+                    Write-Host "Lease has unexpected value for 'Ticks': $ticks" -ForegroundColor Yellow
                 }
             }
         }
