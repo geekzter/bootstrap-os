@@ -27,9 +27,9 @@ if [ -t 0 ]; then
         git -C $SCRIPT_PATH/.. pull
 
         # Done, spawn 2nd stage
-        pushd ${SCRIPT_PATH}
+        pushd ${SCRIPT_PATH} >/dev/null
         . ${SCRIPT_PATH}/bootstrap_linux2.sh "$@"
-        popd
+        popd >/dev/null
         exit
     fi
 fi
@@ -44,6 +44,6 @@ else
     echo "Repository found at $(cd $HOME/src/bootstrap-os && pwd), updating..."
     git -C $HOME/src/bootstrap-os pull
 fi
-pushd $HOME/src/bootstrap-os/linux
+pushd $HOME/src/bootstrap-os/linux >/dev/null
 . $HOME/src/bootstrap-os/linux/bootstrap_linux2.sh "$@"
-popd
+popd >/dev/null

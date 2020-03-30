@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 
 # Define Functions
-$functionsPath = (Join-Path (Split-Path $Profile –Parent) "functions")
+$functionsPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "functions")
 Get-ChildItem $functionsPath -filter "*.ps1" | ForEach-Object {
     Write-Host "$($_.FullName) : loaded"
     . $_.FullName
