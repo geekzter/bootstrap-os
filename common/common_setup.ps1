@@ -29,5 +29,6 @@ git config --global core.excludesfile (Join-Path $HOME .gitignore)
 if (Get-Command az -ErrorAction SilentlyContinue) {
     Write-Host "`nUpdating az-cli extensions"
     az extension add -y -n azure-devops
+    az extension add -y -n azure-firewall
     az extension add -y -n resource-graph
 }
