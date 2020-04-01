@@ -140,8 +140,14 @@ function Get-Blobs (
             Write-Information "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
             $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --auth-mode login --query $JmesPath | ConvertFrom-Json
             if (!$blobs) {
-                Write-Warning "Insufficient permissions (use variable ARM_ACCESS_KEY or ARM_SAS_TOKEN)"
-                return
+                Write-Information "No access to storage using KEY, SAS or SSO. Trying to obtain key..."
+                $storageKey = az storage account keys list -n $BackendStorageAccountName --query "[?keyName=='key1'].value" -o tsv
+                if ($storageKey) {
+                    $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --account-key $storageKey --query $JmesPath | ConvertFrom-Json
+                } else {
+                    Write-Error "Insufficient permissions (set environment variable ARM_SAS_TOKEN or ARM_ACCESS_KEY)"
+                    return
+                }
             }
         }
     }
@@ -190,6 +196,20 @@ function PopFrom-TerraformDirectory {
 }
 Set-Alias cdtf- PopFrom-TerraformDirectory
 Set-Alias tfcd- PopFrom-TerraformDirectory
+
+function Set-TerraformWorkspace (
+    [parameter(Mandatory=$true)][string]$Workspace
+) {
+    Invoke-TerraformCommand "terraform workspace select $Workspace"
+}
+Set-Alias tfw Set-TerraformWorkspace  
+
+function Taint-TerraformResource (
+    [parameter(Mandatory=$true)][string]$Resource
+) {
+    Invoke-TerraformCommand "terraform taint $Resource"
+}
+Set-Alias tft Taint-TerraformResource 
 
 function Unlock-TerraformState (
     [parameter(Mandatory=$false,HelpMessage="The workspace to break lease for")][string]$Workspace=$env:TF_WORKSPACE
@@ -242,6 +262,16 @@ function Unlock-TerraformState (
                     } else {
                         Write-Information "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
                         $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --auth-mode login
+                        if (!$ticks) {
+                            Write-Information "No access to storage using KEY, SAS or SSO. Trying to obtain key..."
+                            $storageKey = az storage account keys list -n $BackendStorageAccountName --query "[?keyName=='key1'].value" -o tsv
+                            if ($storageKey) {
+                                $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --account-key $storageKey
+                            } else {
+                                Write-Error "Insufficient permissions (set environment variable ARM_SAS_TOKEN or ARM_ACCESS_KEY)"
+                                return
+                            }
+                        }
                     }
                 }
                 if ($ticks -eq 0) {
