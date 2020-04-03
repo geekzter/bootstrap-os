@@ -2,7 +2,10 @@ function Connect-TmuxSession (
     [string]$Workspace
 ) {
     if (!$Workspace -and (Get-Command terraform)) {
-        $Workspace = $(terraform workspace show)
+        $Workspace = $(terraform workspace show 2>$null)
+    }
+    if (!$Workspace) {
+        $Workspace = "default"
     }
 
     $prexistingSession = $(tmux ls -F "#S") -match "^${Workspace}$"
