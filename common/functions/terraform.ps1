@@ -69,6 +69,13 @@ function Find-TerraformDirectory {
     }
 }
 
+function Get-TerraformEnvironment {
+    Write-Host "Environment variables:" -ForegroundColor Green
+    Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_* | Sort-Object -Property Name
+}
+Set-Alias tfe Get-TerraformEnvironment
+Set-Alias tfenv Get-TerraformEnvironment
+
 function Get-TerraformInfo {
     $directory = ChangeTo-TerraformDirectory
     try {
