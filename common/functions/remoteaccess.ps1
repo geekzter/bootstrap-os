@@ -8,7 +8,7 @@ function Connect-TmuxSession (
         $Workspace = "default"
     }
 
-    $prexistingSession = $(tmux ls -F "#S") -match "^${Workspace}$"
+    $prexistingSession = $(tmux ls -F "#S" 2>$null) -match "^${Workspace}$"
     if ($prexistingSession) {
         tmux attach-session -d -t $Workspace
     } else {
