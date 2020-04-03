@@ -74,7 +74,8 @@ function Get-TerraformEnvironment {
     Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_* | Sort-Object -Property Name
 }
 Set-Alias tfe Get-TerraformEnvironment
-Set-Alias tfenv Get-TerraformEnvironment
+# Don't overwrite https://github.com/tfutils/tfenv
+#Set-Alias tfenv Get-TerraformEnvironment 
 
 function Get-TerraformInfo {
     $directory = ChangeTo-TerraformDirectory
