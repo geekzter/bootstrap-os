@@ -184,7 +184,7 @@ function List-TerraformOutput {
 Set-Alias tfo List-TerraformOutput
 
 function List-TerraformState {
-    Invoke-TerraformCommand "terraform state list"
+    Invoke-TerraformCommand "terraform state list | sort"
 }
 Set-Alias tfls List-TerraformState
 
