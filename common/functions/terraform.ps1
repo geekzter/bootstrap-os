@@ -205,6 +205,13 @@ function PopFrom-TerraformDirectory {
 Set-Alias cdtf- PopFrom-TerraformDirectory
 Set-Alias tfcd- PopFrom-TerraformDirectory
 
+function RemoveFrom-TerraformState (
+    [parameter(Mandatory=$true)][string]$Resource
+) {
+    Invoke-TerraformCommand "terraform state rm $Resource"
+}
+Set-Alias tfrm RemoveFrom-TerraformState
+
 function Set-TerraformWorkspace (
     [parameter(Mandatory=$true)][string]$Workspace
 ) {
