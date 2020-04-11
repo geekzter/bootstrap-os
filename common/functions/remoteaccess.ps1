@@ -9,11 +9,15 @@ function Connect-TmuxSession (
     }
 
     $prexistingSession = $(tmux ls -F "#S" 2>$null) -match "^${Workspace}$"
-    if ($prexistingSession) {
-        tmux attach-session -d -t $Workspace
-    } else {
-        tmux new -s $Workspace
+    if (!$prexistingSession) {
+        # Start session, but do not yet attach
+        tmux new -d -s $Workspace
     }
+    Write-Verbose "`$env:TF_WORKSPACE='$Workspace'"
+    tmux send-keys -t $Workspace "`$env:TF_WORKSPACE='$Workspace'" Enter
+
+    # Attach
+    tmux attach-session -d -t $Workspace
 
 }
 Set-Alias ct Connect-TmuxSession
