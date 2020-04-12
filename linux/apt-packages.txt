@@ -33,6 +33,7 @@ sed
 snapd
 telnet
 tmux
+traceroute
 unixodbc-dev
 unzip
 whois
