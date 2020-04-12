@@ -143,6 +143,7 @@ function CopyFile (
     $item = Copy-Item -LiteralPath $source -Destination $target -Force -PassThru
     Write-Host "$($item.FullName) <= $source"
 } 
+
 function LinkDirectory (
     [string]$SourceDirectory,
     [string]$TargetDirectory
@@ -190,3 +191,10 @@ function global:Load-Functions {
 }
 Set-Alias lf Load-Functions
 Set-Alias rlf Load-Functions
+
+function Search-History (
+    [string]$Search
+) {
+    Get-History | Where-Object {$_.CommandLine -Like "*${Search}*"}
+}
+Set-Alias sh Search-History
