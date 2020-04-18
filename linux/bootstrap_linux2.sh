@@ -32,9 +32,6 @@ else
     else
         # pre-requisites
         sudo apt-get install -y apt-transport-https curl
-
-        # Required for Midnight Commander
-        sudo add-apt-repository universe
         
         # Kubernetes requirement
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
@@ -48,6 +45,8 @@ EOF
         # Source: https://github.com/Azure/azure-functions-core-tools
         curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
         if [ "$DISTRIB_ID" == "Debian" ]; then
+            # Microsoft dependencies
+            # Source: https://github.com/Azure/azure-functions-core-tools
             wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
             sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
             wget -q https://packages.microsoft.com/config/debian/${DISTRIB_RELEASE_MAJOR}/prod.list
@@ -56,8 +55,16 @@ EOF
             sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
         fi
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
+            # Microsoft dependencies
+            # Source: https://github.com/Azure/azure-functions-core-tools
             curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
             sudo dpkg -i packages-microsoft-prod.deb
+
+            # Required for Midnight Commander
+            sudo add-apt-repository universe
+
+            # For Ubuntu, this PPA provides the latest stable upstream Git version
+            sudo add-apt-repository ppa:git-core/ppa
         fi
 
         echo $'\nUpdating package list...'

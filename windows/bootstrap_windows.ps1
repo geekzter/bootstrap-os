@@ -55,7 +55,7 @@ if (!(Get-Command "choco.exe" -ErrorAction SilentlyContinue)) {
 }
 
 # Install Chocolatey packages
-choco install git.install -y
+choco install git -y
 if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
     refreshenv # This should update the path with changes made by Chocolatey
 }
