@@ -183,8 +183,15 @@ function List-TerraformOutput {
 }
 Set-Alias tfo List-TerraformOutput
 
-function List-TerraformState {
-    Invoke-TerraformCommand "terraform state list | sort"
+function List-TerraformState (
+    [parameter(Mandatory=$false)][string]$SearchPattern
+ ) {
+    $command = "terraform state list"
+    if ($SearchPattern) {
+        $command += " | Select-String -Pattern '$SearchPattern'"
+    }
+    $command += " | Sort-Object"
+    Invoke-TerraformCommand $command
 }
 Set-Alias tfls List-TerraformState
 
