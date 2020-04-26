@@ -178,14 +178,20 @@ function Invoke-TerraformCommand (
     }
 }
 
-function List-TerraformOutput {
-    Invoke-TerraformCommand "terraform output"
+function List-TerraformOutput (
+    [parameter(Mandatory=$false)][string]$SearchPattern
+) {
+    $command = "terraform output"
+    if ($SearchPattern) {
+        $command += " | Select-String -Pattern '$SearchPattern'"
+    }
+    Invoke-TerraformCommand $command
 }
 Set-Alias tfo List-TerraformOutput
 
 function List-TerraformState (
     [parameter(Mandatory=$false)][string]$SearchPattern
- ) {
+) {
     $command = "terraform state list"
     if ($SearchPattern) {
         $command += " | Select-String -Pattern '$SearchPattern'"
