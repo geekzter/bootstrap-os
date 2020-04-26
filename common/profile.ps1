@@ -73,6 +73,9 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     if (!$pathList.Contains("/usr/local/share/dotnet")) {
         $null = $pathList.Add("/usr/local/share/dotnet")
     }
+    if ($IsMacOS -and !$pathList.Contains("/usr/local/opt/tmux@2.6/bin")) {
+        $null = $pathList.Insert(0,"/usr/local/opt/tmux@2.6/bin")
+    }
     if (!($(Get-Command tfenv -ErrorAction SilentlyContinue)) -and (Test-Path ~/.tfenv/bin) -and !$env:PATH.Contains("tfenv/bin")) {
         $null = $pathList.Add("${env:HOME}/.tfenv/bin")
     }
