@@ -1,5 +1,5 @@
 function Connect-TmuxSession (
-    [string]$Workspace
+    [string]$Workspace=($env:TF_WORKSPACE ? $env:TF_WORKSPACE : "default")
 ) {
     if (!$Workspace -and (Get-Command terraform)) {
         $Workspace = $(terraform workspace show 2>$null)
