@@ -25,9 +25,16 @@ if ($IsLinux -or $IsMacos) {
 # Configure git
 git config --global core.excludesfile (Join-Path $HOME .gitignore)
 
-# Non-pwsh common tasks
+# Ruby gems
+if (Get-Command gem -ErrorAction SilentlyContinue) {
+    Write-Host "`nUpdating Ruby gems..."
+    sudo gem update
+    gem install --user-install bundler jekyll
+}
+
+# Azure CLI extensions
 if (Get-Command az -ErrorAction SilentlyContinue) {
-    Write-Host "`nUpdating az-cli extensions"
+    Write-Host "`nUpdating Azure CLI extensions..."
     az extension add -y -n azure-devops
     az extension add -y -n azure-firewall
     az extension add -y -n resource-graph

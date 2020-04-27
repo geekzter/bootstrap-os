@@ -73,6 +73,14 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     if (!$pathList.Contains("/usr/local/share/dotnet")) {
         $null = $pathList.Add("/usr/local/share/dotnet")
     }
+    if (Get-Command ruby -ErrorAction SilentlyContinue) {
+        $null = $(ruby --version) -match '^ruby *(?<version>[\d\.]+)' 
+        $rubyVersion = [version]$Matches['version']
+        $rubyVersionString = "$($rubyVersion.ToString(2)).0"
+        if (!$pathList.Contains("~/.gem/ruby/${rubyVersionString}/bin")) {
+            $null = $pathList.Insert(0,"~/.gem/ruby/${rubyVersionString}/bin")
+        }
+    }
     if ($IsMacOS -and !$pathList.Contains("/usr/local/opt/tmux@2.6/bin")) {
         $null = $pathList.Insert(0,"/usr/local/opt/tmux@2.6/bin")
     }

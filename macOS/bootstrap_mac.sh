@@ -13,6 +13,10 @@ if [ -d ../.git ]; then
     git -C .. pull
 fi
 
+if [ ! -d "$(xcode-select -p)" ]; then 
+    xcode-select --install
+fi
+
 # Homebrew package management
 if test ! $(which brew); then
     echo "Installing homebrew..."
@@ -23,7 +27,10 @@ brew bundle
 brew upgrade
 brew cask upgrade
 
+# .NET tools
 dotnet tool install --global dotnet-ef
+
+# Terraform
 if test ! $(which tfenv); then
     brew link tfenv
 fi
