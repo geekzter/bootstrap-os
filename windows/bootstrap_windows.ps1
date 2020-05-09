@@ -20,13 +20,6 @@ param (
     [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os"
 ) 
 
-# TODO:
-#       Company Portal App
-#       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
-#       Update-Help
-#       Regional Settings
-
-
 # Validation
 if ($PSVersionTable.PSEdition -eq "Core") {
     if ($IsWindows) {
@@ -102,7 +95,7 @@ if (!(Test-Path $windowsBootstrapDirectory)) {
 }
 
 # Invoke next stage
-if (Get-ExecutionPolicy -eq "Restricted") {
+if ((Get-ExecutionPolicy) -eq "Restricted") {
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
 }
 $stage2Script = "bootstrap_windows2.ps1"
