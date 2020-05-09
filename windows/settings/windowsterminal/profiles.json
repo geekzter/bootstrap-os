@@ -105,11 +105,11 @@
             "fontSize" : 9,
             "guid" : "{7bb542a2-6076-46f9-a55e-3ba2f5b792fb}",
             "historySize" : 9001,
-            "icon" : "%USERPROFILE%\\Source\\Public\\bootstrap-os\\common\\icons\\logo-terraform-38bd0e32.png",
+            "icon" : "%USERPROFILE%\\Source\\GitHub\\geekzter\\bootstrap-os\\common\\icons\\logo-terraform-38bd0e32.png",
             "name" : "VDC",
             "padding" : "0, 0, 0, 0",
             "snapOnInput" : true,
-            "startingDirectory" : "%USERPROFILE%\\Source\\Public\\azure-vdc\\Scripts",
+            "startingDirectory" : "%USERPROFILE%\\Source\\GitHub\\geekzter\\azure-vdc\\Scripts",
             "useAcrylic" : false
         }
     ],

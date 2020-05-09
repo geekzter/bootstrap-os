@@ -61,7 +61,7 @@ if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
 }
 
 # Clone (the rest of) the repository
-$repoDirectory = Join-Path $HOME "Source\Public"
+$repoDirectory = Join-Path $HOME "Source\GitHub\geekzter"
 if (!(Test-Path $repoDirectory)) {
     $null = New-Item -ItemType Directory -Force -Path $repoDirectory
 }
