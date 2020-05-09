@@ -95,6 +95,9 @@ if (!(Test-Path $windowsBootstrapDirectory)) {
 }
 
 # Invoke next stage
+if ((Get-ExecutionPolicy) -eq "Restricted") {
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+}
 $stage2Script = "bootstrap_windows2.ps1"
 if (!(Test-Path $stage2Script)) {
     Write-Error "Stage 2 script $stage2Script not found, exiting"

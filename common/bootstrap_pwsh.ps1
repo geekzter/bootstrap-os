@@ -7,7 +7,7 @@ $functionsDirectory = Join-Path $scriptDirectory functions
 
 
 # Check whether Az modules have been installed
-AddorUpdateModule Az
+AddorUpdateModule -ModuleName Az -AllowClobber
 #AddorUpdateModule AzureADPreview
 #AddorUpdateModule MicrosoftPowerBIMgmt
 #AddorUpdateModule MicrosoftTeams

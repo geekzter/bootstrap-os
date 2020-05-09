@@ -10,7 +10,8 @@ param (
 ) 
 
 function AddorUpdateModule (
-    [string]$moduleName
+    [string]$ModuleName,
+    [switch]$AllowClobber=$false
 ) {
     if (IsElevated) {
         $scope = "AllUsers"
@@ -31,7 +32,7 @@ function AddorUpdateModule (
     } else {
         # Install module if not present
         Write-Host "Installing Windows PowerShell $moduleName module..."
-        Install-Module $moduleName -Force -SkipPublisherCheck -Scope $scope # -AcceptLicense 
+        Install-Module $moduleName -Force -SkipPublisherCheck -Scope $scope -AllowClobber:$AllowClobber # -AcceptLicense 
     }
 }
 

@@ -1,7 +1,8 @@
 
 function AddorUpdateModule (
-    [string]$moduleName,
-    [string]$desiredVersion
+    [string]$ModuleName,
+    [string]$DesiredVersion,
+    [switch]$AllowClobber=$false
 ) {
     if (IsElevated) {
         $scope = "AllUsers"
@@ -40,13 +41,13 @@ function AddorUpdateModule (
             $newModule = Find-Module $moduleName -RequiredVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
             if ($newModule) {
                 Write-Host "Installing PowerShell Core $moduleName module $desiredVersion..."
-                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -RequiredVersion $desiredVersion -AllowPrerelease -Scope $scope
+                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -RequiredVersion $desiredVersion -AllowPrerelease -Scope $scope -AllowClobber:$AllowClobber
             } else {
                 Write-Host "PowerShell Core $moduleName module version $desiredVersion is not available on $($PSVersionTable.OS)" -ForegroundColor Red
             }
         } else {
             Write-Host "Installing PowerShell Core $moduleName module..."
-            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -Scope $scope
+            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -Scope $scope -AllowClobber:$AllowClobber
         }
     }
 }
