@@ -36,6 +36,34 @@ function AddorUpdateModule (
     }
 }
 
+function PinToQuickAccess (
+    [string]$Folder
+) {
+    if ($Folder) {
+        $shell = New-Object -com Shell.Application
+        $folderObject = $shell.Namespace($Folder)
+        if ($folderObject) {
+            $folderObject.Self.InvokeVerb("pintohome")
+        }
+    }
+}
+
+function PinToTaskbar (
+    [string]$Application
+) {
+    # $env:AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar
+    if ($Shortcut) {
+        $userStartFolder = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Start Menu" | Select-Object -ExpandProperty "Start Menu")
+        $commonStartFolder = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Common Start Menu" | Select-Object -ExpandProperty "Common Start Menu")
+
+        $shortcut = Get-ChildItem -Path $userStartFolder,$commonStartFolder -File -Filter $Application -Recurse -Depth 5 | Select-Object -First 1
+
+        if ($shortcut) {
+            $null = Copy-Item "$($shortcut.FullName)" -Destination "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar" -Force
+        }
+    }
+}
+
 function global:IsElevated {
     return (New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")
 }
@@ -68,54 +96,59 @@ try {
 
 $minimal = ($Packages.Contains("Desktop") -or $Packages.Contains("Developer") -or $Packages.Contains("Minimal"))
 if ($All -or $minimal) {
-    # Install Chocolatey packages
+    # # Install Chocolatey packages
 
-    # Always setup Minimal set of packages
-    choco install chocolatey-minimal.config -r -y
-    choco install chocolatey-windows-developer.config -r -y -s windowsfeatures
+    # # Always setup Minimal set of packages
+    # choco install chocolatey-minimal.config -r -y
+    # choco install chocolatey-windows-developer.config -r -y -s windowsfeatures
  
-    if (($All -and $osType -ieq "Client") -or $Packages.Contains("Desktop")) {
-        choco install chocolatey-desktop.config -r -y
+    # if (($All -and $osType -ieq "Client") -or $Packages.Contains("Desktop")) {
+    #     choco install chocolatey-desktop.config -r -y
 
-        # Windows capabilities
-        $capabilities  = Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"}
-        $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
-        $capabilities += Get-WindowsCapability -Online -Name OpenSSH.Client     | Where-Object {$_.State -ne "Installed"}
-        foreach ($capability in $capabilities) {
-            Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
-            $capability | Add-WindowsCapability -Online
-        }
-    }
+    #     # Windows capabilities
+    #     $capabilities  = Get-WindowsCapability -Online -Name "Language.*en-US*" | Where-Object {$_.State -ne "Installed"}
+    #     $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
+    #     $capabilities += Get-WindowsCapability -Online -Name OpenSSH.Client     | Where-Object {$_.State -ne "Installed"}
+    #     foreach ($capability in $capabilities) {
+    #         Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
+    #         $capability | Add-WindowsCapability -Online
+    #     }
 
-    if ($All -or $Packages.Contains("Developer")) {
-        choco install chocolatey-developer.config -r -y
-    }
+    #     UpdateStoreApps
+    # }
 
-    choco upgrade all -r -y 
-    if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
-        refreshenv # This should update the path with changes made by Chocolatey
-    }
+    # if ($All -or $Packages.Contains("Developer")) {
+    #     choco install chocolatey-developer.config -r -y
+    # }
 
-    # Move shortcuts of installed applications
-    Invoke-Command -ScriptBlock {
-        $private:ErrorActionPreference = "SilentlyContinue"
-        $script:desktopFolder = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Desktop" -ErrorAction SilentlyContinue  
-    }
-    # $desktopFolder may be emoty when executing before first logon
-    if ($desktopFolder) {
-        $allUsersDesktopFolder = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "common Desktop"    
-        $installedAppsFolder = Join-Path $desktopFolder "Installed"
-        if (!(Test-Path $installedAppsFolder)) {
-            $null = mkdir $installedAppsFolder
-        }
-        Get-ChildItem -Path $desktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
-        Get-ChildItem -Path $allUsersDesktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
-        if (!(Get-ChildItem -Path $installedAppsFolder)) {
-            Remove-Item -Path $installedAppsFolder
-        }
-    }
+    # choco upgrade all -r -y 
+    # if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
+    #     refreshenv # This should update the path with changes made by Chocolatey
+    # }
 
-    UpdateStoreApps
+    # # Move shortcuts of installed applications
+    # Invoke-Command -ScriptBlock {
+    #     $private:ErrorActionPreference = "SilentlyContinue"
+    #     $script:desktopFolder = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Desktop" -ErrorAction SilentlyContinue  
+    # }
+    # # $desktopFolder may be emoty when executing before first logon
+    # if ($desktopFolder) {
+    #     $allUsersDesktopFolder = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "common Desktop"    
+    #     $installedAppsFolder = Join-Path $desktopFolder "Installed"
+    #     if (!(Test-Path $installedAppsFolder)) {
+    #         $null = mkdir $installedAppsFolder
+    #     }
+    #     Get-ChildItem -Path $desktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
+    #     Get-ChildItem -Path $allUsersDesktopFolder -Filter *.lnk | Where-Object {$_.LastWriteTime -ge $startTime} | Move-Item -Destination $installedAppsFolder -Force
+    #     if (!(Get-ChildItem -Path $installedAppsFolder)) {
+    #         Remove-Item -Path $installedAppsFolder
+    #     }
+    # }
+
+    PinToQuickAccess "$env:HOME\Source"
+    PinToTaskbar "Visual Studio Code.lnk"
+    PinToTaskbar "Windows PowerShell.lnk"
+    PinToTaskbar "Windows Terminal*"
 } else {
     if ($Powershell) {
         choco install powershell-core -y
@@ -153,7 +186,7 @@ if ($All -or $Settings) {
     }
 
     # Disable autostarts
-    Get-ScheduledTask -TaskName ServerManager -ErrorAction SilentlyContinue | Disable-ScheduledTask
+    Get-ScheduledTask -TaskName ServerManager -ErrorAction SilentlyContinue | Disable-ScheduledTask | Out-Null
     Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name "Docker Desktop" -ErrorAction SilentlyContinue
 
     # Display Setting customization
@@ -184,6 +217,8 @@ if ($All -or $Settings) {
 
     # Set up application settings
     & (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "create_settings.ps1")
+
+    # TODO: Show hidden files in explorer
 }
 
 if ($All -or $Powershell) {
