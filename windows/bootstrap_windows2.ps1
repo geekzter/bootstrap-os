@@ -220,6 +220,9 @@ if ($All -or $Settings) {
     Get-ScheduledTask -TaskName ServerManager -ErrorAction SilentlyContinue | Disable-ScheduledTask | Out-Null
     Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name "Docker Desktop" -ErrorAction SilentlyContinue
 
+    # Show hidden files
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "Hidden" -Type DWord -Value 1
+
     # Display Setting customization
     New-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -PropertyType String -Value -1125 -ErrorAction SilentlyContinue
     if ($metadataContent) {

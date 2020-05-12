@@ -98,7 +98,7 @@ if (!(Test-Path $windowsBootstrapDirectory)) {
 }
 
 # Invoke next stage
-if ((Get-ExecutionPolicy) -eq "Restricted") {
+if ((Get-ExecutionPolicy) -eq "Allsigned") {
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
 }
 $stage2Script = "bootstrap_windows2.ps1"
