@@ -51,8 +51,7 @@ function PinToQuickAccess (
 function PinToTaskbar (
     [string]$Application
 ) {
-    # $env:AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar
-    if ($Shortcut) {
+    if ($Application) {
         $userStartFolder = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Start Menu" | Select-Object -ExpandProperty "Start Menu")
         $commonStartFolder = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Common Start Menu" | Select-Object -ExpandProperty "Common Start Menu")
 
@@ -61,6 +60,14 @@ function PinToTaskbar (
         if ($shortcut) {
             $null = Copy-Item "$($shortcut.FullName)" -Destination "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar" -Force
         }
+    }
+}
+
+function RemoveFromTaskbar (
+    [string]$Shortcut
+) {
+    if ($Shortcut) {
+        Get-ChildItem -Filter $Shortcut -Path "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar" | Remove-Item | Out-Null
     }
 }
 
@@ -117,8 +124,16 @@ if ($All -or $minimal) {
         UpdateStoreApps
     }
 
+    PinToTaskbar "Microsoft Edge*"
+    RemoveFromTaskbar "Internet Explorer*"
+
     if ($All -or $Packages.Contains("Developer")) {
         choco install chocolatey-developer.config -r -y
+
+        PinToQuickAccess "$env:HOME\Source"
+        PinToTaskbar "Visual Studio Code.lnk"
+        PinToTaskbar "Windows PowerShell.lnk"
+        PinToTaskbar "Windows Terminal*"
     }
 
     choco upgrade all -r -y 
@@ -144,11 +159,6 @@ if ($All -or $minimal) {
             Remove-Item -Path $installedAppsFolder
         }
     }
-
-    PinToQuickAccess "$env:HOME\Source"
-    PinToTaskbar "Visual Studio Code.lnk"
-    PinToTaskbar "Windows PowerShell.lnk"
-    PinToTaskbar "Windows Terminal*"
 } else {
     if ($Powershell) {
         choco install powershell-core -y
