@@ -141,6 +141,27 @@ if ($All -or $minimal) {
         refreshenv # This should update the path with changes made by Chocolatey
     }
 
+    # Replace IE
+    $defaultBrowser = "Microsoft Edge"
+    $edge = Get-ItemProperty -Path "HKCU:\SOFTWARE\Clients\StartMenuInternet\$defaultBrowser" -ErrorAction SilentlyContinue
+    if ($edge) {
+        Write-Host "Setting '$defaultBrowser' as default browser"
+        Set-Item -Path "HKCU:\SOFTWARE\Clients\StartMenuInternet" -Value $defaultBrowser
+        $removeIE = $true
+    }
+    $edge = Get-ItemProperty -Path "HKLM:\SOFTWARE\Clients\StartMenuInternet\$defaultBrowser" -ErrorAction SilentlyContinue
+    if ($edge) {
+        Write-Host "Setting '$defaultBrowser' as default browser"
+        Set-Item -Path "HKLM:\SOFTWARE\Clients\StartMenuInternet" -Value $defaultBrowser
+        $removeIE = $true
+    }
+    if ($removeIE) {
+        Write-Host "Removing 'Internet Explorer'..."
+        # Taken from https://github.com/Disassembler0
+        Get-WindowsOptionalFeature -Online | Where-Object { $_.FeatureName -like "Internet-Explorer-Optional*" } | Disable-WindowsOptionalFeature -Online -NoRestart -WarningAction SilentlyContinue | Out-Null
+        Get-WindowsCapability -Online | Where-Object { $_.Name -like "Browser.InternetExplorer*" } | Remove-WindowsCapability -Online | Out-Null
+    }
+
     # Move shortcuts of installed applications
     Invoke-Command -ScriptBlock {
         $private:ErrorActionPreference = "SilentlyContinue"
