@@ -36,6 +36,18 @@ function AddorUpdateModule (
     }
 }
 
+function FindApplication (
+    [string]$Application
+) {
+    if ($Application) {
+        $userStartFolder = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Start Menu" | Select-Object -ExpandProperty "Start Menu")
+        $commonStartFolder = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Common Start Menu" | Select-Object -ExpandProperty "Common Start Menu")
+
+        $shortcut = Get-ChildItem -Path $userStartFolder,$commonStartFolder -File -Filter $Application -Recurse -Depth 5 | Select-Object -First 1
+        return $shortcut
+    }
+}
+
 function PinToQuickAccess (
     [string]$Folder
 ) {
@@ -48,17 +60,21 @@ function PinToQuickAccess (
     }
 }
 
-function PinToTaskbar (
-    [string]$Application
+function PinTo (
+    [string]$Application,
+    [switch]$StartMenu=$falase,
+    [switch]$Taskbar=$false
 ) {
-    if ($Application) {
-        $userStartFolder = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Start Menu" | Select-Object -ExpandProperty "Start Menu")
-        $commonStartFolder = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Common Start Menu" | Select-Object -ExpandProperty "Common Start Menu")
-
-        $shortcut = Get-ChildItem -Path $userStartFolder,$commonStartFolder -File -Filter $Application -Recurse -Depth 5 | Select-Object -First 1
+    if ($Application -and (Get-Command syspin)) {
+        $shortcut = FindApplication $Application
 
         if ($shortcut) {
-            $null = Copy-Item "$($shortcut.FullName)" -Destination "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar" -Force
+            if ($StartMenu) {
+                syspin $shortcut.FullName "Pin to start"
+            }
+            if ($TaskBar) {
+                syspin $shortcut.FullName "Pin to taskbar"
+            }
         }
     }
 }
@@ -66,8 +82,8 @@ function PinToTaskbar (
 function RemoveFromTaskbar (
     [string]$Shortcut
 ) {
-    if ($Shortcut) {
-        Get-ChildItem -Filter $Shortcut -Path "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar" | Remove-Item | Out-Null
+    if ($Shortcut -and (Get-Command syspin)) {
+        syspin $Shortcut "Unpin from taskbar"
     }
 }
 
@@ -131,9 +147,9 @@ if ($All -or $minimal) {
         choco install chocolatey-developer.config -r -y
 
         PinToQuickAccess "$env:HOME\Source"
-        PinToTaskbar "Visual Studio Code.lnk"
-        PinToTaskbar "Windows PowerShell.lnk"
-        PinToTaskbar "Windows Terminal*"
+        PinTo -Application "Visual Studio Code.lnk" -StartMenu -Taskbar 
+        PinTo -Application "Windows PowerShell.lnk" -StartMenu
+        PinTo -Application "Windows Terminal*" -StartMenu -Taskbar
     }
 
     choco upgrade all -r -y 
