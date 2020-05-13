@@ -252,7 +252,13 @@ if ($All -or $Settings) {
     # Set up application settings
     & (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "create_settings.ps1")
 
-    # TODO: Show hidden files in explorer
+    # Set UAC for Desktop OS
+    if ($osType -ieq "Client") {
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Type DWord -Value 5
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "FilterAdministratorToken" -Type DWord -Value 1
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Type DWord -Value 1
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "PromptOnSecureDesktop" -Type DWord -Value 1   
+    }
 }
 
 if ($All -or $Powershell) {
