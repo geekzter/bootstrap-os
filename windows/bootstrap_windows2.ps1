@@ -9,7 +9,7 @@ param (
     [parameter(Mandatory=$false)][bool]$Settings=$true
 ) 
 
-function AddorUpdateModule (
+function global:AddorUpdateModule (
     [string]$ModuleName,
     [switch]$AllowClobber=$false
 ) {
@@ -36,7 +36,7 @@ function AddorUpdateModule (
     }
 }
 
-function FindApplication (
+function global:FindApplication (
     [string]$Application
 ) {
     if ($Application) {
@@ -48,7 +48,7 @@ function FindApplication (
     }
 }
 
-function PinToQuickAccess (
+function global:PinToQuickAccess (
     [string]$Folder
 ) {
     if ($Folder) {
@@ -60,7 +60,7 @@ function PinToQuickAccess (
     }
 }
 
-function PinTo (
+function global:PinTo (
     [string]$Application,
     [switch]$StartMenu=$falase,
     [switch]$Taskbar=$false
@@ -79,7 +79,7 @@ function PinTo (
     }
 }
 
-function RemoveFromTaskbar (
+function global:RemoveFromTaskbar (
     [string]$Shortcut
 ) {
     if ($Shortcut -and (Get-Command syspin)) {
@@ -91,7 +91,7 @@ function global:IsElevated {
     return (New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")
 }
 
-function UpdateStoreApps () {
+function global:UpdateStoreApps () {
     $namespaceName = "root\cimv2\mdm\dmmap"
     $className = "MDM_EnterpriseModernAppManagement_AppManagement01"
     $wmiObj = Get-WmiObject -Namespace $namespaceName -Class $className
@@ -133,14 +133,27 @@ if ($All -or $minimal) {
         $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
         $capabilities += Get-WindowsCapability -Online -Name OpenSSH.Client     | Where-Object {$_.State -ne "Installed"}
         foreach ($capability in $capabilities) {
-            Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
-            $capability | Add-WindowsCapability -Online
+            if ($capability -and $capability.Name) {
+                Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
+                $capability | Add-WindowsCapability -Online
+            }
         }
 
+        # Store Apps
+        Get-AppxPackage -AllUsers "Microsoft.MicrosoftOfficeHub" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.MicrosoftPowerBIForWindows" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.MSPaint" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.NetworkSpeedTest" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.OfficeLens" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.Office.OneNote" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.Office.Sway" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.RemoteDesktop" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.Whiteboard" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        
         UpdateStoreApps
     }
 
-    PinToTaskbar "Microsoft Edge*"
+    PinTo -Application "Microsoft Edge*" -Taskbar 
     RemoveFromTaskbar "Internet Explorer*"
 
     if ($All -or $Packages.Contains("Developer")) {
