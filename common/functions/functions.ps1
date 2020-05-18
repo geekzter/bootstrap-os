@@ -52,6 +52,20 @@ function AddorUpdateModule (
     }
 }
 
+function ChangeTo-Previous {
+    Pop-Location
+}
+Set-Alias cd- ChangeTo-Previous
+
+function ChangeTo-Parent {
+    Push-Location ..
+}
+Set-Alias .. ChangeTo-Parent
+function ChangeTo-GrandParent {
+    Push-Location ..\..
+}
+Set-Alias ... ChangeTo-GrandParent
+
 function Disable-Warning {
 	Disable-Information
 

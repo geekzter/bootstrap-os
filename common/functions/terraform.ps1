@@ -1,9 +1,14 @@
 $global:directoryStack = New-Object system.collections.stack
 
 function Apply-Terraform {
-    Invoke-TerraformCommand "terraform apply -auto-approve"
+    Invoke-TerraformCommand "terraform apply"
 }
 Set-Alias tfa Apply-Terraform
+
+function ForceApply-Terraform {
+    Invoke-TerraformCommand "terraform apply -auto-approve"
+}
+Set-Alias tfaf ForceApply-Terraform
 
 function ChangeTo-TerraformDirectory {
     $depth = 2
@@ -188,7 +193,11 @@ function List-TerraformOutput (
 ) {
     $command = "terraform output"
     if ($SearchPattern) {
-        $command += " | Select-String -Pattern '$SearchPattern'"
+        if ($SearchPattern -match "\*") {
+            $command += " | Select-String -Pattern '$SearchPattern'"
+        } else {
+            $command += " $SearchPattern"
+        }
     }
     Invoke-TerraformCommand $command
 }
@@ -199,7 +208,7 @@ function List-TerraformState (
 ) {
     $command = "terraform state list"
     if ($SearchPattern) {
-        $command += " | Select-String -Pattern '$SearchPattern'"
+        $command += " | Select-String -Pattern $SearchPattern"
     }
     $command += " | Sort-Object"
     Invoke-TerraformCommand $command
