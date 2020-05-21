@@ -65,7 +65,7 @@ function global:PinTo (
     [switch]$StartMenu=$falase,
     [switch]$Taskbar=$false
 ) {
-    if ($Application -and (Get-Command syspin)) {
+    if ($Application -and (Get-Command syspin -ErrorAction SilentlyContinue)) {
         $shortcut = FindApplication $Application
 
         if ($shortcut) {
@@ -159,9 +159,6 @@ if ($All -or $minimal) {
         UpdateStoreApps
     }
 
-    PinTo -Application "Microsoft Edge*" -Taskbar 
-    RemoveFromTaskbar "Internet Explorer*"
-
     if ($All -or $Packages.Contains("Developer")) {
         choco install chocolatey-developer.config -r -y
 
@@ -175,6 +172,9 @@ if ($All -or $minimal) {
     if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
         refreshenv # This should update the path with changes made by Chocolatey
     }
+
+    PinTo -Application "Microsoft Edge*" -Taskbar 
+    RemoveFromTaskbar "Internet Explorer*"
 
     # Replace IE
     $defaultBrowser = "Microsoft Edge"
