@@ -88,18 +88,18 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
         $null = $pathList.Add("${env:HOME}/.tfenv/bin")
     }
     $env:PATH = $pathList -Join ":"
+}
 
-    # Source environment variables from ~/.config/powershell/environment.ps1
-    $environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
-    if (Test-Path -Path $environmentPath) {
-        if ($printMessages) {
-            Write-Host "${environmentPath}: sourced"
-        }
-        . $environmentPath
-    } else {
-        if ($printMessages) {
-            Write-Information "$environmentPath not found"
-        }
+# Source environment variables from ~/.config/powershell/environment.ps1
+$environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
+if (Test-Path -Path $environmentPath) {
+    . $environmentPath
+    if ($printMessages) {
+        Write-Host "${environmentPath}: sourced"
+    }
+} else {
+    if ($printMessages -and (!$IsWindows)) {
+        Write-Host "$environmentPath not found"
     }
 }
 
