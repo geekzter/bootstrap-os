@@ -259,7 +259,8 @@ if ($All -or $Settings) {
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "Hidden" -Type DWord -Value 1
 
     # Display Setting customization
-    New-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -PropertyType String -Value -1125 -ErrorAction SilentlyContinue
+    New-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -PropertyType String -Value -2730 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -Value -2730 -ErrorAction SilentlyContinue
     if ($metadataContent) {
         # Cloud hosted, so no wallpapers
         Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WallPaper" ""
