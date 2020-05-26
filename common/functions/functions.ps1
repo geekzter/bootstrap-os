@@ -52,6 +52,24 @@ function AddorUpdateModule (
     }
 }
 
+function ChangeTo-Directory (
+    [string]$Directory   
+) {
+    if (Test-Path $Directory) {
+        Push-Location $Directory
+    } else {
+        $sibling = (Join-Path .. $Directory)
+        if (Test-Path $sibling) {
+            Push-Location $sibling
+        }
+    }
+}
+
+function ChangeTo-GrandParent {
+    Push-Location (Join-Path .. ..)
+}
+Set-Alias ... ChangeTo-GrandParent
+
 function ChangeTo-Previous {
     Pop-Location
 }
@@ -61,10 +79,11 @@ function ChangeTo-Parent {
     Push-Location ..
 }
 Set-Alias .. ChangeTo-Parent
-function ChangeTo-GrandParent {
-    Push-Location ..\..
+
+function ChangeTo-Scripts {
+    ChangeTo-Directory scripts
 }
-Set-Alias ... ChangeTo-GrandParent
+Set-Alias cds ChangeTo-Scripts
 
 function Disable-Warning {
 	Disable-Information

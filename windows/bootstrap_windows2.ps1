@@ -51,7 +51,7 @@ function global:FindApplication (
 function global:PinToQuickAccess (
     [string]$Folder
 ) {
-    if ($Folder) {
+    if ($Folder -and (Test-Path $Folder)) {
         $shell = New-Object -com Shell.Application
         $folderObject = $shell.Namespace($Folder)
         if ($folderObject) {
