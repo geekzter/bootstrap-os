@@ -82,7 +82,7 @@ function global:PinTo (
 function global:RemoveFromTaskbar (
     [string]$Shortcut
 ) {
-    if ($Shortcut -and (Get-Command syspin)) {
+    if ($Shortcut -and (Get-Command syspin -ErrorAction SilentlyContinue)) {
         syspin $Shortcut "Unpin from taskbar"
     }
 }
