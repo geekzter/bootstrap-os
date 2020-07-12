@@ -16,6 +16,7 @@ fi
 if [ ! -d "$(xcode-select -p)" ]; then 
     xcode-select --install
 fi
+softwareupdate --all --install --force
 
 # Homebrew package management
 if test ! $(which brew); then
