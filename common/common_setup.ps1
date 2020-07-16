@@ -6,9 +6,13 @@
 .DESCRIPTION 
     Setup common to Linux, macOS, Windows. This also includes setup that is used by more than one OS, but not all.
 #>
+#Requires -Version 7
+param ( 
+    [parameter(Mandatory=$false)][switch]$NoPackages=$false
+) 
 
 # Set up PowerShell Core (modules, profile)
-& (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "bootstrap_pwsh.ps1")
+& (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "bootstrap_pwsh.ps1") -NoPackages:$NoPackages
 
 # Configure PowerShell as default shell on Linux & macOS
 if ($IsLinux -or $IsMacos) {
@@ -25,17 +29,19 @@ if ($IsLinux -or $IsMacos) {
 # Configure git
 git config --global core.excludesfile (Join-Path $HOME .gitignore)
 
-# Ruby gems
-if (Get-Command gem -ErrorAction SilentlyContinue) {
-    Write-Host "`nUpdating Ruby gems..."
-    sudo gem update
-    gem install --user-install bundler jekyll
-}
+if (-not $NoPackages) {
+    # Ruby gems
+    if (Get-Command gem -ErrorAction SilentlyContinue) {
+        Write-Host "`nUpdating Ruby gems..."
+        sudo gem update
+        gem install --user-install bundler jekyll
+    }
 
-# Azure CLI extensions
-if (Get-Command az -ErrorAction SilentlyContinue) {
-    Write-Host "`nUpdating Azure CLI extensions..."
-    az extension add -y -n azure-devops
-    az extension add -y -n azure-firewall
-    az extension add -y -n resource-graph
+    # Azure CLI extensions
+    if (Get-Command az -ErrorAction SilentlyContinue) {
+        Write-Host "`nUpdating Azure CLI extensions..."
+        az extension add -y -n azure-devops
+        az extension add -y -n azure-firewall
+        az extension add -y -n resource-graph
+    }
 }
