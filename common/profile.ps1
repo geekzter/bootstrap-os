@@ -103,16 +103,13 @@ if (Test-Path -Path $environmentPath) {
     }
 }
 
-# Install Az module if not present
-if (!(Get-Module Az -ListAvailable)) {
-    Write-Host "Az modules not present, installing..."
-    Install-Module Az
-}
 
 if ($printMessages) {
 
     $azModule = Get-Module Az -ListAvailable | Select-Object -First 1     
-    Write-Host "PowerShell $($azModule.Name) v$($azModule.Version)"
+    if ($azModule) {
+        Write-Host "PowerShell $($azModule.Name) v$($azModule.Version)"
+    }
  
     # Print message on bootstrap configuration
     $bootstrapDirectory = Split-Path -Parent (Split-Path -Parent (Get-Item $MyInvocation.MyCommand.Path).Target)
