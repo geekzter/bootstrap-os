@@ -67,10 +67,10 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     if (!$pathList.Contains("/usr/local/bin")) {
         $pathList.Insert(1,"/usr/local/bin")
     }
-    if (!$pathList.Contains("~/.dotnet/tools")) {
+    if ((Test-Path "~/.dotnet/tools") -and (!$pathList.Contains("~/.dotnet/tools"))) {
         $null = $pathList.Add("~/.dotnet/tools")
     }
-    if (!$pathList.Contains("/usr/local/share/dotnet")) {
+    if ((Test-Path "/usr/local/share/dotnet") -and (!$pathList.Contains("/usr/local/share/dotnet"))) {
         $null = $pathList.Add("/usr/local/share/dotnet")
     }
     if (Get-Command ruby -ErrorAction SilentlyContinue) {
@@ -81,7 +81,7 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
             $null = $pathList.Insert(0,"~/.gem/ruby/${rubyVersionString}/bin")
         }
     }
-    if ($IsMacOS -and !$pathList.Contains("/usr/local/opt/tmux@2.6/bin")) {
+    if ($IsMacOS -and (Test-Path "/usr/local/opt/tmux@2.6/bin") -and !$pathList.Contains("/usr/local/opt/tmux@2.6/bin")) {
         $null = $pathList.Insert(0,"/usr/local/opt/tmux@2.6/bin")
     }
     if (!($(Get-Command tfenv -ErrorAction SilentlyContinue)) -and (Test-Path ~/.tfenv/bin) -and !$env:PATH.Contains("tfenv/bin")) {
