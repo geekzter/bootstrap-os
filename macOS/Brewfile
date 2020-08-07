@@ -38,6 +38,7 @@ cask "vlc"
 # Packages
 brew "ansible"
 #brew "awscli"
+brew "azcopy"
 #brew "azdata-cli"
 brew "azure-cli"
 brew "azure-functions-core-tools"
