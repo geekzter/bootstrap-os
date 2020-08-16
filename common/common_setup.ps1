@@ -28,7 +28,12 @@ git config --global core.excludesfile (Join-Path $HOME .gitignore)
 # Ruby gems
 if (Get-Command gem -ErrorAction SilentlyContinue) {
     Write-Host "`nUpdating Ruby gems..."
-    sudo gem update
+
+    if (Get-Command sudo -ErrorAction SilentlyContinue) {
+        sudo gem update
+    } else {
+        gem update
+    }
     gem install --user-install bundler jekyll
 }
 
