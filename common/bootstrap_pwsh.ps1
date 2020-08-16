@@ -1,4 +1,8 @@
 #!/usr/bin/env pwsh
+#Requires -Version 7
+param ( 
+    [parameter(Mandatory=$false)][switch]$NoPackages=$false
+) 
 
 $scriptDirectory = Split-Path -Parent -Path $MyInvocation.MyCommand.Path
 $functionsDirectory = Join-Path $scriptDirectory functions
@@ -6,18 +10,20 @@ $functionsDirectory = Join-Path $scriptDirectory functions
 . (Join-Path $functionsDirectory functions.ps1)
 
 
-# Check whether Az modules have been installed
-AddorUpdateModule Az
-#AddorUpdateModule AzureADPreview
-#AddorUpdateModule MicrosoftPowerBIMgmt
-#AddorUpdateModule MicrosoftTeams
-AddorUpdateModule Oh-My-Posh
-AddorUpdateModule Posh-Git
-AddorUpdateModule PSReadLine
-AddorUpdateModule SqlServer
-AddorUpdateModule VSTeam
-if ($IsWindows) {
-    AddorUpdateModule WindowsCompatibility
+if (-not $NoPackages) {
+    # Check whether Az modules have been installed
+    AddorUpdateModule -ModuleName Az -AllowClobber
+    #AddorUpdateModule AzureADPreview
+    #AddorUpdateModule MicrosoftPowerBIMgmt
+    #AddorUpdateModule MicrosoftTeams
+    AddorUpdateModule Oh-My-Posh
+    AddorUpdateModule Posh-Git
+    AddorUpdateModule PSReadLine
+    AddorUpdateModule SqlServer
+    AddorUpdateModule VSTeam
+    if ($IsWindows) {
+        AddorUpdateModule WindowsCompatibility
+    }
 }
 
 # Create symbolic link for PowerShell Core profile directory

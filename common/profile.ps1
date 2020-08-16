@@ -54,7 +54,7 @@ $printMessages = (($nestedPromptLevel -eq 0) -and $($env:TERM -notmatch "^screen
 if ($host.Name -eq 'ConsoleHost')
 {
     Import-Module posh-git
-    Import-Module oh-my-posh
+    #Import-Module oh-my-posh
     # Requires PSReadLine 2.0
     #Set-Theme Agnoster
     #Set-Theme Paradox
@@ -67,10 +67,10 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     if (!$pathList.Contains("/usr/local/bin")) {
         $pathList.Insert(1,"/usr/local/bin")
     }
-    if (!$pathList.Contains("~/.dotnet/tools")) {
+    if ((Test-Path "~/.dotnet/tools") -and (!$pathList.Contains("~/.dotnet/tools"))) {
         $null = $pathList.Add("~/.dotnet/tools")
     }
-    if (!$pathList.Contains("/usr/local/share/dotnet")) {
+    if ((Test-Path "/usr/local/share/dotnet") -and (!$pathList.Contains("/usr/local/share/dotnet"))) {
         $null = $pathList.Add("/usr/local/share/dotnet")
     }
     if (Get-Command ruby -ErrorAction SilentlyContinue) {
@@ -81,38 +81,35 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
             $null = $pathList.Insert(0,"~/.gem/ruby/${rubyVersionString}/bin")
         }
     }
-    if ($IsMacOS -and !$pathList.Contains("/usr/local/opt/tmux@2.6/bin")) {
+    if ($IsMacOS -and (Test-Path "/usr/local/opt/tmux@2.6/bin") -and !$pathList.Contains("/usr/local/opt/tmux@2.6/bin")) {
         $null = $pathList.Insert(0,"/usr/local/opt/tmux@2.6/bin")
     }
     if (!($(Get-Command tfenv -ErrorAction SilentlyContinue)) -and (Test-Path ~/.tfenv/bin) -and !$env:PATH.Contains("tfenv/bin")) {
         $null = $pathList.Add("${env:HOME}/.tfenv/bin")
     }
     $env:PATH = $pathList -Join ":"
+}
 
-    # Source environment variables from ~/.config/powershell/environment.ps1
-    $environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
-    if (Test-Path -Path $environmentPath) {
-        if ($printMessages) {
-            Write-Host "${environmentPath}: sourced"
-        }
-        . $environmentPath
-    } else {
-        if ($printMessages) {
-            Write-Information "$environmentPath not found"
-        }
+# Source environment variables from ~/.config/powershell/environment.ps1
+$environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
+if (Test-Path -Path $environmentPath) {
+    . $environmentPath
+    if ($printMessages) {
+        Write-Host "${environmentPath}: sourced"
+    }
+} else {
+    if ($printMessages -and (!$IsWindows)) {
+        Write-Host "$environmentPath not found"
     }
 }
 
-# Install Az module if not present
-if (!(Get-Module Az -ListAvailable)) {
-    Write-Host "Az modules not present, installing..."
-    Install-Module Az
-}
 
 if ($printMessages) {
 
     $azModule = Get-Module Az -ListAvailable | Select-Object -First 1     
-    Write-Host "PowerShell $($azModule.Name) v$($azModule.Version)"
+    if ($azModule) {
+        Write-Host "PowerShell $($azModule.Name) v$($azModule.Version)"
+    }
  
     # Print message on bootstrap configuration
     $bootstrapDirectory = Split-Path -Parent (Split-Path -Parent (Get-Item $MyInvocation.MyCommand.Path).Target)

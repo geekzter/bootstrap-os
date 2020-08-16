@@ -1,7 +1,8 @@
 
 function AddorUpdateModule (
-    [string]$moduleName,
-    [string]$desiredVersion
+    [string]$ModuleName,
+    [string]$DesiredVersion,
+    [switch]$AllowClobber=$false
 ) {
     if (IsElevated) {
         $scope = "AllUsers"
@@ -40,16 +41,49 @@ function AddorUpdateModule (
             $newModule = Find-Module $moduleName -RequiredVersion $desiredVersion -AllowPrerelease -ErrorAction SilentlyContinue
             if ($newModule) {
                 Write-Host "Installing PowerShell Core $moduleName module $desiredVersion..."
-                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -RequiredVersion $desiredVersion -AllowPrerelease -Scope $scope
+                Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -RequiredVersion $desiredVersion -AllowPrerelease -Scope $scope -AllowClobber:$AllowClobber
             } else {
                 Write-Host "PowerShell Core $moduleName module version $desiredVersion is not available on $($PSVersionTable.OS)" -ForegroundColor Red
             }
         } else {
             Write-Host "Installing PowerShell Core $moduleName module..."
-            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -Scope $scope
+            Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -Scope $scope -AllowClobber:$AllowClobber
         }
     }
 }
+
+function ChangeTo-Directory (
+    [string]$Directory   
+) {
+    if (Test-Path $Directory) {
+        Push-Location $Directory
+    } else {
+        $sibling = (Join-Path .. $Directory)
+        if (Test-Path $sibling) {
+            Push-Location $sibling
+        }
+    }
+}
+
+function ChangeTo-GrandParent {
+    Push-Location (Join-Path .. ..)
+}
+Set-Alias ... ChangeTo-GrandParent
+
+function ChangeTo-Previous {
+    Pop-Location
+}
+Set-Alias cd- ChangeTo-Previous
+
+function ChangeTo-Parent {
+    Push-Location ..
+}
+Set-Alias .. ChangeTo-Parent
+
+function ChangeTo-Scripts {
+    ChangeTo-Directory scripts
+}
+Set-Alias cds ChangeTo-Scripts
 
 function Disable-Warning {
 	Disable-Information

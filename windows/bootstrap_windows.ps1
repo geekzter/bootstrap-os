@@ -40,12 +40,15 @@ if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Pri
 # Disable IE Enhanced Security Mode
 $ieSecMode = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IsInstalled
 if ($ieSecMode -and ($ieSecMode -ne 0)) {
-    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}" -Name "IsInstalled" -Value 0 
-    Stop-Process -Name Explorer -Force -ErrorAction SilentlyContinue # Should spawn a new process
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}" -Name "IsInstalled" -Type DWord -Value 0 
+    $killExplorer = $true
 }
 $ieSecMode = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IsInstalled
 if ($ieSecMode -and ($ieSecMode -ne 0)) {
-    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}" -Name "IsInstalled" -Value 0 
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}" -Name "IsInstalled" -Type DWord -Value 0 
+    $killExplorer = $true
+}
+if ($killExplorer) {
     Stop-Process -Name Explorer -Force -ErrorAction SilentlyContinue # Should spawn a new process
 }
 
@@ -61,7 +64,7 @@ if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
 }
 
 # Clone (the rest of) the repository
-$repoDirectory = Join-Path $HOME "Source\Public"
+$repoDirectory = Join-Path $HOME "Source\GitHub\geekzter"
 if (!(Test-Path $repoDirectory)) {
     $null = New-Item -ItemType Directory -Force -Path $repoDirectory
 }
@@ -95,6 +98,10 @@ if (!(Test-Path $windowsBootstrapDirectory)) {
 }
 
 # Invoke next stage
+$userExecutionPolicy = Get-ExecutionPolicy -Scope CurrentUser
+if (($userExecutionPolicy -ieq "AllSigned") -or ($userExecutionPolicy -ieq "Undefined")) {
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+}
 $stage2Script = "bootstrap_windows2.ps1"
 if (!(Test-Path $stage2Script)) {
     Write-Error "Stage 2 script $stage2Script not found, exiting"

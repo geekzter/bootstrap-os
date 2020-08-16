@@ -9,8 +9,9 @@ param (
     [parameter(Mandatory=$false)][bool]$Settings=$true
 ) 
 
-function AddorUpdateModule (
-    [string]$moduleName
+function global:AddorUpdateModule (
+    [string]$ModuleName,
+    [switch]$AllowClobber=$false
 ) {
     if (IsElevated) {
         $scope = "AllUsers"
@@ -31,7 +32,58 @@ function AddorUpdateModule (
     } else {
         # Install module if not present
         Write-Host "Installing Windows PowerShell $moduleName module..."
-        Install-Module $moduleName -Force -SkipPublisherCheck -Scope $scope # -AcceptLicense 
+        Install-Module $moduleName -Force -SkipPublisherCheck -Scope $scope -AllowClobber:$AllowClobber # -AcceptLicense 
+    }
+}
+
+function global:FindApplication (
+    [string]$Application
+) {
+    if ($Application) {
+        $userStartFolder = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Start Menu" | Select-Object -ExpandProperty "Start Menu")
+        $commonStartFolder = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Common Start Menu" | Select-Object -ExpandProperty "Common Start Menu")
+
+        $shortcut = Get-ChildItem -Path $userStartFolder,$commonStartFolder -File -Filter $Application -Recurse -Depth 5 | Select-Object -First 1
+        return $shortcut
+    }
+}
+
+function global:PinToQuickAccess (
+    [string]$Folder
+) {
+    if ($Folder -and (Test-Path $Folder)) {
+        $shell = New-Object -com Shell.Application
+        $folderObject = $shell.Namespace($Folder)
+        if ($folderObject) {
+            $folderObject.Self.InvokeVerb("pintohome")
+        }
+    }
+}
+
+function global:PinTo (
+    [string]$Application,
+    [switch]$StartMenu=$falase,
+    [switch]$Taskbar=$false
+) {
+    if ($Application -and (Get-Command syspin -ErrorAction SilentlyContinue)) {
+        $shortcut = FindApplication $Application
+
+        if ($shortcut) {
+            if ($StartMenu) {
+                syspin $shortcut.FullName "Pin to start"
+            }
+            if ($TaskBar) {
+                syspin $shortcut.FullName "Pin to taskbar"
+            }
+        }
+    }
+}
+
+function global:RemoveFromTaskbar (
+    [string]$Shortcut
+) {
+    if ($Shortcut -and (Get-Command syspin -ErrorAction SilentlyContinue)) {
+        syspin $Shortcut "Unpin from taskbar"
     }
 }
 
@@ -39,7 +91,7 @@ function global:IsElevated {
     return (New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")
 }
 
-function UpdateStoreApps () {
+function global:UpdateStoreApps () {
     $namespaceName = "root\cimv2\mdm\dmmap"
     $className = "MDM_EnterpriseModernAppManagement_AppManagement01"
     $wmiObj = Get-WmiObject -Namespace $namespaceName -Class $className
@@ -81,18 +133,68 @@ if ($All -or $minimal) {
         $capabilities += Get-WindowsCapability -Online -Name "Language.*nl-NL*" | Where-Object {$_.State -ne "Installed"}
         $capabilities += Get-WindowsCapability -Online -Name OpenSSH.Client     | Where-Object {$_.State -ne "Installed"}
         foreach ($capability in $capabilities) {
-            Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
-            $capability | Add-WindowsCapability -Online
+            if ($capability -and $capability.Name) {
+                Write-Host "Installing Windows Capability '$($capability.DisplayName)'..."
+                $capability | Add-WindowsCapability -Online
+            }
         }
+
+        # Store
+        Get-AppxPackage -AllUsers "Microsoft.DesktopAppInstaller" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.Services.Store.Engagement" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.StorePurchaseApp" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.WindowsStore" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+    
+        # Store Apps
+        Get-AppxPackage -AllUsers "Microsoft.MicrosoftOfficeHub" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.MicrosoftPowerBIForWindows" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.MSPaint" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.NetworkSpeedTest" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.OfficeLens" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.Office.OneNote" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.Office.Sway" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.RemoteDesktop" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        Get-AppxPackage -AllUsers "Microsoft.Whiteboard" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+        
+        UpdateStoreApps
     }
 
     if ($All -or $Packages.Contains("Developer")) {
         choco install chocolatey-developer.config -r -y
+
+        PinToQuickAccess "$env:HOME\Source"
+        PinTo -Application "Visual Studio Code.lnk" -StartMenu -Taskbar 
+        PinTo -Application "Windows PowerShell.lnk" -StartMenu
+        PinTo -Application "Windows Terminal*" -StartMenu -Taskbar
     }
 
     choco upgrade all -r -y 
     if (Get-Command refreshenv -ErrorAction SilentlyContinue) {
         refreshenv # This should update the path with changes made by Chocolatey
+    }
+
+    PinTo -Application "Microsoft Edge*" -Taskbar 
+    RemoveFromTaskbar "Internet Explorer*"
+
+    # Replace IE
+    $defaultBrowser = "Microsoft Edge"
+    $edge = Get-ItemProperty -Path "HKCU:\SOFTWARE\Clients\StartMenuInternet\$defaultBrowser" -ErrorAction SilentlyContinue
+    if ($edge) {
+        Write-Host "Setting '$defaultBrowser' as default browser"
+        Set-Item -Path "HKCU:\SOFTWARE\Clients\StartMenuInternet" -Value $defaultBrowser
+        $removeIE = $true
+    }
+    $edge = Get-ItemProperty -Path "HKLM:\SOFTWARE\Clients\StartMenuInternet\$defaultBrowser" -ErrorAction SilentlyContinue
+    if ($edge) {
+        Write-Host "Setting '$defaultBrowser' as default browser"
+        Set-Item -Path "HKLM:\SOFTWARE\Clients\StartMenuInternet" -Value $defaultBrowser
+        $removeIE = $true
+    }
+    if ($removeIE) {
+        Write-Host "Removing 'Internet Explorer'..."
+        # Taken from https://github.com/Disassembler0
+        Get-WindowsOptionalFeature -Online | Where-Object { $_.FeatureName -like "Internet-Explorer-Optional*" } | Disable-WindowsOptionalFeature -Online -NoRestart -WarningAction SilentlyContinue | Out-Null
+        Get-WindowsCapability -Online | Where-Object { $_.Name -like "Browser.InternetExplorer*" } | Remove-WindowsCapability -Online | Out-Null
     }
 
     # Move shortcuts of installed applications
@@ -113,8 +215,6 @@ if ($All -or $minimal) {
             Remove-Item -Path $installedAppsFolder
         }
     }
-
-    UpdateStoreApps
 } else {
     if ($Powershell) {
         choco install powershell-core -y
@@ -152,11 +252,15 @@ if ($All -or $Settings) {
     }
 
     # Disable autostarts
-    Get-ScheduledTask -TaskName ServerManager -ErrorAction SilentlyContinue | Disable-ScheduledTask
+    Get-ScheduledTask -TaskName ServerManager -ErrorAction SilentlyContinue | Disable-ScheduledTask | Out-Null
     Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name "Docker Desktop" -ErrorAction SilentlyContinue
 
+    # Show hidden files
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "Hidden" -Type DWord -Value 1
+
     # Display Setting customization
-    New-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -PropertyType String -Value -1125 -ErrorAction SilentlyContinue
+    New-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -PropertyType String -Value -2730 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -Value -2730 -ErrorAction SilentlyContinue
     if ($metadataContent) {
         # Cloud hosted, so no wallpapers
         Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WallPaper" ""
@@ -183,6 +287,14 @@ if ($All -or $Settings) {
 
     # Set up application settings
     & (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "create_settings.ps1")
+
+    # Set UAC for Desktop OS
+    if ($osType -ieq "Client") {
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Type DWord -Value 5
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "FilterAdministratorToken" -Type DWord -Value 1
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Type DWord -Value 1
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "PromptOnSecureDesktop" -Type DWord -Value 1   
+    }
 }
 
 if ($All -or $Powershell) {

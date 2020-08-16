@@ -10,6 +10,14 @@ function Connect-TmuxSession (
         $Workspace = $(terraform workspace show 2>$null)
     }
 
+    # Set locale as it may be missing and is required for tmux
+    if (!$env:LANG) {
+        $env:LANG="en_US.UTF-8"
+    }
+    if (!$env:LC_ALL) {
+        $env:LC_ALL=$env:LANG
+    }
+
     $prexistingSession = $(tmux ls -F "#S" 2>$null) -match "^${Workspace}$"
     if (!$prexistingSession) {
         # Start session, but do not yet attach
