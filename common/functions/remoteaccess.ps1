@@ -1,6 +1,11 @@
 function Connect-TmuxSession (
     [string]$Workspace=($env:TF_WORKSPACE ? $env:TF_WORKSPACE : "default")
 ) {
+    if ($env:TMUX) {
+        Write-Warning "Session already exixts: $env:TMUX"
+        return
+    }
+
     if (!$Workspace -and (Get-Command terraform)) {
         $Workspace = $(terraform workspace show 2>$null)
     }
