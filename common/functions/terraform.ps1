@@ -203,6 +203,13 @@ function List-TerraformOutput (
 }
 Set-Alias tfo List-TerraformOutput
 
+function Search-TerraformOutput (
+    [parameter(Mandatory=$true)][string]$Substring
+) {
+    Invoke-TerraformCommand "terraform output | Select-String -Pattern '^.*${Substring}.*$'"
+}
+Set-Alias tfos Search-TerraformOutput
+
 function List-TerraformState (
     [parameter(Mandatory=$false)][string]$SearchPattern
 ) {
@@ -233,9 +240,13 @@ Set-Alias cdtf- PopFrom-TerraformDirectory
 Set-Alias tfcd- PopFrom-TerraformDirectory
 
 function RemoveFrom-TerraformState (
-    [parameter(Mandatory=$true)][string]$Resource
+    [parameter(Mandatory=$true,ValueFromPipeline=$true)][string]$Resource
 ) {
-    Invoke-TerraformCommand "terraform state rm $Resource"
+    process {
+        foreach ($res in $Resource) {
+            Invoke-TerraformCommand "terraform state rm $res"
+        }
+    }
 }
 Set-Alias tfrm RemoveFrom-TerraformState
 
@@ -247,9 +258,13 @@ function Set-TerraformWorkspace (
 Set-Alias tfw Set-TerraformWorkspace  
 
 function Taint-TerraformResource (
-    [parameter(Mandatory=$true)][string]$Resource
+    [parameter(Mandatory=$true,ValueFromPipeline=$true)][string[]]$Resource
 ) {
-    Invoke-TerraformCommand "terraform taint $Resource"
+    process {
+        foreach ($res in $Resource) {
+            Invoke-TerraformCommand "terraform taint $res"
+        }
+    }
 }
 Set-Alias tft Taint-TerraformResource 
 
