@@ -96,14 +96,20 @@ else
 fi
 
 # Set up terraform with tfenv
-if [ ! -d $HOME/.tfenv ]; then
-    echo $'\nInstalling tfenv...'
-    git clone https://github.com/tfutils/tfenv.git $HOME/.tfenv
+if test $(which unzip); then
+    if [ ! -d $HOME/.tfenv ]; then
+        echo $'\nInstalling tfenv...'
+        git clone https://github.com/tfutils/tfenv.git $HOME/.tfenv
+    else
+        echo $'\nUpdating tfenv...'
+        git -C $HOME/.tfenv pull
+    fi
 else
-    echo $'\nUpdating tfenv...'
-    git -C $HOME/.tfenv pull
+    echo $'\nunzip not found, can\'t set up tfenv'
 fi
-$HOME/.tfenv/bin/tfenv install latest
+if test $(which $HOME/.tfenv/bin/tfenv); then
+    $HOME/.tfenv/bin/tfenv install latest
+fi
 
 # Git settings
 if [ -f ../common/settings.json ]; then
