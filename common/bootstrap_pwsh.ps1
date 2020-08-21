@@ -17,6 +17,7 @@ if (-not $NoPackages) {
     #AddorUpdateModule MicrosoftPowerBIMgmt
     #AddorUpdateModule MicrosoftTeams
     AddorUpdateModule Oh-My-Posh
+    AddorUpdateModule Pester
     AddorUpdateModule Posh-Git
     AddorUpdateModule PSReadLine
     AddorUpdateModule SqlServer
