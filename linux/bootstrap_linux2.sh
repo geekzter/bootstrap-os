@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 
 # Detect Linux distribution
-if test ! $(which lsb_release); then
-    if test $(which apt-get); then
-        # Debian/Ubuntu
-        sudo apt-get install lsb-release -y
-    elif test $(which yum); then
-        # CentOS/Red Hat
-        sudo yum install redhat-lsb-core -y
-    elif test $(which zypper); then
-        # (Open)SUSE
-        sudo zypper install lsb-release -y
-    else
-        echo $'\nlsb_release not found, not able to detect distribution'
-        exit 1
+if test $(which sudo); then
+    if test ! $(which lsb_release); then
+        if test $(which apt-get); then
+            # Debian/Ubuntu
+            sudo apt-get install lsb-release -y
+        elif test $(which yum); then
+            # CentOS/Red Hat
+            sudo yum install redhat-lsb-core -y
+        elif test $(which zypper); then
+            # (Open)SUSE
+            sudo zypper install lsb-release -y
+        else
+            echo $'\nlsb_release not found, not able to detect distribution'
+            exit 1
+        fi
     fi
 fi
 if test $(which lsb_release); then
