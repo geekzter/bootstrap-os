@@ -104,11 +104,9 @@ if test $(which unzip); then
         echo $'\nUpdating tfenv...'
         git -C $HOME/.tfenv pull
     fi
-else
-    echo $'\nunzip not found, can\'t set up tfenv'
-fi
-if test $(which $HOME/.tfenv/bin/tfenv); then
     $HOME/.tfenv/bin/tfenv install latest
+else
+    echo $'\nunzip not found, skipping tfenv set up'
 fi
 
 # Git settings
