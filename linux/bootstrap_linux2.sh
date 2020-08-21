@@ -110,10 +110,14 @@ else
 fi
 
 # Git settings
-if [ -f ../common/settings.json ]; then
-    git config --global user.email $(cat ../common/settings.json | jq '.GitEmail')
-    git config --global user.name "$(cat ../common/settings.json | jq '.GitName')"
+if test $(which jq); then
+    if [ -f ../common/settings.json ]; then
+        git config --global user.email $(cat ../common/settings.json | jq '.GitEmail')
+        git config --global user.name "$(cat ../common/settings.json | jq '.GitName')"
+    else
+        echo $'\n'
+        echo "Settings file $(cd ../common/ && pwd)/settings.json not found, skipping personalization"
+    fi
 else
-    echo $'\n'
-    echo "Settings file $(cd ../common/ && pwd)/settings.json not found, skipping personalization"
+    echo $'\njq not found, skipping personalization'
 fi
