@@ -125,7 +125,7 @@ if ($printMessages) {
     }
 
     # Show tmux sessions
-    if ($IsLinux -or $IsMacOS) {
+    if (($IsLinux -or $IsMacOS) -and (Get-Command tmux -ErrorAction SilentlyContinue)) {
         $tmuxSessions = $(tmux ls 2>/dev/null)
         if ($tmuxSessions) {
             Write-Host "Active tmux sessions:"
