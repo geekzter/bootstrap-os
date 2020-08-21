@@ -166,6 +166,9 @@ if ($All -or $minimal) {
         PinTo -Application "Visual Studio Code.lnk" -StartMenu -Taskbar 
         PinTo -Application "Windows PowerShell.lnk" -StartMenu
         PinTo -Application "Windows Terminal*" -StartMenu -Taskbar
+
+        # Enable long paths
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Type DWord -Value 1 
     }
 
     choco upgrade all -r -y 
