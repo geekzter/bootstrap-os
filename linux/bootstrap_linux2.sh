@@ -3,9 +3,11 @@
 if [ "$EUID" = "0" ]; then
     CANELEVATE='true'
     SUDO=''
+    SUDOEULA=''
 elif test $(which sudo); then
     CANELEVATE='true'
     SUDO='sudo'
+    SUDOEULA='sudo ACCEPT_EULA=Y'
 else
     CANELEVATE='false'
 fi
@@ -83,7 +85,7 @@ EOF
         $SUDO apt-get update
 
         echo $'\nUpgrading packages...'
-        $SUDO ACCEPT_EULA=Y apt-get upgrade -y
+        $SUDOEULA apt-get upgrade -y
 
         echo $'\nInstalling new packages...'
         INSTALLED_PACKAGES=$(mktemp)
@@ -91,7 +93,7 @@ EOF
         dpkg -l | grep ^ii | awk '{print $2}' >$INSTALLED_PACKAGES
         grep -Fvx -f $INSTALLED_PACKAGES ./apt-packages.txt >$NEW_PACKAGES
         while read package; do 
-            $SUDO ACCEPT_EULA=Y apt-get install -y $package
+            $SUDOEULA apt-get install -y $package
         done < $NEW_PACKAGES
         rm $INSTALLED_PACKAGES $NEW_PACKAGES
     fi
