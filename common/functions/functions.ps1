@@ -151,6 +151,24 @@ function  Enable-Debug {
 }
 Set-Alias debug Enable-Debug
 
+function global:CanElevate {
+    if (IsElevated) {
+        return $true
+    }
+
+	if ($IsWindows) {
+        # Windows requires a new Administrative shell to be started
+        return $false
+    }
+    
+    if ($PSVersionTable.Platform -eq 'Unix') {
+        if (Get-Command sudo -ErrorAction SilentlyContinue) {
+            return $true
+        }
+    }
+
+    return $false
+}
 function global:IsElevated {
 	if ($IsWindows -and (New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
         return $true
@@ -163,6 +181,27 @@ function global:IsElevated {
     }
 
     return $false
+}
+function global:RunElevated () {
+    $commandJoined = $args -join " " 
+    Write-Debug "commandJoined: $commandJoined"
+    if (IsElevated) {
+        return Invoke-Expression $commandJoined
+    } else {
+        if ($IsWindows) {
+            throw "Windows requires a new Administrative shell to be started, can't run '$commandJoined' elevated"
+        }
+
+        if ($PSVersionTable.Platform -eq 'Unix') {
+            if (Get-Command sudo -ErrorAction SilentlyContinue) {
+                return Invoke-Expression "sudo $commandJoined"
+            } else {
+                throw "sudo not found, can't run '$commandJoined' elevated"
+            }
+        }
+
+        throw "Operating system not detected, can't run '$commandJoined' elevated"
+    }
 }
 
 function CopyFile (

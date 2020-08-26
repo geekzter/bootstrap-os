@@ -21,6 +21,10 @@ if ($IsLinux -or $IsMacos) {
         Write-Host "Replacing $env:SHELL with $pwshPath as default shell"
         sudo chsh -s $pwshPath
     }
+    if (($pwshPath -ne $env:SHELL) -and (CanElevate)) {
+        Write-Host "Replacing $env:SHELL with $pwshPath as default shell"
+        RunElevated chsh -s $pwshPath
+    }
 }
 
 # Set up dotfiles
@@ -31,13 +35,6 @@ git config --global core.excludesfile (Join-Path $HOME .gitignore)
 git config --system core.longpaths true
 
 if (-not $NoPackages) {
-    # Ruby gems
-    if ((Get-Command sudo -ErrorAction SilentlyContinue) -and (Get-Command gem -ErrorAction SilentlyContinue)) {
-        Write-Host "`nUpdating Ruby gems..."
-        sudo gem update
-        gem install --user-install bundler jekyll
-    }
-
     # Azure CLI extensions
     if (Get-Command az -ErrorAction SilentlyContinue) {
         Write-Host "`nUpdating Azure CLI extensions..."

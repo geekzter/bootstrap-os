@@ -5,16 +5,28 @@
 
 SCRIPT_PATH=`dirname $0`
 
-if test ! $(which git); then
-    if test $(which apt-get); then
-        sudo apt-get install git -y
-    elif test $(which yum); then
-        sudo yum install git -y
-    elif test $(which zypper); then
-        sudo zypper install git -y
-    else
-        echo $'\nGit not found, exiting'
-        exit 1
+if [ "$EUID" = "0" ]; then
+    CANELEVATE='true'
+    SUDO=''
+elif test $(which sudo); then
+    CANELEVATE='true'
+    SUDO='sudo'
+else
+    CANELEVATE='false'
+fi
+
+if [ "$CANELEVATE" = "true" ]; then
+    if test ! $(which git); then
+        if test $(which apt-get); then
+            $SUDO apt-get install git -y
+        elif test $(which yum); then
+            $SUDO yum install git -y
+        elif test $(which zypper); then
+            $SUDO zypper install git -y
+        else
+            echo $'\nGit not found, exiting'
+            exit 1
+        fi
     fi
 fi
 
