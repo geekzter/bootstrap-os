@@ -16,6 +16,7 @@ dotnet-sdk-3.1
 findutils
 fish
 fuse
+gh
 git
 htop
 jq

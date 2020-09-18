@@ -45,7 +45,7 @@ else
         echo $'\napt-get not found, skipping packages'
     else
         # pre-requisites
-        $SUDO apt-get install -y apt-transport-https curl
+        $SUDO apt-get install -y apt-transport-https curl software-properties-common
         
         # Kubernetes requirement
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | $SUDO apt-key add -
@@ -54,6 +54,17 @@ deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
         # Installs Azure CLI including dependencies
         curl -sL https://aka.ms/InstallAzureCLIDeb | $SUDO bash
+
+        # GitHub CLI pre-requisites
+        # https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+        $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+        $SUDO apt-add-repository https://cli.github.com/packages
+
+        # Required for Midnight Commander
+        $SUDO add-apt-repository universe
+
+        # For Ubuntu, this PPA provides the latest stable upstream Git version
+        $SUDO add-apt-repository ppa:git-core/ppa
 
         # Microsoft dependencies
         # Source: https://github.com/Azure/azure-functions-core-tools
@@ -73,12 +84,6 @@ EOF
             # Source: https://github.com/Azure/azure-functions-core-tools
             curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | $SUDO tee /etc/apt/sources.list.d/msprod.list
             $SUDO dpkg -i packages-microsoft-prod.deb
-
-            # Required for Midnight Commander
-            $SUDO add-apt-repository universe
-
-            # For Ubuntu, this PPA provides the latest stable upstream Git version
-            $SUDO add-apt-repository ppa:git-core/ppa
         fi
 
         echo $'\nUpdating package list...'
