@@ -64,7 +64,7 @@ EOF
         $SUDO add-apt-repository universe
 
         # For Ubuntu, this PPA provides the latest stable upstream Git version
-        $SUDO add-apt-repository ppa:git-core/ppa
+        $SUDO add-apt-repository ppa:git-core/ppa -y
 
         # Microsoft dependencies
         # Source: https://github.com/Azure/azure-functions-core-tools
