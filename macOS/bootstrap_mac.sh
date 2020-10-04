@@ -29,7 +29,7 @@ brew upgrade
 brew cask upgrade
 
 # .NET tools
-dotnet tool install --global dotnet-ef
+dotnet tool update --global dotnet-ef
 
 # Terraform
 if test ! $(which tfenv); then
