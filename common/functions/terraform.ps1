@@ -34,12 +34,21 @@ function Clear-TerraformState {
     # 'terraform state rm' does not remove output (anymore)
     # HACK: Manipulate the state directly instead
     $tfState = terraform state pull | ConvertFrom-Json
-    $terraformSupportedVersion = "0.12"
-    if ($tfState.terraform_version -notmatch "^$terraformSupportedVersion") {
+    $terraformSupportedVersions = @("0.12","0.13")  
+    $terraformSupportedVersionRegEx = "^($($terraformSupportedVersions -join "|"))"
+    if ($tfState.terraform_version -notmatch $terraformSupportedVersionRegEx) {
         Write-Host "Terraform state is maintained by version '$($tfState.terraform_version)', expected '$terraformSupportedVersion'" -ForegroundColor Yellow
         return
     }
     if ($tfState -and $tfState.outputs) {
+        Write-Host "If you wish to clear Terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+        $proceedanswer = Read-Host
+
+        if ($proceedanswer -ne "yes") {
+            Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+            return
+        }
+
         $tfState.outputs = New-Object PSObject # Empty output
         $tfState.resources = @() # No resources
         $tfState.serial++
