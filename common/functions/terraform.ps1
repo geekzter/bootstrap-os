@@ -90,7 +90,7 @@ function Find-TerraformDirectory {
 
 function Get-TerraformEnvironment {
     Write-Host "Environment variables:" -ForegroundColor Green
-    Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_* | Sort-Object -Property Name
+    Get-ChildItem -Path Env: -Recurse -Include ARM_*,AWS_*,TF_* | Sort-Object -Property Name
 }
 Set-Alias tfe Get-TerraformEnvironment
 # Don't overwrite https://github.com/tfutils/tfenv
@@ -137,7 +137,7 @@ function Get-TerraformInfo {
 
             # Environment variables
             Write-Host "Environment variables:" -ForegroundColor Green
-            Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_* | Sort-Object -Property Name
+            Get-ChildItem -Path Env: -Recurse -Include ARM_*,AWS_*,TF_* | Sort-Object -Property Name
 
             # Azure resources
             $resourceQuery = "Resources | where tags['provisioner']=='terraform' | summarize ResourceCount=count() by Application=tostring(tags['application']), Deployment=tostring(tags['deployment-name']), Environment=tostring(tags['environment']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) | order by Application asc, Environment asc, Workspace asc, Suffix asc"
