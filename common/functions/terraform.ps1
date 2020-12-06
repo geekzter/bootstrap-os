@@ -27,7 +27,9 @@ function ChangeTo-TerraformDirectory {
 Set-Alias cdtf ChangeTo-TerraformDirectory
 Set-Alias tfcd ChangeTo-TerraformDirectory
 
-function Clear-TerraformState {
+function Clear-TerraformState(
+    [parameter(Mandatory=$false)][switch]$Force
+) {
     # terraform state list | ForEach-Object { 
     #     terraform state rm $_
     # }
@@ -41,12 +43,14 @@ function Clear-TerraformState {
         return
     }
     if ($tfState -and $tfState.outputs) {
-        Write-Host "If you wish to clear Terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-        $proceedanswer = Read-Host
+        if (!$Force) {
+            Write-Host "If you wish to clear Terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+            $proceedanswer = Read-Host
 
-        if ($proceedanswer -ne "yes") {
-            Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-            return
+            if ($proceedanswer -ne "yes") {
+                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+                return
+            }
         }
 
         $tfState.outputs = New-Object PSObject # Empty output
@@ -65,10 +69,141 @@ function Clear-TerraformState {
 }
 Set-Alias tfclr Clear-TerraformState
 
-function Destroy-Terraform {
-    Invoke-TerraformCommand "terraform destroy" # -auto-approve
+function Destroy-Terraform(
+    [parameter(Mandatory=$false)][switch]$Force
+) {
+    Invoke-TerraformCommand "terraform destroy $($Force ? '-auto-approve' : $null)"
 }
 Set-Alias tfd Destroy-Terraform
+
+function Clear-TerraformResources(
+    [CmdletBinding(DefaultParameterSetName="Workspace")]
+
+    [parameter(Mandatory=$true)]
+    [string]
+    $Application,
+    
+    [parameter(Mandatory=$false,ParameterSetName="Workspace")]
+    [string]
+    $Workspace=$env:TF_WORKSPACE,
+    
+    [parameter(Mandatory=$false,ParameterSetName="DeploymentName")]
+    [string]
+    $DeploymentName,
+    
+    [parameter(Mandatory=$false,ParameterSetName="Suffix")]
+    [string[]]
+    $Suffix,
+    
+    [parameter(Mandatory=$false,ParameterSetName="Workspace")]
+    [bool]
+    $ClearTerraformState=$true,
+    
+    [switch]
+    $Destroy=$false,
+    
+    [parameter(Mandatory=$false)]
+    [switch]
+    $Force=$false,
+
+    [parameter(Mandatory=$false)]
+    [switch]
+    $Wait=$false,
+
+    [parameter(Mandatory=$false)]
+    [int]
+    $TimeoutMinutes=50
+) {
+    Write-Information $MyInvocation.line
+
+    $tfdirectory = ChangeTo-TerraformDirectory
+    if ($Workspace) {
+        Set-TerraformWorkspace $Workspace
+    } else {
+        # Ensure this is always populated
+        $Workspace = $(terraform workspace show)
+    }
+
+    try {
+        if ($ClearTerraformState -and ($PSCmdlet.ParameterSetName -ieq "Workspace")) {
+            Clear-TerraformState -Force:$Force
+        }
+    
+        if ($Destroy) {
+            if (!$Force) {
+                $proceedanswer = $null
+                Write-Host "Do you wish to proceed removing resources? `nplease reply 'yes' - null or N aborts" -ForegroundColor Cyan
+                $proceedanswer = Read-Host
+                if ($proceedanswer -ne "yes") {
+                    exit
+                }
+            }
+            $tagQuery = "[?tags.application == '${Application}' && properties.provisioningState != 'Deleting'].id"
+            switch ($PSCmdlet.ParameterSetName) {
+                "DeploymentName" {
+                    $tagQuery = $tagQuery -replace "\]", " && tags.deployment == '${DeploymentName}']"
+                }
+                "Suffix" {
+                    $suffixQuery = "("
+                    foreach ($suff in $Suffix) {
+                        if ($suffixQuery -ne "(") {
+                            $suffixQuery += " || "
+                        }
+                        $suffixQuery += "tags.suffix == '${suff}'"
+                    }
+                    $suffixQuery += ")"
+                    $tagQuery = $tagQuery -replace "\]", " && $suffixQuery]"
+                }
+                "Workspace" {
+                    $tagQuery = $tagQuery -replace "\]", " && tags.workspace == '${Workspace}']"
+                }
+            }
+            Write-Host "Removing resources which match JMESPath `"$tagQuery`"" -ForegroundColor Green
+    
+            # Remove resource groups 
+            # Async operation, as they have unique suffixes that won't clash with new deployments
+            Write-Host "Removing '${Application}' resource groups (async)..."
+            $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
+            if ($resourceGroupIDs -and $resourceGroupIDs.Length -gt 0) {
+                Write-Verbose "Starting job 'az resource delete --ids $resourceGroupIDs'"
+                Start-Job -Name "Remove ResourceGroups" -ScriptBlock {az resource delete --ids $args} -ArgumentList $resourceGroupIDs | Out-Null
+            }
+    
+            # Remove resources in the NetworkWatcher resource group
+            Write-Host "Removing '${Application}' network watchers from shared resource group 'NetworkWatcherRG' (async)..."
+            $resourceIDs = $(az resource list -g NetworkWatcherRG --query "$tagQuery" -o tsv)
+            if ($resourceIDs -and $resourceIDs.Length -gt 0) {
+                Write-Verbose "Starting job 'az resource delete --ids $resourceIDs'"
+                Start-Job -Name "Remove Resources from NetworkWatcherRG" -ScriptBlock {az resource delete --ids $args} -ArgumentList $resourceIDs | Out-Null
+            }
+    
+            $metadataQuery = $tagQuery -replace "tags\.","metadata."
+            Write-Information "JMESPath Metadata Query: $metadataQuery"
+            # Remove DNS records using tags expressed as record level metadata
+            # Synchronous operation, as records will clash with new deployments
+            Write-Host "Removing '${Application}' records from shared DNS zone (sync)..."
+            $dnsZones = $(az network dns zone list | ConvertFrom-Json)
+            foreach ($dnsZone in $dnsZones) {
+                Write-Verbose "Processing zone '$($dnsZone.name)'..."
+                $dnsResourceIDs = $(az network dns record-set list -g $dnsZone.resourceGroup -z $dnsZone.name --query "$metadataQuery" -o tsv)
+                if ($dnsResourceIDs) {
+                    Write-Information "Removing DNS records from zone '$($dnsZone.name)'..."
+                    az resource delete --ids $dnsResourceIDs -o none
+                }
+            }
+    
+            $jobs = Get-Job -State Running | Where-Object {$_.Command -match "az resource"}
+            $jobs | Format-Table -Property Id, Name, Command, State
+            if ($Wait -and $jobs) {
+                # Waiting for async operations to complete
+                WaitFor-Jobs -Jobs $jobs -TimeoutMinutes $TimeoutMinutes
+            }
+        }
+    } finally {
+        PopFrom-TerraformDirectory 
+    }
+}
+Set-Alias tferase Clear-TerraformResources
 
 function Find-TerraformDirectory {
     $depth = 2
@@ -357,3 +492,32 @@ function Validate-Terraform {
     Invoke-TerraformCommand "terraform validate"
 }
 Set-Alias tfv Validate-Terraform
+
+function WaitFor-Jobs (
+    [parameter(Mandatory=$true)][object[]]$Jobs,
+    [parameter(Mandatory=$false)][int]$TimeoutMinutes=5
+) {
+    if ($Jobs) {
+        $updateIntervalSeconds = 10 # Same as Terraform
+        $stopWatch = New-Object -TypeName System.Diagnostics.Stopwatch     
+        $stopWatch.Start()
+    
+        Write-Host "Waiting for jobs to complete..."
+    
+        do {
+            $runningJobs = $Jobs | Where-Object {$_.State -like "Running"}
+            $elapsed = $stopWatch.Elapsed.ToString("m'm's's'")
+            Write-Host "$($runningJobs.Count) jobs in running state [$elapsed elapsed]"
+            $null = Wait-Job -Job $Jobs -Timeout $updateIntervalSeconds
+        } while ($runningJobs -and ($stopWatch.Elapsed.TotalMinutes -lt $TimeoutMinutes)) 
+    
+        $jobs | Format-Table -Property Id, Name, State
+        if ($waitStatus) {
+            Write-Warning "Jobs did not complete before timeout (${TimeoutMinutes}m) expired"
+        } else {
+            # Timeout expired before jobs completed
+            $elapsed = $stopWatch.Elapsed.ToString("m'm's's'")
+            Write-Host "Jobs completed in $elapsed"
+        }
+    }
+}
