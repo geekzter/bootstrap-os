@@ -34,7 +34,7 @@ if test $(which lsb_release); then
     DISTRIB_ID=$(lsb_release -i -s)
     DISTRIB_RELEASE=$(lsb_release -r -s)
     DISTRIB_RELEASE_MAJOR=$(lsb_release -s -r | cut -d '.' -f 1)
-    lsb_release -a
+    lsb_release -ar 2>/dev/null
 fi
 
 # Packages
@@ -60,8 +60,6 @@ EOF
         if [[ ! $(apt-key finger --fingerprint C99B11DEB97541F0 2>/dev/null) ]]; then
             $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
         fi
-        # apt-key finger --fingerprint C99B11DEB97541F0
-        $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
         $SUDO apt-add-repository https://cli.github.com/packages
 
         # Required for Midnight Commander
