@@ -82,7 +82,8 @@ EOF
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
             # Microsoft dependencies
             # Source: https://github.com/Azure/azure-functions-core-tools
-            curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | $SUDO tee /etc/apt/sources.list.d/msprod.list
+            curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | $SUDO tee /etc/apt/sources.list.d/microsoft-prod.list
+            wget -q https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/packages-microsoft-prod.deb
             $SUDO dpkg -i packages-microsoft-prod.deb
         fi
 
@@ -124,17 +125,4 @@ if test $(which unzip); then
     $HOME/.tfenv/bin/tfenv install latest
 else
     echo $'\nunzip not found, skipping tfenv set up'
-fi
-
-# Git settings
-if test $(which jq); then
-    if [ -f ../common/settings.json ]; then
-        git config --global user.email $(cat ../common/settings.json | jq '.GitEmail')
-        git config --global user.name "$(cat ../common/settings.json | jq '.GitName')"
-    else
-        echo $'\n'
-        echo "Settings file $(cd ../common/ && pwd)/settings.json not found, skipping personalization"
-    fi
-else
-    echo $'\njq not found, skipping personalization'
 fi

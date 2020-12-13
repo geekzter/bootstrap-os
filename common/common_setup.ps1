@@ -30,8 +30,18 @@ if ($IsLinux -or $IsMacos) {
 # Set up dotfiles
 & (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "create_dotfiles.ps1")
 
-# Configure git
+# Configure Git
+$settingsFile = (Join-Path $PSScriptRoot settings.json)
+if (Test-Path $settingsFile) {
+    $settings = (Get-Content (Join-Path $PSScriptRoot settings.json)) | ConvertFrom-Json
+}
 git config --global core.excludesfile (Join-Path $HOME .gitignore)
+if ($settings.GitEmail) {
+    git config --global user.email $settings.GitEmail
+}
+if ($settings.GitName) {
+    git config --global user.name $settings.GitName
+}
 if (CanElevate) {
     RunElevated git config --system core.longpaths true
 }
@@ -40,8 +50,8 @@ if (-not $NoPackages) {
     # Azure CLI extensions
     if (Get-Command az -ErrorAction SilentlyContinue) {
         Write-Host "`nUpdating Azure CLI extensions..."
-        az extension add -y -n azure-devops
-        az extension add -y -n azure-firewall
-        az extension add -y -n resource-graph
+        az extension add -y -n --upgrade azure-devops
+        az extension add -y -n --upgrade azure-firewall
+        az extension add -y -n --upgrade resource-graph
     }
 }
