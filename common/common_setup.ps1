@@ -32,7 +32,9 @@ if ($IsLinux -or $IsMacos) {
 
 # Configure git
 git config --global core.excludesfile (Join-Path $HOME .gitignore)
-git config --system core.longpaths true
+if (CanElevate) {
+    RunElevated git config --system core.longpaths true
+}
 
 if (-not $NoPackages) {
     # Azure CLI extensions
