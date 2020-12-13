@@ -57,6 +57,10 @@ EOF
 
         # GitHub CLI pre-requisites
         # https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+        if [[ ! $(apt-key finger --fingerprint C99B11DEB97541F0 2>/dev/null) ]]; then
+            $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+        fi
+        # apt-key finger --fingerprint C99B11DEB97541F0
         $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
         $SUDO apt-add-repository https://cli.github.com/packages
 
@@ -68,7 +72,7 @@ EOF
 
         # Microsoft dependencies
         # Source: https://github.com/Azure/azure-functions-core-tools
-        curl https://packages.microsoft.com/keys/microsoft.asc | $SUDO apt-key add -
+        curl -s https://packages.microsoft.com/keys/microsoft.asc | $SUDO apt-key add -
         if [ "$DISTRIB_ID" == "Debian" ]; then
             # Microsoft dependencies
             # Source: https://github.com/Azure/azure-functions-core-tools
@@ -82,7 +86,7 @@ EOF
         if [ "$DISTRIB_ID" == "Ubuntu" ]; then
             # Microsoft dependencies
             # Source: https://github.com/Azure/azure-functions-core-tools
-            curl https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | $SUDO tee /etc/apt/sources.list.d/microsoft-prod.list
+            curl -s https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | $SUDO tee /etc/apt/sources.list.d/microsoft-prod.list
             wget -q https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/packages-microsoft-prod.deb
             $SUDO dpkg -i packages-microsoft-prod.deb
         fi

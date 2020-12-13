@@ -36,6 +36,7 @@ if (Test-Path $settingsFile) {
     $settings = (Get-Content (Join-Path $PSScriptRoot settings.json)) | ConvertFrom-Json
 }
 git config --global core.excludesfile (Join-Path $HOME .gitignore)
+git config --global pull.rebase false
 if ($settings.GitEmail) {
     git config --global user.email $settings.GitEmail
 }
