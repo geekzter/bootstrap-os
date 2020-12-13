@@ -35,6 +35,7 @@ snapd
 telnet
 tmux
 traceroute
+tree
 unixodbc-dev
 unzip
 whois
