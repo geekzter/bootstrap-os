@@ -122,7 +122,7 @@ fi
 if test $(which unzip); then
     if [ ! -d $HOME/.tfenv ]; then
         echo $'\nInstalling tfenv...'
-        git clone https://github.com/tfutils/tfenv.git $HOME/.tfenv
+        git clone -q https://github.com/tfutils/tfenv.git $HOME/.tfenv
     else
         echo $'\nUpdating tfenv...'
         git -C $HOME/.tfenv pull
