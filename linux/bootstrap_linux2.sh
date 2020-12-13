@@ -37,6 +37,9 @@ if test $(which lsb_release); then
     lsb_release -ar 2>/dev/null
 fi
 
+#sudo chown -R ${USER}:${USER} ~/.gnupg
+#chmod -R go-rwx ~/.gnupg
+
 # Packages
 if [ $CANELEVATE = "false" ]; then
     echo $'\nsudo not found, skipping packages'
@@ -53,7 +56,7 @@ else
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
         # Installs Azure CLI including dependencies
-        curl -sL https://aka.ms/InstallAzureCLIDeb | $SUDO bash
+        curl -sL https://aka.ms/InstallAzureCLIDeb | $SUDO bash 2>/dev/null
 
         # GitHub CLI pre-requisites
         # https://github.com/cli/cli/blob/trunk/docs/install_linux.md
