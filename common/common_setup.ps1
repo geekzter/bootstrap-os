@@ -50,8 +50,8 @@ if (-not $NoPackages) {
     # Azure CLI extensions
     if (Get-Command az -ErrorAction SilentlyContinue) {
         Write-Host "`nUpdating Azure CLI extensions..."
-        az extension add -y -n --upgrade azure-devops
-        az extension add -y -n --upgrade azure-firewall
-        az extension add -y -n --upgrade resource-graph
+        az extension add -n azure-devops   --upgrade -y 2>&1
+        az extension add -n azure-firewall --upgrade -y 2>&1
+        az extension add -n resource-graph --upgrade -y 2>&1
     }
 }
