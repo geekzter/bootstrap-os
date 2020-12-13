@@ -37,14 +37,6 @@ if test ! $(which tfenv); then
 fi
 tfenv install latest
 
-# Git
-if [ -f ../common/settings.json ]; then
-    git config --global user.email $(cat ../common/settings.json | jq '.GitEmail')
-    git config --global user.name "$(cat ../common/settings.json | jq '.GitName')"
-else
-    echo "Settings file ../common/settings.json not found, skipping personalization"
-fi
-
 # Let PowerShell Core configure itself
 if test ! $(which pwsh); then
     echo "PowerShell Core (pwsh) not found, skipping setup"
