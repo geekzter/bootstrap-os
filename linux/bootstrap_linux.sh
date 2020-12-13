@@ -54,6 +54,7 @@ if [ ! -d $HOME/src/bootstrap-os ]; then
     git clone https://github.com/geekzter/bootstrap-os $HOME/src/bootstrap-os
 else 
     echo "Repository found at $(cd $HOME/src/bootstrap-os && pwd), updating..."
+    git config --global pull.rebase false
     git -C $HOME/src/bootstrap-os pull
 fi
 pushd $HOME/src/bootstrap-os/linux >/dev/null
