@@ -95,8 +95,12 @@ EOF
         echo $'\nUpdating package list...'
         $SUDO apt-get update
 
-        echo $'\nUpgrading packages...'
-        $SUDOEULA apt-get upgrade -y
+        # FIX: Could not get lock /var/lib/dpkg/lock-frontend - open (11: Resource temporarily unavailable)
+        # Upgrade packages only when not running from cloud-init
+        if [[ $(pstree -pls $$) != *"cloud-init"* ]]; then
+            echo $'\nUpgrading packages...'
+            $SUDOEULA apt-get upgrade -y
+        fi
 
         echo $'\nInstalling new packages...'
         INSTALLED_PACKAGES=$(mktemp)
@@ -127,7 +131,8 @@ if test $(which unzip); then
         echo $'\nUpdating tfenv...'
         git -C $HOME/.tfenv pull
     fi
-    $HOME/.tfenv/bin/tfenv install latest 2>&1
+    TFENV_CURL_OUTPUT=0
+    $HOME/.tfenv/bin/tfenv install latest #2>&1
 else
     echo $'\nunzip not found, skipping tfenv set up'
 fi
