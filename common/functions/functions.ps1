@@ -1,8 +1,8 @@
 
 function AddorUpdateModule (
-    [string]$ModuleName,
-    [string]$DesiredVersion,
-    [switch]$AllowClobber=$false
+    [parameter(Mandatory=$true)][string]$ModuleName,
+    [parameter(Mandatory=$true)][string]$DesiredVersion,
+    [parameter(Mandatory=$false)][switch]$AllowClobber=$false
 ) {
     if (IsElevated) {
         $scope = "AllUsers"
@@ -53,7 +53,7 @@ function AddorUpdateModule (
 }
 
 function ChangeTo-Directory (
-    [string]$Directory   
+    [parameter(Mandatory=$true)][string]$Directory   
 ) {
     if (Test-Path $Directory) {
         Push-Location $Directory
@@ -205,9 +205,9 @@ function global:RunElevated () {
 }
 
 function CopyFile (
-    [string]$File,
-    [string]$SourceDirectory,
-    [string]$TargetDirectory
+    [parameter(Mandatory=$true)][string]$File,
+    [parameter(Mandatory=$true)][string]$SourceDirectory,
+    [parameter(Mandatory=$true)][string]$TargetDirectory
 ) {
     $target = $(Join-Path $TargetDirectory $File)
     $source = $(Join-Path $SourceDirectory $File)
@@ -218,8 +218,8 @@ function CopyFile (
 } 
 
 function LinkDirectory (
-    [string]$SourceDirectory,
-    [string]$TargetDirectory
+    [parameter(Mandatory=$true)][string]$SourceDirectory,
+    [parameter(Mandatory=$true)][string]$TargetDirectory
 ) {
     if (!(Test-Path $SourceDirectory)) {
         Write-Information "Creating symbolic link $SourceDirectory -> $TargetDirectory"
@@ -234,9 +234,9 @@ function LinkDirectory (
     }
 } 
 function LinkFile (
-    [string]$File,
-    [string]$SourceDirectory,
-    [string]$TargetDirectory
+    [parameter(Mandatory=$true)][string]$File,
+    [parameter(Mandatory=$true)][string]$SourceDirectory,
+    [parameter(Mandatory=$true)][string]$TargetDirectory
 ) {
     # Reverse
     $linkSource = $(Join-Path $TargetDirectory $File)
@@ -266,7 +266,7 @@ Set-Alias lf Load-Functions
 Set-Alias rlf Load-Functions
 
 function Search-History (
-    [string]$Search
+    [parameter(Mandatory=$true)][string]$Search
 ) {
     Get-History | Where-Object {$_.CommandLine -Like "*${Search}*"}
 }

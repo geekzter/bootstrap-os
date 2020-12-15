@@ -40,7 +40,7 @@ if [ -t 0 ]; then
 
         # Done, spawn 2nd stage
         pushd ${SCRIPT_PATH} >/dev/null
-        . ${SCRIPT_PATH}/bootstrap_linux2.sh "$@"
+        . ${SCRIPT_PATH}/bootstrap_linux2.sh "$@" # 2> >(tee err.out >&2)
         popd >/dev/null
         exit
     fi
@@ -58,5 +58,5 @@ else
     git -C $HOME/src/bootstrap-os pull
 fi
 pushd $HOME/src/bootstrap-os/linux >/dev/null
-. $HOME/src/bootstrap-os/linux/bootstrap_linux2.sh "$@"
+. $HOME/src/bootstrap-os/linux/bootstrap_linux2.sh "$@" # 2> >(tee err.out >&2)
 popd >/dev/null
