@@ -1,7 +1,7 @@
 
 function AddorUpdateModule (
     [parameter(Mandatory=$true)][string]$ModuleName,
-    [parameter(Mandatory=$true)][string]$DesiredVersion,
+    [parameter(Mandatory=$false)][string]$DesiredVersion,
     [parameter(Mandatory=$false)][switch]$AllowClobber=$false
 ) {
     if (IsElevated) {
