@@ -36,10 +36,10 @@ function Clear-TerraformState(
     # 'terraform state rm' does not remove output (anymore)
     # HACK: Manipulate the state directly instead
     $tfState = terraform state pull | ConvertFrom-Json
-    $terraformSupportedVersions = @("0.12","0.13")  
+    $terraformSupportedVersions = @("0.12","0.13","0.14")  
     $terraformSupportedVersionRegEx = "^($($terraformSupportedVersions -join "|"))"
     if ($tfState.terraform_version -notmatch $terraformSupportedVersionRegEx) {
-        Write-Host "Terraform state is maintained by version '$($tfState.terraform_version)', expected '$terraformSupportedVersion'" -ForegroundColor Yellow
+        Write-Warning "Terraform state is maintained by version $($tfState.terraform_version), expected $terraformSupportedVersions"
         return
     }
     if ($tfState -and $tfState.outputs) {
@@ -114,8 +114,8 @@ function Erase-TerraformAzureResources(
     [int]
     $TimeoutMinutes=50
 ) {
-    Write-Verbose "`$PSScriptRoot: $PSScriptRoot"
     Write-Information $MyInvocation.line
+    Write-Debug "`$PSCmdlet.ParameterSetName: $($PSCmdlet.ParameterSetName)"
 
     $tfdirectory = ChangeTo-TerraformDirectory
     if ($Workspace) {
