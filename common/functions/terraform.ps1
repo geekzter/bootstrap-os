@@ -76,12 +76,12 @@ function Destroy-Terraform(
 }
 Set-Alias tfd Destroy-Terraform
 
-function Clear-TerraformResources(
+function Erase-TerraformAzureResources(
     [CmdletBinding(DefaultParameterSetName="Workspace")]
 
-    [parameter(Mandatory=$true)]
+    [parameter(Mandatory=$false)]
     [string]
-    $Application,
+    $Repository,
     
     [parameter(Mandatory=$false,ParameterSetName="Workspace")]
     [string]
@@ -114,6 +114,7 @@ function Clear-TerraformResources(
     [int]
     $TimeoutMinutes=50
 ) {
+    Write-Verbose "`$PSScriptRoot: $PSScriptRoot"
     Write-Information $MyInvocation.line
 
     $tfdirectory = ChangeTo-TerraformDirectory
@@ -125,6 +126,17 @@ function Clear-TerraformResources(
     }
 
     try {
+
+        if (!$Repository) {
+            $Repository = Find-RepositoryDirectory            
+        }
+        if (!$Repository) {
+            Write-Warning "Repository not specified, exiting"
+            return
+        } else {
+            $Repository = (Split-Path -Leaf $Repository)
+        }
+
         if ($ClearTerraformState -and ($PSCmdlet.ParameterSetName -ieq "Workspace")) {
             Clear-TerraformState -Force:$Force
         }
@@ -132,13 +144,13 @@ function Clear-TerraformResources(
         if ($Destroy) {
             if (!$Force) {
                 $proceedanswer = $null
-                Write-Host "Do you wish to proceed removing resources? `nplease reply 'yes' - null or N aborts" -ForegroundColor Cyan
+                Write-Host "Do you wish to proceed removing '${Repository}' resources? `nplease reply 'yes' - null or N aborts" -ForegroundColor Cyan
                 $proceedanswer = Read-Host
                 if ($proceedanswer -ne "yes") {
                     exit
                 }
             }
-            $tagQuery = "[?tags.application == '${Application}' && properties.provisioningState != 'Deleting'].id"
+            $tagQuery = "[?tags.repository == '${Repository}' && properties.provisioningState != 'Deleting'].id"
             switch ($PSCmdlet.ParameterSetName) {
                 "DeploymentName" {
                     $tagQuery = $tagQuery -replace "\]", " && tags.deployment == '${DeploymentName}']"
@@ -162,7 +174,7 @@ function Clear-TerraformResources(
     
             # Remove resource groups 
             # Async operation, as they have unique suffixes that won't clash with new deployments
-            Write-Host "Removing '${Application}' resource groups (async)..."
+            Write-Host "Removing '${Repository}' resource groups (async)..."
             $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
             if ($resourceGroupIDs -and $resourceGroupIDs.Length -gt 0) {
                 Write-Verbose "Starting job 'az resource delete --ids $resourceGroupIDs'"
@@ -170,7 +182,7 @@ function Clear-TerraformResources(
             }
     
             # Remove resources in the NetworkWatcher resource group
-            Write-Host "Removing '${Application}' network watchers from shared resource group 'NetworkWatcherRG' (async)..."
+            Write-Host "Removing '${Repository}' network watchers from shared resource group 'NetworkWatcherRG' (async)..."
             $resourceIDs = $(az resource list -g NetworkWatcherRG --query "$tagQuery" -o tsv)
             if ($resourceIDs -and $resourceIDs.Length -gt 0) {
                 Write-Verbose "Starting job 'az resource delete --ids $resourceIDs'"
@@ -181,7 +193,7 @@ function Clear-TerraformResources(
             Write-Information "JMESPath Metadata Query: $metadataQuery"
             # Remove DNS records using tags expressed as record level metadata
             # Synchronous operation, as records will clash with new deployments
-            Write-Host "Removing '${Application}' records from shared DNS zone (sync)..."
+            Write-Host "Removing '${Repository}' records from shared DNS zone (sync)..."
             $dnsZones = $(az network dns zone list | ConvertFrom-Json)
             foreach ($dnsZone in $dnsZones) {
                 Write-Verbose "Processing zone '$($dnsZone.name)'..."
@@ -203,7 +215,25 @@ function Clear-TerraformResources(
         PopFrom-TerraformDirectory 
     }
 }
-Set-Alias tferase Clear-TerraformResources
+Set-Alias tferase Erase-TerraformAzureResources
+
+function Find-RepositoryDirectory {
+    $depth = 2
+
+    if (Test-Path LICENSE) {
+        return (Get-Location).Path
+    } else {
+        $license = Get-ChildItem -Path . -Filter LICENSE -Recurse -Depth $depth | Select-Object -First 1
+        if (!$license) {
+            # Go one level below current directory
+            $license = Get-ChildItem -Path .. -Filter LICENSE -Recurse -Depth $depth | Select-Object -First 1
+        }
+        if ($license) {
+            return $license.Directory.FullName
+        }
+        return $null
+    }
+}
 
 function Find-TerraformDirectory {
     $depth = 2
@@ -275,7 +305,7 @@ function Get-TerraformInfo {
             Get-ChildItem -Path Env: -Recurse -Include ARM_*,AWS_*,TF_* | Sort-Object -Property Name
 
             # Azure resources
-            $resourceQuery = "Resources | where tags['provisioner']=='terraform' | summarize ResourceCount=count() by Application=tostring(tags['application']), Deployment=tostring(tags['deployment-name']), Environment=tostring(tags['environment']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) | order by Application asc, Environment asc, Workspace asc, Suffix asc"
+            $resourceQuery = "Resources | where tags['provisioner']=='terraform' | summarize ResourceCount=count() by Repository=tostring(tags['repository']), Deployment=tostring(tags['deployment-name']), Environment=tostring(tags['environment']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) | order by Repository asc, Environment asc, Workspace asc, Suffix asc"
             Write-Information "Executing graph query:`n$resourceQuery"
             Write-Host "`nAzure resources:`n" -ForegroundColor Green
             az extension add --name resource-graph 2>$null
