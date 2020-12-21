@@ -76,44 +76,45 @@ function Destroy-Terraform(
 }
 Set-Alias tfd Destroy-Terraform
 
-function Erase-TerraformAzureResources(
+function Erase-TerraformAzureResources {
     [CmdletBinding(DefaultParameterSetName="Workspace")]
+    param (
+        [parameter(Mandatory=$false)]
+        [string]
+        $Repository,
+        
+        [parameter(Mandatory=$false,ParameterSetName="Workspace")]
+        [string]
+        $Workspace=$env:TF_WORKSPACE,
+        
+        [parameter(Mandatory=$false,ParameterSetName="DeploymentName")]
+        [string]
+        $DeploymentName,
+        
+        [parameter(Mandatory=$false,ParameterSetName="Suffix")]
+        [string[]]
+        $Suffix,
+        
+        [parameter(Mandatory=$false,ParameterSetName="Workspace")]
+        [bool]
+        $ClearTerraformState=$true,
+        
+        [switch]
+        $Destroy=$false,
+        
+        [parameter(Mandatory=$false)]
+        [switch]
+        $Force=$false,
 
-    [parameter(Mandatory=$false)]
-    [string]
-    $Repository,
-    
-    [parameter(Mandatory=$false,ParameterSetName="Workspace")]
-    [string]
-    $Workspace=$env:TF_WORKSPACE,
-    
-    [parameter(Mandatory=$false,ParameterSetName="DeploymentName")]
-    [string]
-    $DeploymentName,
-    
-    [parameter(Mandatory=$false,ParameterSetName="Suffix")]
-    [string[]]
-    $Suffix,
-    
-    [parameter(Mandatory=$false,ParameterSetName="Workspace")]
-    [bool]
-    $ClearTerraformState=$true,
-    
-    [switch]
-    $Destroy=$false,
-    
-    [parameter(Mandatory=$false)]
-    [switch]
-    $Force=$false,
+        [parameter(Mandatory=$false)]
+        [switch]
+        $Wait=$false,
 
-    [parameter(Mandatory=$false)]
-    [switch]
-    $Wait=$false,
+        [parameter(Mandatory=$false)]
+        [int]
+        $TimeoutMinutes=50
+    ) 
 
-    [parameter(Mandatory=$false)]
-    [int]
-    $TimeoutMinutes=50
-) {
     Write-Information $MyInvocation.line
     Write-Debug "`$PSCmdlet.ParameterSetName: $($PSCmdlet.ParameterSetName)"
 
@@ -142,14 +143,6 @@ function Erase-TerraformAzureResources(
         }
     
         if ($Destroy) {
-            if (!$Force) {
-                $proceedanswer = $null
-                Write-Host "Do you wish to proceed removing '${Repository}' resources? `nplease reply 'yes' - null or N aborts" -ForegroundColor Cyan
-                $proceedanswer = Read-Host
-                if ($proceedanswer -ne "yes") {
-                    exit
-                }
-            }
             $tagQuery = "[?tags.repository == '${Repository}' && properties.provisioningState != 'Deleting'].id"
             switch ($PSCmdlet.ParameterSetName) {
                 "DeploymentName" {
@@ -171,6 +164,14 @@ function Erase-TerraformAzureResources(
                 }
             }
             Write-Host "Removing resources which match JMESPath `"$tagQuery`"" -ForegroundColor Green
+            if (!$Force) {
+                $proceedanswer = $null
+                Write-Host "Do you wish to proceed removing '${Repository}' resources? `nplease reply 'yes' - null or N aborts" -ForegroundColor Cyan
+                $proceedanswer = Read-Host
+                if ($proceedanswer -ne "yes") {
+                    return
+                }
+            }
     
             # Remove resource groups 
             # Async operation, as they have unique suffixes that won't clash with new deployments
@@ -427,6 +428,14 @@ Set-Alias tfrm RemoveFrom-TerraformState
 function Set-TerraformWorkspace (
     [parameter(Mandatory=$true)][string]$Workspace
 ) {
+    if ($env:TF_WORKSPACE) {
+        if ($env:TF_WORKSPACE -eq $Workspace) {
+            Write-Verbose "Using `$env:TF_WORKSPACE = `'$($env:TF_WORKSPACE)`', nothing to set"
+            return
+        } else {
+            Write-Warning "Specified workspace '$Workspace' while `$env:TF_WORKSPACE = `'$($env:TF_WORKSPACE)`'"
+        }
+    }
     Invoke-TerraformCommand "terraform workspace select $Workspace"
 }
 Set-Alias tfw Set-TerraformWorkspace  
