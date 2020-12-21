@@ -137,7 +137,8 @@ if ($printMessages) {
 # Go to home (not automatic for elevated prompt)
 if (IsElevated) {
     # But only if not a nested shell
-    if ((Get-Process -id $pid).Parent.Parent.ProcessName -ne "pwsh") {        
+    $parentProcess = (Get-Process -id $pid).Parent
+   if (($parentProcess.ProcessName -ine "code") -and ($parentProcess.Parent.ProcessName -ine "pwsh")) {        
         if ($home -and (Test-Path $home)) {
             Set-Location $home
         } else {
