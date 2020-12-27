@@ -425,6 +425,15 @@ function RemoveFrom-TerraformState (
 }
 Set-Alias tfrm RemoveFrom-TerraformState
 
+function Set-TerraformAzureSubscription(
+    [parameter(Mandatory=$true,Position=0)][string]$SubscriptionID
+) {
+    $env:ARM_SUBSCRIPTION_ID = $SubscriptionID
+    az account set --subscription $env:ARM_SUBSCRIPTION_ID
+    az account show
+}
+Set-Alias stas Set-TerraformAzureSubscription
+
 function Set-TerraformWorkspace (
     [parameter(Mandatory=$true)][string]$Workspace
 ) {
