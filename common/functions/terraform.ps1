@@ -125,6 +125,10 @@ function Erase-TerraformAzureResources {
         # Ensure this is always populated
         $Workspace = $(terraform workspace show)
     }
+    if ($Workspace -imatch "prod") {
+        Write-Warning "The workspace name '${Workspace}' indicates this may be a production workload. Exiting..."
+        return
+    }
 
     try {
 
@@ -318,6 +322,25 @@ function Get-TerraformInfo {
 }
 Set-Alias tfi Get-TerraformInfo
 
+function Get-TerraformWorkspace () {
+    if ($env:TF_WORKSPACE) {
+        Write-Debug "Get-TerraformWorkspace: $($env:TF_WORKSPACE)"
+        return $env:TF_WORKSPACE
+    }
+
+    $null = ChangeTo-TerraformDirectory
+    try {
+        $workspace = $(terraform workspace show)
+    } finally {
+        PopFrom-TerraformDirectory 
+    }
+
+    Write-Debug "Get-TerraformWorkspace: $workspace"
+    return $workspace
+}
+Set-Alias gtfw Get-TerraformWorkspace 
+Set-Alias tfwg Get-TerraformWorkspace 
+
 function Get-Blobs (
     [parameter(Mandatory=$true)][string]$BackendStorageAccountName,
     [parameter(Mandatory=$true)][string]$BackendStorageContainerName,
@@ -447,7 +470,8 @@ function Set-TerraformWorkspace (
     }
     Invoke-TerraformCommand "terraform workspace select $Workspace"
 }
-Set-Alias tfw Set-TerraformWorkspace  
+Set-Alias tfws Set-TerraformWorkspace  
+Set-Alias stfw Set-TerraformWorkspace  
 
 function Taint-TerraformResource (
     [parameter(Mandatory=$true,ValueFromPipeline=$true)][string[]]$Resource

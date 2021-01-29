@@ -35,6 +35,7 @@ $settingsFile = (Join-Path $PSScriptRoot settings.json)
 if (Test-Path $settingsFile) {
     $settings = (Get-Content (Join-Path $PSScriptRoot settings.json)) | ConvertFrom-Json
 }
+git config --global core.autocrlf true # May be needed for Windows to not mess up Git
 git config --global core.excludesfile (Join-Path $HOME .gitignore)
 git config --global pull.rebase false
 if ($settings.GitEmail) {
