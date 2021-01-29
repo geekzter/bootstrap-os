@@ -33,6 +33,7 @@ cask "minecraft"
 cask "minikube"
 #cask "mono-mdk" # Required for Xamarin -> Visual Studio
 cask "mono-mdk-for-visual-studio"
+cask "owasp-zap"
 cask "postman"
 cask "powershell"
 cask "unity"
