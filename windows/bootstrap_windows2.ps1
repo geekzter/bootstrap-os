@@ -289,7 +289,7 @@ if ($All -or $Settings) {
         # Configure DPI scaling for BGInfo
         if ($bgInfoExe) {
             New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Name $bgInfoExe -PropertyType String -Value "^ DPIUNAWARE" -ErrorAction SilentlyContinue
-            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Name $bgInfoExe -Value "^ DPIUNAWARE" -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Name $bgInfoExe -Value  "^ DPIUNAWARE" -ErrorAction SilentlyContinue
         }
 
         # Execute BGInfo regardless, as we just removed the wallpaper
