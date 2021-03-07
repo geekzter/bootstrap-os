@@ -262,6 +262,7 @@ if ($All -or $Settings) {
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "Hidden" -Type DWord -Value 1
 
     # Display Setting customization
+    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name TileWallpaper -Value 0 -ErrorAction SilentlyContinue
     New-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -PropertyType String -Value -2730 -ErrorAction SilentlyContinue
     Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name IconSpacing -Value -2730 -ErrorAction SilentlyContinue
     if ($metadataContent) {
@@ -272,7 +273,9 @@ if ($All -or $Settings) {
         New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name DisableLogonBackgroundImage -PropertyType DWord -Value 1 -ErrorAction SilentlyContinue
 
         $bgInfoCommand = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "BGInfo" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty "BGInfo"
-        if (!($bgInfoCommand)) {
+        if ($bgInfoCommand) {
+            $bgInfoExe = ($bgInfoCommand -replace "BGInfo.exe.*$","BGInfo.exe")
+        } else {
             # Configure BGInfo of not already done so (e.g. by VM extension)
             $bgInfoExe = Get-Command "bginfo.exe" -ErrorAction SilentlyContinue
             if ($bgInfoExe) {
@@ -282,6 +285,13 @@ if ($All -or $Settings) {
                 Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "BGInfo" $bgInfoCommand
             }
         }
+
+        # Configure DPI scaling for BGInfo
+        if ($bgInfoExe) {
+            New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Name $bgInfoExe -PropertyType String -Value "^ DPIUNAWARE" -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Name $bgInfoExe -Value "^ DPIUNAWARE" -ErrorAction SilentlyContinue
+        }
+
         # Execute BGInfo regardless, as we just removed the wallpaper
         if ($bgInfoCommand) {
             Invoke-Expression $bgInfoCommand
