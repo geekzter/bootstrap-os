@@ -257,6 +257,7 @@ if ($All -or $Settings) {
     # Disable autostarts
     Get-ScheduledTask -TaskName ServerManager -ErrorAction SilentlyContinue | Disable-ScheduledTask | Out-Null
     Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name "Docker Desktop" -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name "KeePassXC" -ErrorAction SilentlyContinue
 
     # Show hidden files
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "Hidden" -Type DWord -Value 1
