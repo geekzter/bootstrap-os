@@ -312,16 +312,18 @@ if ($All -or $Settings) {
 
     # Import GPO
     if (!(Get-Command lgpo -ErrorAction SilentlyContinue)) {
-        $lgpoUrl = 'https://download.microsoft.com/download/8/5/C/85C25433-A1B0-4FFA-9429-7E023E7DA8D8/LGPO.zip'
-        Write-Warning "LGPO not found"
-        Write-Host "Retrieving lgpo from ${lgpoUrl}..."
         $gpoDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) "data\gpo")
-        $lgoArchive = (Join-Path $gpoDirectory "lgpo.zip")
-        Invoke-WebRequest -Uri $lgpoUrl -UseBasicParsing -OutFile $lgoArchive
-        Write-Host "Extracting ${lgoArchive} in ${$gpoDirectory}..."
-        Expand-Archive -Path $lgoArchive -DestinationPath $gpoDirectory -Force
-        Write-Host "Extracted ${lgoArchive}"
         $lgpoExeDirectory = (Join-Path $gpoDirectory "LGPO_30")
+        if (!(Test-Path $lgpoExeDirectory)) {
+            Write-Warning "LGPO not found"
+            $lgoArchive = (Join-Path $gpoDirectory "lgpo.zip")
+            $lgpoUrl = 'https://download.microsoft.com/download/8/5/C/85C25433-A1B0-4FFA-9429-7E023E7DA8D8/LGPO.zip'
+            Write-Host "Retrieving lgpo from ${lgpoUrl}..."
+            Invoke-WebRequest -Uri $lgpoUrl -UseBasicParsing -OutFile $lgoArchive
+            Write-Host "Extracting ${lgoArchive} in ${$gpoDirectory}..."
+            Expand-Archive -Path $lgoArchive -DestinationPath $gpoDirectory -Force
+            Write-Host "Extracted ${lgoArchive}"
+        }
         $env:PATH += ";${lgpoExeDirectory}"
     }
     if (Get-Command lgpo -ErrorAction SilentlyContinue) {
