@@ -37,6 +37,8 @@ if (!(Test-Path $userPolicy)) {
     Write-Warning "Policy ${userPolicy} not found, exiting"
     exit
 }
+$savedPolicy = (Join-Path $PSScriptRoot "user.pol")
+$null = Copy-Item -Path $userPolicy -Destination $savedPolicy -Force
 
 $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
 Write-Host "Parsing policy file ${userPolicy} to ${userPolicyText}..."
