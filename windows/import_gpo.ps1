@@ -1,4 +1,5 @@
 param ( 
+    [parameter(Mandatory=$false)][string]$PolicyFile=(Join-Path $PSScriptRoot "user-policy.txt"),
     [parameter(Mandatory=$false)][switch]$InstallToolsIfMissing
 ) 
 
@@ -23,12 +24,18 @@ if (!(Get-Command lgpo -ErrorAction SilentlyContinue)) {
 }
 
 # Find root repo directory
-$userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
-if (!(Test-Path $userPolicyText)) {
-    Write-Warning "Policy text file ${userPolicyText} not found, exiting"
+if (!(Test-Path $PolicyFile)) {
+    Write-Warning "Policy text file ${PolicyFile} not found, exiting"
     exit
 }
 
-Write-Host "Importing policy text file ${userPolicyText}..."
-lgpo /t $userPolicyText
+Write-Host "Importing policy file ${PolicyFile}..."
+if ($PolicyFile -imatch "pol$") {
+    lgpo /ua $PolicyFile
+}
+if ($PolicyFile -imatch "txt$") {
+    lgpo /t $PolicyFile
+}
+
+
 gpupdate /Target:User /Force
