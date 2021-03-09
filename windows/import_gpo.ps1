@@ -31,10 +31,10 @@ if (!(Test-Path $PolicyFile)) {
 
 Write-Host "Importing policy file ${PolicyFile}..."
 if ($PolicyFile -imatch "pol$") {
-    lgpo /ua $PolicyFile
+    lgpo /u:${env:username}   $PolicyFile /v
 }
 if ($PolicyFile -imatch "txt$") {
-    lgpo /t $PolicyFile
+    lgpo /t $PolicyFile /v
 }
 
 

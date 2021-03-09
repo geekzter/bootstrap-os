@@ -315,7 +315,7 @@ if ($All -or $Settings) {
         $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
         if (Test-Path $userPolicyText) {
             Write-Host "Importing policy text file ${userPolicyText}..."
-            lgpo /t $userPolicyText
+            lgpo /t $userPolicyText /v
             gpupdate /Target:User /Force
         } else {
             Write-Warning "Policy text file ${userPolicyText} not found, exiting"
