@@ -311,6 +311,19 @@ if ($All -or $Settings) {
     }
 
     # Import GPO
+    if (!(Get-Command lgpo -ErrorAction SilentlyContinue)) {
+        $lgpoUrl = 'https://download.microsoft.com/download/8/5/C/85C25433-A1B0-4FFA-9429-7E023E7DA8D8/LGPO.zip'
+        Write-Warning "LGPO not found"
+        Write-Host "Retrieving lgpo from ${lgpoUrl}..."
+        $gpoDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) "data\gpo")
+        $lgoArchive = (Join-Path $gpoDirectory "lgpo.zip")
+        Invoke-WebRequest -Uri $lgpoUrl -UseBasicParsing -OutFile $lgoArchive
+        Write-Host "Extracting ${lgoArchive} in ${$gpoDirectory}..."
+        Expand-Archive -Path $lgoArchive -DestinationPath $gpoDirectory -Force
+        Write-Host "Extracted ${lgoArchive}"
+        $lgpoExeDirectory = (Join-Path $gpoDirectory "LGPO_30")
+        $env:PATH += ";${lgpoExeDirectory}"
+    }
     if (Get-Command lgpo -ErrorAction SilentlyContinue) {
         $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
         if (Test-Path $userPolicyText) {
