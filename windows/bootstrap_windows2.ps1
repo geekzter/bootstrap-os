@@ -309,6 +309,20 @@ if ($All -or $Settings) {
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "PromptOnSecureDesktop" -Type DWord -Value 1   
     }
+
+    # Import GPO
+    if (Get-Command lgpo -ErrorAction SilentlyContinue) {
+        $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
+        if (Test-Path $userPolicyText) {
+            Write-Host "Importing policy text file ${userPolicyText}..."
+            lgpo /t $userPolicyText
+            gpupdate /Target:User /Force
+        } else {
+            Write-Warning "Policy text file ${userPolicyText} not found, exiting"
+        }
+    } else {
+        Write-Warning "LGPO not found. Please install by running 'choco install winsecuritybaseline' from an elevated shell, or downloading and installing it from https://www.microsoft.com/en-us/download/details.aspx?id=55319"
+    }
 }
 
 if ($All -or $Powershell) {
