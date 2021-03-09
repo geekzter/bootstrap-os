@@ -42,4 +42,4 @@ $null = Copy-Item -Path $userPolicy -Destination $savedPolicy -Force
 
 $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
 Write-Host "Parsing policy file ${userPolicy} to ${userPolicyText}..."
-lgpo /parse /ua $userPolicy | Out-File $userPolicyText
+lgpo /parse /u $userPolicy | Out-File $userPolicyText
