@@ -314,32 +314,34 @@ if ($All -or $Settings) {
     }
 
     # Import GPO
-    if (!(Get-Command lgpo -ErrorAction SilentlyContinue)) {
-        $gpoDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) "data\gpo")
-        $lgpoExeDirectory = (Join-Path $gpoDirectory "LGPO_30")
-        if (!(Test-Path $lgpoExeDirectory)) {
-            Write-Warning "LGPO not found"
-            $lgoArchive = (Join-Path $gpoDirectory "lgpo.zip")
-            $lgpoUrl = 'https://download.microsoft.com/download/8/5/C/85C25433-A1B0-4FFA-9429-7E023E7DA8D8/LGPO.zip'
-            Write-Host "Retrieving lgpo from ${lgpoUrl}..."
-            Invoke-WebRequest -Uri $lgpoUrl -UseBasicParsing -OutFile $lgoArchive
-            Write-Host "Extracting ${lgoArchive} in ${$gpoDirectory}..."
-            Expand-Archive -Path $lgoArchive -DestinationPath $gpoDirectory -Force
-            Write-Host "Extracted ${lgoArchive}"
+    if ($Packages.Contains("Desktop") {
+        if (!(Get-Command lgpo -ErrorAction SilentlyContinue)) {
+            $gpoDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) "data\gpo")
+            $lgpoExeDirectory = (Join-Path $gpoDirectory "LGPO_30")
+            if (!(Test-Path $lgpoExeDirectory)) {
+                Write-Warning "LGPO not found"
+                $lgoArchive = (Join-Path $gpoDirectory "lgpo.zip")
+                $lgpoUrl = 'https://download.microsoft.com/download/8/5/C/85C25433-A1B0-4FFA-9429-7E023E7DA8D8/LGPO.zip'
+                Write-Host "Retrieving lgpo from ${lgpoUrl}..."
+                Invoke-WebRequest -Uri $lgpoUrl -UseBasicParsing -OutFile $lgoArchive
+                Write-Host "Extracting ${lgoArchive} in ${$gpoDirectory}..."
+                Expand-Archive -Path $lgoArchive -DestinationPath $gpoDirectory -Force
+                Write-Host "Extracted ${lgoArchive}"
+            }
+            $env:PATH += ";${lgpoExeDirectory}"
         }
-        $env:PATH += ";${lgpoExeDirectory}"
-    }
-    if (Get-Command lgpo -ErrorAction SilentlyContinue) {
-        $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
-        if (Test-Path $userPolicyText) {
-            Write-Host "Importing policy text file ${userPolicyText}..."
-            lgpo /t $userPolicyText /v
-            gpupdate /Target:User /Force
+        if (Get-Command lgpo -ErrorAction SilentlyContinue) {
+            $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
+            if (Test-Path $userPolicyText) {
+                Write-Host "Importing policy text file ${userPolicyText}..."
+                lgpo /t $userPolicyText /v
+                gpupdate /Target:User /Force
+            } else {
+                Write-Warning "Policy text file ${userPolicyText} not found, exiting"
+            }
         } else {
-            Write-Warning "Policy text file ${userPolicyText} not found, exiting"
+            Write-Warning "LGPO not found. Please install by running 'choco install winsecuritybaseline' from an elevated shell, or downloading and installing it from https://www.microsoft.com/en-us/download/details.aspx?id=55319"
         }
-    } else {
-        Write-Warning "LGPO not found. Please install by running 'choco install winsecuritybaseline' from an elevated shell, or downloading and installing it from https://www.microsoft.com/en-us/download/details.aspx?id=55319"
     }
 }
 
