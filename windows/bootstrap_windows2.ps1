@@ -257,6 +257,7 @@ if ($All -or $Settings) {
     # Disable autostarts
     Get-ScheduledTask -TaskName ServerManager -ErrorAction SilentlyContinue | Disable-ScheduledTask | Out-Null
     Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name "Docker Desktop" -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name "KeePassXC" -ErrorAction SilentlyContinue
 
     # Show hidden files
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "Hidden" -Type DWord -Value 1
@@ -292,9 +293,12 @@ if ($All -or $Settings) {
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Name $bgInfoExe -Value  "^ DPIUNAWARE" -ErrorAction SilentlyContinue
         }
 
-        # Execute BGInfo regardless, as we just removed the wallpaper
         if ($bgInfoCommand) {
+            # Execute BGInfo regardless, as we just have removed the wallpaper
             Invoke-Expression $bgInfoCommand
+
+            # Schedule task to be run whenever user connects via RDP
+            schtasks.exe /create /f /rl HIGHEST /tn "BGInfo" /tr "$bgInfoCommand" /SC ONEVENT /EC Security /MO "*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and EventID=4672]]"
         }
     }
 
@@ -307,6 +311,37 @@ if ($All -or $Settings) {
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "FilterAdministratorToken" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "PromptOnSecureDesktop" -Type DWord -Value 1   
+    }
+
+    # Import GPO
+    if ($Packages.Contains("Desktop") {
+        if (!(Get-Command lgpo -ErrorAction SilentlyContinue)) {
+            $gpoDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) "data\gpo")
+            $lgpoExeDirectory = (Join-Path $gpoDirectory "LGPO_30")
+            if (!(Test-Path $lgpoExeDirectory)) {
+                Write-Warning "LGPO not found"
+                $lgoArchive = (Join-Path $gpoDirectory "lgpo.zip")
+                $lgpoUrl = 'https://download.microsoft.com/download/8/5/C/85C25433-A1B0-4FFA-9429-7E023E7DA8D8/LGPO.zip'
+                Write-Host "Retrieving lgpo from ${lgpoUrl}..."
+                Invoke-WebRequest -Uri $lgpoUrl -UseBasicParsing -OutFile $lgoArchive
+                Write-Host "Extracting ${lgoArchive} in ${$gpoDirectory}..."
+                Expand-Archive -Path $lgoArchive -DestinationPath $gpoDirectory -Force
+                Write-Host "Extracted ${lgoArchive}"
+            }
+            $env:PATH += ";${lgpoExeDirectory}"
+        }
+        if (Get-Command lgpo -ErrorAction SilentlyContinue) {
+            $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
+            if (Test-Path $userPolicyText) {
+                Write-Host "Importing policy text file ${userPolicyText}..."
+                lgpo /t $userPolicyText /v
+                gpupdate /Target:User /Force
+            } else {
+                Write-Warning "Policy text file ${userPolicyText} not found, exiting"
+            }
+        } else {
+            Write-Warning "LGPO not found. Please install by running 'choco install winsecuritybaseline' from an elevated shell, or downloading and installing it from https://www.microsoft.com/en-us/download/details.aspx?id=55319"
+        }
     }
 }
 
