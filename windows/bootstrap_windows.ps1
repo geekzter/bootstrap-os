@@ -82,7 +82,7 @@ if ($gitPath) {
 if (!(Test-Path $bootstrapDirectory)) {
     Set-Location $repoDirectory    
     Write-Host "Cloning $Repository into $repoDirectory..."
-    git clone -b gpo $Repository   
+    git clone $Repository   
 } else {
     # git update if repo already exists
     Set-Location $bootstrapDirectory
