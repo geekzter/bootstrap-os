@@ -296,6 +296,9 @@ if ($All -or $Settings) {
         # Execute BGInfo regardless, as we just removed the wallpaper
         if ($bgInfoCommand) {
             Invoke-Expression $bgInfoCommand
+
+            # Schedule task to be run when user connects via RDP
+            schtasks.exe /create /f /rl HIGHEST /tn "BGInfo" /tr "$bgInfoCommand" /SC ONEVENT /EC Security /MO "*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and EventID=4672]]"
         }
     }
 
