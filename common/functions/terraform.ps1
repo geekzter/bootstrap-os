@@ -478,7 +478,8 @@ function Taint-TerraformResource (
 ) {
     process {
         foreach ($res in $Resource) {
-            Invoke-TerraformCommand "terraform taint $res"
+            $res = ($res -replace "`"","`\`"")
+            Invoke-TerraformCommand "terraform taint '$res'"
         }
     }
 }
