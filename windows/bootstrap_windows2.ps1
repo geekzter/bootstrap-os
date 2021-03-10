@@ -293,11 +293,11 @@ if ($All -or $Settings) {
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Name $bgInfoExe -Value  "^ DPIUNAWARE" -ErrorAction SilentlyContinue
         }
 
-        # Execute BGInfo regardless, as we just removed the wallpaper
         if ($bgInfoCommand) {
+            # Execute BGInfo regardless, as we just have removed the wallpaper
             Invoke-Expression $bgInfoCommand
 
-            # Schedule task to be run when user connects via RDP
+            # Schedule task to be run whenever user connects via RDP
             schtasks.exe /create /f /rl HIGHEST /tn "BGInfo" /tr "$bgInfoCommand" /SC ONEVENT /EC Security /MO "*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and EventID=4672]]"
         }
     }
