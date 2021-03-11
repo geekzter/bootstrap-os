@@ -14,13 +14,13 @@ function global:Prompt {
         # Use ~ for home directory in prompt
         $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
         # Don't overwrite the title set in iTerm2/Windows Terminal
-        $GitPromptSettings.EnableWindowTitle = $null
+        $GitPromptSettings.WindowTitle = $null
         if (IsElevated) {
             $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
         } else {
             $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
         }
-        & $GitPromptScriptBlock
+        $prompt = (& $GitPromptScriptBlock)
     } else {
         $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"
 
@@ -43,9 +43,8 @@ function global:Prompt {
             $host.ui.rawui.WindowTitle += " - "
             $prompt += "$('>' * ($nestedPromptLevel + 1)) ";
         }
-
-        $prompt
     }
+    if ($prompt) { "$prompt" } else { " " }
 }
 
 # Only print when not in a nested shell, tmux session, or Codespace
