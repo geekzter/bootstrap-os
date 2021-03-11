@@ -314,7 +314,7 @@ if ($All -or $Settings) {
     }
 
     # Import GPO
-    if ($Packages.Contains("Desktop")) {
+    if ($All -or $Packages.Contains("Developer")) {
         if (!(Get-Command lgpo -ErrorAction SilentlyContinue)) {
             $gpoDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) "data\gpo")
             $lgpoExeDirectory = (Join-Path $gpoDirectory "LGPO_30")
