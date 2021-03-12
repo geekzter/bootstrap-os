@@ -26,6 +26,10 @@ function Connect-TmuxSession (
     if (!$prexistingSession) {
         # Start session, but do not yet attach
         tmux new -d -s $Workspace
+        # Inherit PATH
+        Write-Verbose "`$env:PATH='${env:PATH}'"
+        tmux send-keys -t $Workspace "`$env:PATH='${env:PATH}'" Enter
+
         # Set Terraform workspace to the name of the session
         Write-Verbose "`$env:TF_WORKSPACE='$Workspace'"
         tmux send-keys -t $Workspace "`$env:TF_WORKSPACE='$Workspace'" Enter
