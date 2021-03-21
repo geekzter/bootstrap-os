@@ -23,29 +23,37 @@ function prompt
         # Use ~ for home directory in prompt
         $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
         # Don't overwrite the title set in iTerm2/Windows Terminal
-        $GitPromptSettings.EnableWindowTitle = $null
+        $GitPromptSettings.WindowTitle = $null
         if (IsElevated) {
             $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
         } else {
             $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
         }
-        & $GitPromptScriptBlock
+        $prompt = (& $GitPromptScriptBlock)
     } else {
-		$host.ui.rawui.WindowTitle = "Windows PowerShell $($host.Version.ToString())"
+        $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"
 
-		$path = $(Get-Location).Path
+        if ($executionContext.SessionState.Path.CurrentLocation.Path.StartsWith($home)) {
+            $path = $executionContext.SessionState.Path.CurrentLocation.Path.Replace($home,"~")
+        } else {
+            $path = $executionContext.SessionState.Path.CurrentLocation.Path
+        }
 
-		Write-Host $path "" -NoNewline
-		if (IsElevated) {
-			$host.ui.rawui.WindowTitle += " # "
-			Write-Host "#" -nonewline
-		} else {
-			$host.ui.rawui.WindowTitle += " - "
-			Write-Host "$" -nonewline
-		}
-		$host.ui.rawui.WindowTitle += $path
-		return " "
+        $host.ui.rawui.WindowTitle += "$($executionContext.SessionState.Path.CurrentLocation.Path)"
+        $branch = $(git rev-parse --abbrev-ref HEAD 2>$null)
+        $prompt = $path
+        if ($branch) {
+            $prompt += ":$branch"
+        }
+        if (IsElevated) {
+            $host.ui.rawui.WindowTitle += " # "
+            $prompt += "$('#' * ($nestedPromptLevel + 1)) ";
+        } else {
+            $host.ui.rawui.WindowTitle += " - "
+            $prompt += "$('>' * ($nestedPromptLevel + 1)) ";
+        }
     }
+    if ($prompt) { "$prompt" } else { " " }
 }
 #endregion
 
