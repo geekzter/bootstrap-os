@@ -317,6 +317,7 @@ if ($All -or $Settings) {
     if ($All -or $Packages.Contains("Developer")) {
         if (!(Get-Command lgpo -ErrorAction SilentlyContinue)) {
             $gpoDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) "data\gpo")
+            $null = New-Item -ItemType Directory -Force -Path $gpoDirectory 
             $lgpoExeDirectory = (Join-Path $gpoDirectory "LGPO_30")
             if (!(Test-Path $lgpoExeDirectory)) {
                 Write-Warning "LGPO not found"
