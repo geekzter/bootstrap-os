@@ -38,8 +38,6 @@ function Connect-TmuxSession (
 }
 Set-Alias ct Connect-TmuxSession
 
-
-
 function End-TmuxSession (
     [string]$Workspace
 ) {
@@ -75,25 +73,18 @@ function Init-TmuxSession (
     $terraformDirectory = Find-TerraformDirectory
     $terraformWorkspaceVars = (Join-Path $terraformDirectory "${Workspace}.tfvars")
     if (Test-Path $terraformWorkspaceVars) {
-        # $re = [regex]"client_id|client_secret|subscription_id|tenant_id"
-        $re = [regex]"(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)"
-        $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars | Select-String "(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)") # Match relevant lines first
-        # $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars -Raw | Select-String $re.ToString()) # Match relevant lines first
+        # Match relevant lines first
+        $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars | Select-String "(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)")
         if ($terraformVarsFileContent) {
-            $re = [regex]"client_id|client_secret|subscription_id|tenant_id"
-            # $envScript = $re.Replace($terraformVarsFileContent,$regexCallback)
-            $envScript = $re.Replace((Get-Content $terraformWorkspaceVars | Select-String $re.ToString()),$regexCallback)
-            # $envScript = $re.Replace((Get-Content $terraformWorkspaceVars -Raw | Select-String $re.ToString()),$regexCallback)
-            # $envScript = $re.Replace((Get-Content $terraformWorkspaceVars | select-string "^[^#]*=" | Select-String $re.ToString()),$regexCallback)
-            # $envScript = ($envScript | Select-String "(?m)^[^#]*=") # Hide commented lines
+            $envScript = [regex]::replace($terraformVarsFileContent,"(client_id|client_secret|subscription_id|tenant_id)",$regexCallback,[System.Text.RegularExpressions.RegexOptions]::Multiline)
             if ($envScript) {
                 Write-Verbose $envScript
                 Invoke-Expression $envScript
             } else {
-                Write-Verbose "Nothing to set"
+                Write-Warning "[regex]::replace removed all content from script"
             }
         } else {
-            Write-Verbose "No matches for '$($re.ToString())'"
+            Write-Verbose "No matches"
         }
     }
     Get-ChildItem -Path Env: -Recurse -Include $script:environmentVariableNames | Sort-Object -Property Name
