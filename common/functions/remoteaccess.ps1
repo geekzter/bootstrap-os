@@ -26,13 +26,10 @@ function Connect-TmuxSession (
     if (!$prexistingSession) {
         # Start session, but do not yet attach
         tmux new -d -s $Workspace
-        # Inherit PATH
-        Write-Verbose "`$env:PATH='${env:PATH}'"
-        tmux send-keys -t $Workspace "`$env:PATH='${env:PATH}'" Enter
 
-        # Set Terraform workspace to the name of the session
+        # Initialize session
         Write-Verbose "`$env:TF_WORKSPACE='$Workspace'"
-        tmux send-keys -t $Workspace "`$env:TF_WORKSPACE='$Workspace'" Enter
+        tmux send-keys -t $Workspace "Init-TmuxSession -Workspace $Workspace -Path ${env:PATH}" Enter
     }
 
     # Attach to session
@@ -40,6 +37,8 @@ function Connect-TmuxSession (
 
 }
 Set-Alias ct Connect-TmuxSession
+
+
 
 function End-TmuxSession (
     [string]$Workspace
@@ -51,3 +50,53 @@ function End-TmuxSession (
     }
 }
 Set-Alias et End-TmuxSession
+
+function Init-TmuxSession (
+    [string]$Workspace,
+    [string]$Path
+)
+{
+    $script:environmentVariableNames = @()
+
+    # Inherit PATH
+    $env:PATH = $Path
+    $script:environmentVariableNames += "PATH"
+
+    # Set Terraform workspace to the name of the session
+    $env:TF_WORKSPACE = $Workspace
+    $script:environmentVariableNames += "TF_WORKSPACE"
+
+    $regexCallback = {
+        $terraformEnvironmentVariableName = "ARM_$($args[0])".ToUpper()
+        $script:environmentVariableNames += $terraformEnvironmentVariableName
+        "`n`$env:${terraformEnvironmentVariableName}"
+    }
+
+    $terraformDirectory = Find-TerraformDirectory
+    $terraformWorkspaceVars = (Join-Path $terraformDirectory "${Workspace}.tfvars")
+    if (Test-Path $terraformWorkspaceVars) {
+        # $re = [regex]"client_id|client_secret|subscription_id|tenant_id"
+        $re = [regex]"(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)"
+        $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars | Select-String "(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)") # Match relevant lines first
+        # $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars -Raw | Select-String $re.ToString()) # Match relevant lines first
+        if ($terraformVarsFileContent) {
+            $re = [regex]"client_id|client_secret|subscription_id|tenant_id"
+            # $envScript = $re.Replace($terraformVarsFileContent,$regexCallback)
+            $envScript = $re.Replace((Get-Content $terraformWorkspaceVars | Select-String $re.ToString()),$regexCallback)
+            # $envScript = $re.Replace((Get-Content $terraformWorkspaceVars -Raw | Select-String $re.ToString()),$regexCallback)
+            # $envScript = $re.Replace((Get-Content $terraformWorkspaceVars | select-string "^[^#]*=" | Select-String $re.ToString()),$regexCallback)
+            # $envScript = ($envScript | Select-String "(?m)^[^#]*=") # Hide commented lines
+            if ($envScript) {
+                Write-Verbose $envScript
+                Invoke-Expression $envScript
+            } else {
+                Write-Verbose "Nothing to set"
+            }
+        } else {
+            Write-Verbose "No matches for '$($re.ToString())'"
+        }
+    }
+    Get-ChildItem -Path Env: -Recurse -Include $script:environmentVariableNames | Sort-Object -Property Name
+
+    Write-Debug "Environment variables: $script:environmentVariableNames"
+}
