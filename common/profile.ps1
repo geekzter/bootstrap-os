@@ -57,6 +57,7 @@ if ($host.Name -eq 'ConsoleHost')
     # Requires PSReadLine 2.0
     #Set-Theme Agnoster
     #Set-Theme Paradox
+    Import-Module Terminal-Icons
 }
 
 # Linux & macOS only:

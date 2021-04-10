@@ -21,6 +21,7 @@ if (-not $NoPackages) {
     AddorUpdateModule Posh-Git
     AddorUpdateModule PSReadLine
     AddorUpdateModule SqlServer
+    AddorUpdateModule Terminal-Icons
     AddorUpdateModule VSTeam
     if ($IsWindows) {
         AddorUpdateModule WindowsCompatibility
