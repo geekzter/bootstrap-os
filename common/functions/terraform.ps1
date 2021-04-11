@@ -186,6 +186,15 @@ function Erase-TerraformAzureResources {
                 Start-Job -Name "Remove ResourceGroups" -ScriptBlock {az resource delete --ids $args} -ArgumentList $resourceGroupIDs | Out-Null
             }
     
+            # Remove other tagged resources
+            # Async operation, as they have unique suffixes that won't clash with new deployments
+            Write-Host "Removing '${Repository}' resources (async)..."
+            $resourceIDs = $(az resource list --query "$tagQuery" -o tsv)
+            if ($resourceIDs -and $resourceIDs.Length -gt 0) {
+                Write-Verbose "Starting job 'az resource delete --ids $resourceIDs'"
+                Start-Job -Name "Remove Resources" -ScriptBlock {az resource delete --ids $args} -ArgumentList $resourceIDs | Out-Null
+            }
+    
             # Remove resources in the NetworkWatcher resource group
             Write-Host "Removing '${Repository}' network watchers from shared resource group 'NetworkWatcherRG' (async)..."
             $resourceIDs = $(az resource list -g NetworkWatcherRG --query "$tagQuery" -o tsv)
