@@ -1,6 +1,37 @@
 {
     "$schema": "https://aka.ms/terminal-profiles-schema",
     "defaultProfile": "{7bb542a2-6076-46f9-a55e-3ba2f5b792fb}",
+    // Add custom keybindings to this array.
+    // To unbind a key combination from your defaults.json, set the command to "unbound".
+    // To learn more about keybindings, visit https://aka.ms/terminal-keybindings
+    "keybindings": 
+    [
+        // Copy and paste are bound to Ctrl+Shift+C and Ctrl+Shift+V in your defaults.json.
+        // These two lines additionally bind them to Ctrl+C and Ctrl+V.
+        // To learn more about selection, visit https://aka.ms/terminal-selection
+        {
+            "command": 
+            {
+                "action": "copy",
+                "singleLine": false
+            },
+            "keys": "ctrl+c"
+        },
+        {
+            "command": "paste",
+            "keys": "ctrl+v"
+        },
+        // Press Ctrl+Shift+F to open the search box
+        {
+            "command": "find",
+            "keys": "ctrl+f"
+        },
+        // Open New Tab
+        {
+            "command": "newTab",
+            "keys": "ctrl+t"
+        }
+    ],
     "profiles": 
     {
         "defaults": {},
@@ -580,23 +611,5 @@
             "white": "#C0C0C0",
             "yellow": "#808000"
         }
-    ],
-
-    // Add custom keybindings to this array.
-    // To unbind a key combination from your defaults.json, set the command to "unbound".
-    // To learn more about keybindings, visit https://aka.ms/terminal-keybindings
-    "keybindings":
-    [
-        // Copy and paste are bound to Ctrl+Shift+C and Ctrl+Shift+V in your defaults.json.
-        // These two lines additionally bind them to Ctrl+C and Ctrl+V.
-        // To learn more about selection, visit https://aka.ms/terminal-selection
-        { "command": {"action": "copy", "singleLine": false }, "keys": "ctrl+c" },
-        { "command": "paste", "keys": "ctrl+v" },
- 
-        // Press Ctrl+Shift+F to open the search box
-        { "command": "find", "keys": "ctrl+f" },
- 
-        // Open New Tab
-        {"command":"newTab", "keys": "ctrl+t"}
     ]
 }
