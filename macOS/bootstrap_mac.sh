@@ -37,6 +37,18 @@ if test ! $(which tfenv); then
 fi
 tfenv install latest
 
+# PATH
+echo "Updating /etc/paths.d..."
+if [ ! -f /etc/paths.d/localbin ]; then
+    sudo mkdir -p /etc/paths.d
+    # This should include brew packages in the PATH for all shells
+    echo /usr/local/bin | sudo tee /etc/paths.d/localbin
+fi
+if [[ ! "$(launchctl getenv PATH)" == *"/usr/local/bin"* ]]; then
+    echo "Launch Control PATH does not contain /usr/local/bin, updating..."
+    sudo launchctl config user path "/usr/local/bin:$(launchctl getenv PATH)"
+fi
+
 # Let PowerShell Core configure itself
 if test ! $(which pwsh); then
     echo "PowerShell Core (pwsh) not found, skipping setup"
