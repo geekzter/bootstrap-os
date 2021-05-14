@@ -321,7 +321,7 @@ function Get-TerraformInfo {
             Write-Information "Executing graph query:`n$resourceQuery"
             Write-Host "`nAzure resources:`n" -ForegroundColor Green
             az extension add --name resource-graph 2>$null
-            az graph query -q $resourceQuery -o table
+            az graph query -q $resourceQuery --query "data" -o table
         }
     } finally {
         PopFrom-TerraformDirectory 
