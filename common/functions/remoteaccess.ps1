@@ -29,7 +29,7 @@ function Connect-TmuxSession (
 
         # Initialize session
         Write-Verbose "`$env:TF_WORKSPACE='$Workspace'"
-        tmux send-keys -t $Workspace "Init-TmuxSession -Workspace $Workspace -Path ${env:PATH}" Enter
+        tmux send-keys -t $Workspace "Init-TmuxSession -Workspace $Workspace -Path '${env:PATH}'" Enter
     }
 
     # Attach to session
@@ -60,15 +60,15 @@ function Init-TmuxSession (
     $env:PATH = $Path
     $script:environmentVariableNames += "PATH"
 
-    # Set Terraform workspace to the name of the session
-    $env:TF_WORKSPACE = $Workspace
-    $script:environmentVariableNames += "TF_WORKSPACE"
-
     $regexCallback = {
         $terraformEnvironmentVariableName = "ARM_$($args[0])".ToUpper()
         $script:environmentVariableNames += $terraformEnvironmentVariableName
         "`n`$env:${terraformEnvironmentVariableName}"
     }
+
+    # Set Terraform workspace to the name of the session
+    $env:TF_WORKSPACE = $Workspace
+    $script:environmentVariableNames += "TF_WORKSPACE"
 
     $terraformDirectory = Find-TerraformDirectory
     $terraformWorkspaceVars = (Join-Path $terraformDirectory "${Workspace}.tfvars")
