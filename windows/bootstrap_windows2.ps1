@@ -332,13 +332,20 @@ if ($All -or $Settings) {
             $env:PATH += ";${lgpoExeDirectory}"
         }
         if (Get-Command lgpo -ErrorAction SilentlyContinue) {
-            $userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
-            if (Test-Path $userPolicyText) {
-                Write-Host "Importing policy text file ${userPolicyText}..."
-                lgpo /t $userPolicyText /v
-                gpupdate /Target:User /Force
-            } else {
-                Write-Warning "Policy text file ${userPolicyText} not found, exiting"
+            foreach ($policyScope in @("user","machine")) {
+                $policyText = (Join-Path $PSScriptRoot "${policyScope}-policy.txt")
+                if (Test-Path $policyText) {
+                    Write-Host "Importing policy text file ${policyText}..."
+                    lgpo /t $policyText /v
+                    if ($policyScope -eq "user") {
+                        $policyTarget = "User"
+                    } else {
+                        $policyTarget = "Computer"
+                    }
+                    gpupdate /Target:${policyTarget} /Force
+                } else {
+                    Write-Warning "Policy text file ${policyText} not found, skipping import"
+                }
             }
         } else {
             Write-Warning "LGPO not found. Please install by running 'choco install winsecuritybaseline' from an elevated shell, or downloading and installing it from https://www.microsoft.com/en-us/download/details.aspx?id=55319"

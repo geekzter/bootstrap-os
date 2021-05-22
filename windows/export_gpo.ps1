@@ -32,14 +32,19 @@ lgpo /b $exportRoot
 $exportDirectory = (Get-ChildItem $exportRoot | Sort-Object -Property LastWriteTime -Descending | Where-Object -Property Name -Match '(?im)^[{(]?[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?$' | Select-Object -First 1)
 Write-Host "Local Policy exported to ${exportDirectory}..."
 
-$userPolicy = (Join-Path $exportDirectory.FullName "DomainSysvol\GPO\User\registry.pol")
-if (!(Test-Path $userPolicy)) {
-    Write-Warning "Policy ${userPolicy} not found, exiting"
-    exit
-}
-$savedPolicy = (Join-Path $PSScriptRoot "user.pol")
-$null = Copy-Item -Path $userPolicy -Destination $savedPolicy -Force
+# User & Machine policies
+foreach ($policyScope in @("user","machine")) {
+    Write-Host "Processing ${policyScope} policy..."
 
-$userPolicyText = (Join-Path $PSScriptRoot "user-policy.txt")
-Write-Host "Parsing policy file ${userPolicy} to ${userPolicyText}..."
-lgpo /parse /u $userPolicy | Out-File $userPolicyText
+    $policy = (Join-Path $exportDirectory.FullName "DomainSysvol\GPO\User\registry.pol")
+    if (!(Test-Path $policy)) {
+        Write-Warning "Policy ${policy} not found, exiting"
+        exit
+    }
+    $savedPolicy = (Join-Path $PSScriptRoot "${policyScope}.pol")
+    $null = Copy-Item -Path $policy -Destination $savedPolicy -Force
+
+    $policyText = (Join-Path $PSScriptRoot "${policyScope}-policy.txt")
+    Write-Host "Parsing policy file ${policy} to ${policyText}..."
+    lgpo /parse /u $policy | Out-File $policyText
+}

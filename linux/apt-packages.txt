@@ -27,7 +27,6 @@ mc
 msodbcsql17
 mssql-tools
 nano
-nmap
 node-typescript
 powershell
 sed
