@@ -36,7 +36,7 @@ Write-Host "Local Policy exported to ${exportDirectory}..."
 foreach ($policyScope in @("user","machine")) {
     Write-Host "Processing ${policyScope} policy..."
 
-    $policy = (Join-Path $exportDirectory.FullName "DomainSysvol\GPO\User\registry.pol")
+    $policy = (Join-Path $exportDirectory.FullName "DomainSysvol\GPO\${policyScope}\registry.pol")
     if (!(Test-Path $policy)) {
         Write-Warning "Policy ${policy} not found, exiting"
         exit
@@ -45,6 +45,7 @@ foreach ($policyScope in @("user","machine")) {
     $null = Copy-Item -Path $policy -Destination $savedPolicy -Force
 
     $policyText = (Join-Path $PSScriptRoot "${policyScope}-policy.txt")
+    $lgpoPolicySwitch = $policyScope.Substring(0,1).ToLower()
     Write-Host "Parsing policy file ${policy} to ${policyText}..."
-    lgpo /parse /u $policy | Out-File $policyText
+    lgpo /parse /$lgpoPolicySwitch $policy | Out-File $policyText
 }
