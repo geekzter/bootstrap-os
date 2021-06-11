@@ -6,7 +6,7 @@ lsb-release
 wget
 ansible
 azure-cli
-azure-functions-core-tools
+azure-functions-core-tools-3
 blobfuse
 coreutils
 dnsutils
