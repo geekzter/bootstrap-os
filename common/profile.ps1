@@ -52,12 +52,18 @@ $printMessages = (($nestedPromptLevel -eq 0) -and $($env:TERM -notmatch "^screen
 
 if ($host.Name -eq 'ConsoleHost')
 {
-    Import-Module posh-git
-    #Import-Module oh-my-posh
+    if (Get-InstalledModule posh-git -ErrorAction SilentlyContinue) {
+        Import-Module posh-git
+    }
+    # if (Get-InstalledModule oh-my-posh -ErrorAction SilentlyContinue) {
+    #     Import-Module oh-my-posh
+    # }
     # Requires PSReadLine 2.0
     #Set-Theme Agnoster
     #Set-Theme Paradox
-    Import-Module Terminal-Icons
+    if (Get-InstalledModule Terminal-Icons -ErrorAction SilentlyContinue) {
+        Import-Module Terminal-Icons
+    }
 }
 
 # Linux & macOS only:
