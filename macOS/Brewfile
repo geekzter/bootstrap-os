@@ -37,11 +37,13 @@ cask "multimc"
 cask "owasp-zap"
 cask "postman"
 cask "powershell"
+cask "slack"
 cask "unity"
 cask "unity-hub"
 cask "visual-studio"
 cask "visual-studio-code"
 cask "vlc"
+#cask "zoom"
 
 # Packages
 brew "ansible"
