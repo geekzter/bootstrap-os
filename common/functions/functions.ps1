@@ -1,4 +1,3 @@
-
 function AddorUpdateModule (
     [parameter(Mandatory=$true)][string]$ModuleName,
     [parameter(Mandatory=$false)][string]$DesiredVersion,
@@ -48,6 +47,20 @@ function AddorUpdateModule (
         } else {
             Write-Host "Installing PowerShell Core $moduleName module..."
             Install-Module $moduleName -Force -SkipPublisherCheck -AcceptLicense -Scope $scope -AllowClobber:$AllowClobber
+        }
+    }
+}
+function Import-InstalledModule (
+    [parameter(Mandatory=$true)][string]$ModuleName
+) {
+    if (Get-Module $ModuleName -ErrorAction SilentlyContinue) {
+        Write-Verbose "module ${ModuleName} already imported"
+    } else {
+        Write-Verbose "Getting module ${ModuleName} installation status..."
+        # if (Get-InstalledModule $ModuleName -ErrorAction SilentlyContinue) {
+        if (Get-Module -ListAvailable -Name $ModuleName) {
+            Write-Verbose "Importing module ${ModuleName}..."
+            Import-Module $ModuleName
         }
     }
 }

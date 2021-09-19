@@ -1,6 +1,7 @@
 #!/usr/bin/env pwsh
 
 # Define Functions
+Write-Verbose "Defining functions..."
 $functionsPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "functions")
 Get-ChildItem $functionsPath -filter "*.ps1" | ForEach-Object {
     Write-Host "$($_.FullName) : loaded"
@@ -8,6 +9,7 @@ Get-ChildItem $functionsPath -filter "*.ps1" | ForEach-Object {
 }
 
 # Define prompt
+Write-Verbose "Defining prompt..."
 function global:Prompt {
     if ($GitPromptScriptBlock) {
         # Use Posh-Git: https://github.com/dahlbyk/posh-git/wiki/Customizing-Your-PowerShell-Prompt
@@ -52,22 +54,18 @@ $printMessages = (($nestedPromptLevel -eq 0) -and $($env:TERM -notmatch "^screen
 
 if ($host.Name -eq 'ConsoleHost')
 {
-    if (Get-InstalledModule posh-git -ErrorAction SilentlyContinue) {
-        Import-Module posh-git
-    }
-    # if (Get-InstalledModule oh-my-posh -ErrorAction SilentlyContinue) {
-    #     Import-Module oh-my-posh
-    # }
+    Import-InstalledModule posh-git
+    # Import-InstalledModule oh-my-posh
     # Requires PSReadLine 2.0
     #Set-Theme Agnoster
     #Set-Theme Paradox
-    if (Get-InstalledModule Terminal-Icons -ErrorAction SilentlyContinue) {
-        Import-Module Terminal-Icons
-    }
+    Import-InstalledModule Terminal-Icons
 }
 
 # Linux & macOS only:
 if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and ($IsLinux -or $IsMacOS)) {
+    Write-Verbose "Updating PATH..."
+
     # Manage PATH environment variable
     [System.Collections.ArrayList]$pathList = $env:PATH.Split(":")
     if (!$pathList.Contains("/usr/local/bin")) {
@@ -97,6 +95,7 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
 }
 
 # Source environment variables from ~/.config/powershell/environment.ps1
+Write-Verbose "Sourcing environment.ps1..."
 $environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
 if (Test-Path -Path $environmentPath) {
     . $environmentPath
