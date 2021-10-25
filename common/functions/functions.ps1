@@ -78,10 +78,74 @@ function ChangeTo-Directory (
     }
 }
 
+function ChangeTo-GrandGrandParent {
+    Push-Location (Join-Path .. .. ..)
+}
+Set-Alias .... ChangeTo-GrandGrandParent
+
 function ChangeTo-GrandParent {
     Push-Location (Join-Path .. ..)
 }
 Set-Alias ... ChangeTo-GrandParent
+
+function ChangeTo-GoogleDrive () {
+    if (!$IsMacOS) {
+        Write-Warning "Not yet implemented for not available on $($PSVersionTable.OS)"
+        return
+    }
+    $startLocation = (Get-Location).Path
+
+    if (Test-Path "/Volumes/GoogleDrive") {
+        Push-Location "/Volumes/GoogleDrive"
+    }
+
+    if ((Get-Location).Path -ieq $startLocation) {
+        Write-Warning "Google Drive directory not found"
+    }
+}
+Set-Alias cdg ChangeTo-GoogleDrive
+
+function ChangeTo-iCloudDrive () {
+    $startLocation = (Get-Location).Path
+
+    if (!$IsMacOS) {
+        if (Test-Path "~/Library/Mobile Documents/com~apple~CloudDocs") {
+            Push-Location "~/Library/Mobile Documents/com~apple~CloudDocs"
+        }
+    }
+    if ($IsWindows) {
+        if (Test-Path "$HOME\iCloudDrive") {
+            Push-Location "$HOME\iCloudDrive"
+        }
+    }
+
+    if ((Get-Location).Path -ieq $startLocation) {
+        Write-Warning "iCloud Drive directory not found"
+    }
+}
+Set-Alias cdi ChangeTo-iCloudDrive
+
+function ChangeTo-OneDrive () {
+    $startLocation = (Get-Location).Path
+
+    if ($IsMacOS) {
+        if (Test-Path ~/Library/CloudStorage/OneDrive) {
+            Push-Location ~/Library/CloudStorage/OneDrive
+        } if (Test-Path ~/Library/CloudStorage/OneDrive*) {
+            Push-Location (Get-ChildItem ~/Library/CloudStorage -Filter OneDrive* -Directory | Select-Object -First 1)
+        }
+    }
+    if ($IsWindows) {
+        if ($env:OneDrive) {
+            Push-Location "$env:OneDrive"
+        }
+    }
+
+    if ((Get-Location).Path -ieq $startLocation) {
+        Write-Warning "OneDrive directory not found"
+    }
+}
+Set-Alias cdo ChangeTo-OneDrive
 
 function ChangeTo-Previous {
     Pop-Location
