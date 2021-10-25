@@ -88,14 +88,58 @@ function ChangeTo-GrandParent {
 }
 Set-Alias ... ChangeTo-GrandParent
 
-function ChangeTo-iCloudDrive () {
+function ChangeTo-GoogleDrive () {
     if (!$IsMacOS) {
-        Write-Warning "iCloud not available on $($PSVersionTable.OS)"
+        Write-Warning "Not yet implemented for not available on $($PSVersionTable.OS)"
         exit
     }
-    Push-Location "~/Library/Mobile Documents/com~apple~CloudDocs"
+    $startLocation = (Get-Location).Path
+
+    if (Test-Path "/Volumes/GoogleDrive") {
+        Push-Location "/Volumes/GoogleDrive"
+    }
+
+    if ((Get-Location).Path -ieq $startLocation) {
+        Write-Warning "Google Drive directory not found"
+    }
+}
+Set-Alias cdg ChangeTo-GoogleDrive
+
+function ChangeTo-iCloudDrive () {
+    if (!$IsMacOS) {
+        Write-Warning "Not yet implemented for not available on $($PSVersionTable.OS)"
+        exit
+    }
+    $startLocation = (Get-Location).Path
+
+    if (Test-Path "~/Library/Mobile Documents/com~apple~CloudDocs") {
+        Push-Location "~/Library/Mobile Documents/com~apple~CloudDocs"
+    }
+
+    if ((Get-Location).Path -ieq $startLocation) {
+        Write-Warning "iCloud Drive directory not found"
+    }
 }
 Set-Alias cdi ChangeTo-iCloudDrive
+
+function ChangeTo-OneDrive () {
+    if (!$IsMacOS) {
+        Write-Warning "Not yet implemented for not available on $($PSVersionTable.OS)"
+        exit
+    }
+    $startLocation = (Get-Location).Path
+
+    if (Test-Path ~/Library/CloudStorage/OneDrive) {
+        Push-Location ~/Library/CloudStorage/OneDrive
+    } if (Test-Path ~/Library/CloudStorage/OneDrive*) {
+        Push-Location (Get-ChildItem ~/Library/CloudStorage -Filter OneDrive* -Directory | Select-Object -First 1)
+    }
+
+    if ((Get-Location).Path -ieq $startLocation) {
+        Write-Warning "OneDrive directory not found"
+    }
+}
+Set-Alias cdo ChangeTo-OneDrive
 
 function ChangeTo-Previous {
     Pop-Location
