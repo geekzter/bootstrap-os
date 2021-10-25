@@ -78,10 +78,24 @@ function ChangeTo-Directory (
     }
 }
 
+function ChangeTo-GrandGrandParent {
+    Push-Location (Join-Path .. .. ..)
+}
+Set-Alias .... ChangeTo-GrandGrandParent
+
 function ChangeTo-GrandParent {
     Push-Location (Join-Path .. ..)
 }
 Set-Alias ... ChangeTo-GrandParent
+
+function ChangeTo-iCloudDrive () {
+    if (!$IsMacOS) {
+        Write-Warning "iCloud not available on $($PSVersionTable.OS)"
+        exit
+    }
+    Push-Location "~/Library/Mobile Documents/com~apple~CloudDocs"
+}
+Set-Alias cdi ChangeTo-iCloudDrive
 
 function ChangeTo-Previous {
     Pop-Location
