@@ -108,7 +108,7 @@ Set-Alias cdg ChangeTo-GoogleDrive
 function ChangeTo-iCloudDrive () {
     $startLocation = (Get-Location).Path
 
-    if (!$IsMacOS) {
+    if ($IsMacOS) {
         if (Test-Path "~/Library/Mobile Documents/com~apple~CloudDocs") {
             Push-Location "~/Library/Mobile Documents/com~apple~CloudDocs"
         }
