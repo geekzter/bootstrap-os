@@ -78,15 +78,21 @@ function ChangeTo-Directory (
     }
 }
 
-function ChangeTo-GrandGrandParent {
-    Push-Location (Join-Path .. .. ..)
-}
-Set-Alias .... ChangeTo-GrandGrandParent
+function ChangeTo-GitHubRepositoryRoot () {
+    $startLocation = (Get-Location).Path
 
-function ChangeTo-GrandParent {
-    Push-Location (Join-Path .. ..)
+    if (Test-Path ~/src/github) {
+        Push-Location "~/src/github"
+    }
+    if (Test-Path ~/source/github) {
+        Push-Location "~/source/github"
+    }
+
+    if ((Get-Location).Path -ieq $startLocation) {
+        Write-Warning "GitHUb repos root directory not found"
+    }
 }
-Set-Alias ... ChangeTo-GrandParent
+Set-Alias cdgh ChangeTo-GitHubRepositoryRoot
 
 function ChangeTo-GoogleDrive () {
     if (!$IsMacOS) {
@@ -104,6 +110,16 @@ function ChangeTo-GoogleDrive () {
     }
 }
 Set-Alias cdg ChangeTo-GoogleDrive
+
+function ChangeTo-GrandGrandParent {
+    Push-Location (Join-Path .. .. ..)
+}
+Set-Alias .... ChangeTo-GrandGrandParent
+
+function ChangeTo-GrandParent {
+    Push-Location (Join-Path .. ..)
+}
+Set-Alias ... ChangeTo-GrandParent
 
 function ChangeTo-iCloudDrive () {
     $startLocation = (Get-Location).Path
