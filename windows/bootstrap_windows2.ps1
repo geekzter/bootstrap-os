@@ -112,7 +112,7 @@ $osType = Get-ComputerInfo | Select-Object WindowsInstallationType -ExpandProper
 Write-Host "OS Type: $osType"
 try {
     $metadataContent = Invoke-WebRequest -Headers @{"Metadata"='true'} -Uri http://169.254.169.254/metadata/instance?api-version=2017-04-02 -UseBasicParsing -TimeOutSec 1 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Content
-} catch [System.Net.WebException],[System.IO.IOException] {
+} catch {
     # No metadata endpoint available, i.e. not running in the cloud
     $metadataContent = $null
 }
