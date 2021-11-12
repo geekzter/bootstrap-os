@@ -209,8 +209,8 @@ function Disable-Debug {
 Set-Alias debug- Disable-Debug
 
 function  Enable-Warning {
-	$global:ErrorPreference = "Continue"
-	Write-Host `$ErrorPreference = $global:ErrorPreference
+	$global:ErrorActionPreference = "Continue"
+	Write-Host `$ErrorActionPreference = $global:ErrorActionPreference
 	$global:WarningPreference = "Continue"
 	Write-Host `$WarningPreference = $global:WarningPreference
 	Write-Warning "Warning tracing enabled"
