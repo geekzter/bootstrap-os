@@ -26,7 +26,6 @@ fi
 brew update
 brew bundle
 brew upgrade
-brew cask upgrade
 
 # .NET tools
 dotnet tool update --global dotnet-ef
