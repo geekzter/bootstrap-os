@@ -17,14 +17,12 @@ if (-not $NoPackages) {
     #AddorUpdateModule MicrosoftPowerBIMgmt
     #AddorUpdateModule MicrosoftTeams
     AddorUpdateModule Oh-My-Posh
-    AddorUpdateModule Oh-My-Posh
     AddorUpdateModule Posh-Git
     # https://docs.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-72?view=powershell-7.2#separating-dsc-from-powershell-7-to-enable-future-improvements
     if ($PSVerSionTable.PSVersion -ge 7.2) {
         # The PSDesiredStateConfiguration module was removed from the PowerShell 7.2 package and is now published to the PowerShell Gallery
         AddorUpdateModule PSDesiredStateConfiguration
     }
-    Get-Module PSReadLine | Remove-Module
     AddorUpdateModule PSReadLine
     # https://docs.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-72?view=powershell-7.2#psreadline-21-predictive-intellisense
     $psReadLineOptionCommand = (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue)
