@@ -22,6 +22,8 @@ softwareupdate --all --install --force
 if test ! $(which brew); then
     echo "Installing homebrew..."
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/eric/.profile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 brew update
 brew bundle
