@@ -15,6 +15,7 @@ fi
 
 if [ ! -d "$(xcode-select -p)" ]; then 
     xcode-select --install
+    sudo xcodebuild -license accept
 fi
 softwareupdate --all --install --force
 
