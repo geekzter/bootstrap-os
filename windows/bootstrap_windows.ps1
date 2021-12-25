@@ -17,7 +17,8 @@ param (
     [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal", "None")][string[]]$Packages=@("Minimal"),
     [parameter(Mandatory=$false)][bool]$PowerShell=$false,
     [parameter(Mandatory=$false)][bool]$Settings=$true,
-    [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os"
+    [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os",
+    [parameter(Mandatory=$false)][string]$Branch="master" # $(git -C $PSScriptRoot rev-parse --abbrev-ref HEAD 2>$null || "master")
 ) 
 
 # Validation
@@ -83,6 +84,7 @@ if (!(Test-Path $bootstrapDirectory)) {
     Set-Location $repoDirectory    
     Write-Host "Cloning $Repository into $repoDirectory..."
     git clone $Repository   
+    git -C switch $repoDirectory/bootstrap-os $Branch
 } else {
     # git update if repo already exists
     Set-Location $bootstrapDirectory
