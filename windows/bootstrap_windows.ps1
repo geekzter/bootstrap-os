@@ -84,12 +84,14 @@ if (!(Test-Path $bootstrapDirectory)) {
     Set-Location $repoDirectory    
     Write-Host "Cloning $Repository into $repoDirectory..."
     git clone $Repository   
-    git -C switch $repoDirectory/bootstrap-os $Branch
 } else {
     # git update if repo already exists
     Set-Location $bootstrapDirectory
     Write-Host "Pulling $Repository in $bootstrapDirectory..."
     git pull
+}
+if ($Branch) {
+    git -C $bootstrapDirectory switch $Branch
 }
 $windowsBootstrapDirectory = Join-Path $bootstrapDirectory "windows"
 if (!(Test-Path $windowsBootstrapDirectory)) {
