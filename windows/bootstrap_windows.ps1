@@ -18,8 +18,11 @@ param (
     [parameter(Mandatory=$false)][bool]$PowerShell=$false,
     [parameter(Mandatory=$false)][bool]$Settings=$true,
     [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os",
-    [parameter(Mandatory=$false)][string]$Branch=$(git -C $PSScriptRoot rev-parse --abbrev-ref HEAD 2>$null || "master")
+    [parameter(Mandatory=$false)][string]$Branch=$(git -C $PSScriptRoot rev-parse --abbrev-ref HEAD 2>$null)
 ) 
+if (!$Branch) {
+    $Branch = "master"
+}
 
 # Validation
 if ($PSVersionTable.PSEdition -eq "Core") {
