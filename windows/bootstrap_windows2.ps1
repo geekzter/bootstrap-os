@@ -300,6 +300,16 @@ if ($All -or $Settings) {
             # Schedule task to be run whenever user connects via RDP
             schtasks.exe /create /f /rl HIGHEST /tn "BGInfo" /tr "$bgInfoCommand" /SC ONEVENT /EC Security /MO "*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and EventID=4672]]"
         }
+
+        # Install Apple US International keyboard layout
+        # https://github.com/geekzter/mac-us-international-keyboard-windows/files/7781158/0.0.1.zip
+        $keyboardLayountResponse = (Invoke-RestMethod -Uri https://api.github.com/repos/geekzter/mac-us-international-keyboard-windows/releases/latest)
+        if ($keyboardLayountResponse.assets.browser_download_url) {
+            Invoke-Webrequest -Uri $keyboardLayountResponse.assets.browser_download_url -OutFile ~\Downloads\keyboardLayout.zip -UseBasicParsing 
+            Expand-Archive -Path ~\Downloads\keyboardLayout.zip -DestinationPath $pipelineDirectory
+            New-Item -ItemType Directory -Path (Join-Path $([System.IO.Path]::GetTempPath()) $([System.Guid]::NewGuid())) | Select-Object -ExpandProperty FullName | Set-Variable setupDirectory
+            $setupDirectory\setup.exe /a
+        }
     }
 
     # Set up application settings
