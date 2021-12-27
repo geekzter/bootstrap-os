@@ -306,9 +306,10 @@ if ($All -or $Settings) {
         $keyboardLayountResponse = (Invoke-RestMethod -Uri https://api.github.com/repos/geekzter/mac-us-international-keyboard-windows/releases/latest)
         if ($keyboardLayountResponse.assets.browser_download_url) {
             Invoke-Webrequest -Uri $keyboardLayountResponse.assets.browser_download_url -OutFile ~\Downloads\keyboardLayout.zip -UseBasicParsing 
-            Expand-Archive -Path ~\Downloads\keyboardLayout.zip -DestinationPath $pipelineDirectory
-            New-Item -ItemType Directory -Path (Join-Path $([System.IO.Path]::GetTempPath()) $([System.Guid]::NewGuid())) | Select-Object -ExpandProperty FullName | Set-Variable setupDirectory
-            $setupDirectory\setup.exe /a
+            New-Item -ItemType Directory -Path (Join-Path $([System.IO.Path]::GetTempPath()) $([System.Guid]::NewGuid())) | Select-Object -ExpandProperty FullName | Set-Variable keyboardExtractDirectory
+            Expand-Archive -Path ~\Downloads\keyboardLayout.zip -DestinationPath $keyboardExtractDirectory
+            $keyboardSetupDirectory = Join-Path $keyboardExtractDirectory $($keyboardLayountResponse.assets.name -replace ".zip","")
+            . $keyboardSetupDirectory\setup.exe /a
         }
     }
 
