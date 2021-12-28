@@ -302,14 +302,15 @@ if ($All -or $Settings) {
         }
 
         # Install Apple US International keyboard layout
-        # https://github.com/geekzter/mac-us-international-keyboard-windows/files/7781158/0.0.1.zip
-        $keyboardLayountResponse = (Invoke-RestMethod -Uri https://api.github.com/repos/geekzter/mac-us-international-keyboard-windows/releases/latest)
-        if ($keyboardLayountResponse.assets.browser_download_url) {
-            Invoke-Webrequest -Uri $keyboardLayountResponse.assets.browser_download_url -OutFile ~\Downloads\keyboardLayout.zip -UseBasicParsing 
-            New-Item -ItemType Directory -Path (Join-Path $([System.IO.Path]::GetTempPath()) $([System.Guid]::NewGuid())) | Select-Object -ExpandProperty FullName | Set-Variable keyboardExtractDirectory
-            Expand-Archive -Path ~\Downloads\keyboardLayout.zip -DestinationPath $keyboardExtractDirectory
-            $keyboardSetupDirectory = Join-Path $keyboardExtractDirectory $($keyboardLayountResponse.assets.name -replace ".zip","")
-            . $keyboardSetupDirectory\setup.exe /a
+        if ((Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Control\Keyboard Layouts" | Get-ItemProperty | Select-Object -ExpandProperty "Layout File") -inotcontains "USIAPPLE.dll") {
+            $keyboardLayountResponse = (Invoke-RestMethod -Uri https://api.github.com/repos/geekzter/mac-us-international-keyboard-windows/releases/latest)
+            if ($keyboardLayountResponse.assets.browser_download_url) {
+                Invoke-Webrequest -Uri $keyboardLayountResponse.assets.browser_download_url -OutFile ~\Downloads\keyboardLayout.zip -UseBasicParsing 
+                New-Item -ItemType Directory -Path (Join-Path $([System.IO.Path]::GetTempPath()) $([System.Guid]::NewGuid())) | Select-Object -ExpandProperty FullName | Set-Variable keyboardExtractDirectory
+                Expand-Archive -Path ~\Downloads\keyboardLayout.zip -DestinationPath $keyboardExtractDirectory
+                $keyboardSetupDirectory = Join-Path $keyboardExtractDirectory $($keyboardLayountResponse.assets.name -replace ".zip","")
+                . $keyboardSetupDirectory\setup.exe
+            }
         }
     }
 
