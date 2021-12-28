@@ -309,7 +309,7 @@ if ($All -or $Settings) {
                 New-Item -ItemType Directory -Path (Join-Path $([System.IO.Path]::GetTempPath()) $([System.Guid]::NewGuid())) | Select-Object -ExpandProperty FullName | Set-Variable keyboardExtractDirectory
                 Expand-Archive -Path ~\Downloads\keyboardLayout.zip -DestinationPath $keyboardExtractDirectory
                 $keyboardSetupDirectory = Join-Path $keyboardExtractDirectory $($keyboardLayountResponse.assets.name -replace ".zip","")
-                . $keyboardSetupDirectory\setup.exe
+                Invoke-Item $keyboardSetupDirectory\setup.exe
             }
         }
     }
