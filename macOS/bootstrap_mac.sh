@@ -17,7 +17,7 @@ if [ ! -d "$(xcode-select -p)" ]; then
     xcode-select --install
     sudo xcodebuild -license accept
 fi
-sudo softwareupdate --install-rosetta
+sudo softwareupdate --install-rosetta --agree-to-license
 sudo softwareupdate --all --install --force
 
 # Homebrew package management
