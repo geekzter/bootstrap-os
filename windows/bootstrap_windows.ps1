@@ -55,9 +55,11 @@ if ($killExplorer) {
 
 # Install Chocolatey
 if (!(Get-Command "choco.exe" -ErrorAction SilentlyContinue)) {
+    Write-Host "Execution policy: $(Get-ExecutionPolicy)"
     if ((Get-ExecutionPolicy) -ine "ByPass") {
         Set-ExecutionPolicy Bypass -Scope Process -Force
     } 
+    Write-Host "Execution policy: $(Get-ExecutionPolicy)"
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 }
 
