@@ -50,6 +50,9 @@ cask "visual-studio-code"
 cask "vlc"
 #cask "zoom"
 
+# Packages required by other packages
+brew "svn"
+
 # Packages
 brew "ansible"
 #brew "awscli"
@@ -80,7 +83,6 @@ brew "python"
 brew "rsync"
 brew "ruby"
 brew "sqlite"
-brew "svn"
 brew "telnet"
 #brew "hashicorp/tap/terraform"
 brew "tfenv"
