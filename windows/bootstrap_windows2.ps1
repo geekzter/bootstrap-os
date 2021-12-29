@@ -177,7 +177,6 @@ if ($All -or $minimal) {
     }
 
     PinTo -Application "Microsoft Edge*" -Taskbar 
-    RemoveFromTaskbar "Internet Explorer*"
 
     # Replace IE
     $defaultBrowser = "Microsoft Edge"
@@ -299,6 +298,18 @@ if ($All -or $Settings) {
 
             # Schedule task to be run whenever user connects via RDP
             schtasks.exe /create /f /rl HIGHEST /tn "BGInfo" /tr "$bgInfoCommand" /SC ONEVENT /EC Security /MO "*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and EventID=4672]]"
+        }
+
+        # Install Apple US International keyboard layout
+        if ((Get-ChildItem -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layouts" | Get-ItemProperty | Select-Object -ExpandProperty "Layout File") -inotcontains "USIAPPLE.dll") {
+            $keyboardLayountResponse = (Invoke-RestMethod -Uri https://api.github.com/repos/geekzter/mac-us-international-keyboard-windows/releases/latest)
+            if ($keyboardLayountResponse.assets.browser_download_url) {
+                Invoke-Webrequest -Uri $keyboardLayountResponse.assets.browser_download_url -OutFile ~\Downloads\keyboardLayout.zip -UseBasicParsing 
+                New-Item -ItemType Directory -Path (Join-Path $([System.IO.Path]::GetTempPath()) $([System.Guid]::NewGuid())) | Select-Object -ExpandProperty FullName | Set-Variable keyboardExtractDirectory
+                Expand-Archive -Path ~\Downloads\keyboardLayout.zip -DestinationPath $keyboardExtractDirectory
+                $keyboardSetupDirectory = Join-Path $keyboardExtractDirectory $($keyboardLayountResponse.assets.name -replace ".zip","")
+                Invoke-Item $keyboardSetupDirectory\setup.exe
+            }
         }
     }
 
