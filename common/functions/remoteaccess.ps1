@@ -71,20 +71,22 @@ function Init-TmuxSession (
     $script:environmentVariableNames += "TF_WORKSPACE"
 
     $terraformDirectory = Find-TerraformDirectory
-    $terraformWorkspaceVars = (Join-Path $terraformDirectory "${Workspace}.tfvars")
-    if (Test-Path $terraformWorkspaceVars) {
-        # Match relevant lines first
-        $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars | Select-String "(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)")
-        if ($terraformVarsFileContent) {
-            $envScript = [regex]::replace($terraformVarsFileContent,"(client_id|client_secret|subscription_id|tenant_id)",$regexCallback,[System.Text.RegularExpressions.RegexOptions]::Multiline)
-            if ($envScript) {
-                Write-Verbose $envScript
-                Invoke-Expression $envScript
+    if ($terraformDirectory) {
+        $terraformWorkspaceVars = (Join-Path $terraformDirectory "${Workspace}.tfvars")
+        if (Test-Path $terraformWorkspaceVars) {
+            # Match relevant lines first
+            $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars | Select-String "(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)")
+            if ($terraformVarsFileContent) {
+                $envScript = [regex]::replace($terraformVarsFileContent,"(client_id|client_secret|subscription_id|tenant_id)",$regexCallback,[System.Text.RegularExpressions.RegexOptions]::Multiline)
+                if ($envScript) {
+                    Write-Verbose $envScript
+                    Invoke-Expression $envScript
+                } else {
+                    Write-Warning "[regex]::replace removed all content from script"
+                }
             } else {
-                Write-Warning "[regex]::replace removed all content from script"
+                Write-Verbose "No matches"
             }
-        } else {
-            Write-Verbose "No matches"
         }
     }
     Get-ChildItem -Path Env: -Recurse -Include $script:environmentVariableNames | Sort-Object -Property Name

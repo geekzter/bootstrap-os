@@ -1,16 +1,16 @@
 # macOS Bootstrap
 The `bootstrap_mac.sh` sets up macOS with brew packages listed in `Brewfile`
 
-## Manual tasks
--   Install Segoe UI fonts from [https://aka.ms/SegoeFonts](https://aka.ms/SegoeFonts)
+## Instructions
+- Install Xcode Developer Tools by running `xcode-select --install`
+- Clone repo: `git clone https://github.com/geekzter/bootstrap-os.git`
+- Invoke bootstrap: `<repo>/macOS/bootsrap_mac.sh`
 
-## Usage
-Access the Azure Portal using a fully qualified url including AAD domain name in it e.g. `https://portal.azure.com/mybrand.onmicrosoft.com`.
+## Manual tasks
+- Install Segoe UI fonts from [https://aka.ms/SegoeFonts](https://aka.ms/SegoeFonts)
 
 ## Limitations & Known Issues
 - No Bash profile set up
-- As macOS is not used from aVM (by me), there is less focus on automation. Hence the manual set up tasks documented above.
-
 
 ## Resources
 - [Homebrew](https://brew.sh/)

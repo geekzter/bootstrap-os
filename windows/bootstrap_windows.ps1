@@ -17,7 +17,8 @@ param (
     [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal", "None")][string[]]$Packages=@("Minimal"),
     [parameter(Mandatory=$false)][bool]$PowerShell=$false,
     [parameter(Mandatory=$false)][bool]$Settings=$true,
-    [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os"
+    [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os",
+    [parameter(Mandatory=$false)][string]$Branch=$(git -C $PSScriptRoot rev-parse --abbrev-ref HEAD 2>$null)
 ) 
 
 # Validation
@@ -57,7 +58,10 @@ if ($killExplorer) {
 
 # Install Chocolatey
 if (!(Get-Command "choco.exe" -ErrorAction SilentlyContinue)) {
-    Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    if ((Get-ExecutionPolicy) -ine "ByPass") {
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+    } 
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 }
 
 # Install Chocolatey packages
@@ -92,6 +96,9 @@ if (!(Test-Path $bootstrapDirectory)) {
     Write-Host "Pulling $Repository in $bootstrapDirectory..."
     git pull
 }
+if ($Branch) {
+    git -C $bootstrapDirectory switch $Branch
+}
 $windowsBootstrapDirectory = Join-Path $bootstrapDirectory "windows"
 if (!(Test-Path $windowsBootstrapDirectory)) {
     Write-Error "Clone of bootstrap repository was not successful"
@@ -103,7 +110,9 @@ if (!(Test-Path $windowsBootstrapDirectory)) {
 # Invoke next stage
 $userExecutionPolicy = Get-ExecutionPolicy -Scope CurrentUser
 if (($userExecutionPolicy -ieq "AllSigned") -or ($userExecutionPolicy -ieq "Undefined")) {
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    if ((Get-ExecutionPolicy) -ine "ByPass") {
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    } 
 }
 $stage2Script = "bootstrap_windows2.ps1"
 if (!(Test-Path $stage2Script)) {
