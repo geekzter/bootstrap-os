@@ -15,13 +15,17 @@ fi
 
 if [ ! -d "$(xcode-select -p)" ]; then 
     xcode-select --install
+    sudo xcodebuild -license accept
 fi
-softwareupdate --all --install --force
+sudo softwareupdate --install-rosetta --agree-to-license
+sudo softwareupdate --all --install --force
 
 # Homebrew package management
 if test ! $(which brew); then
     echo "Installing homebrew..."
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/eric/.profile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 brew update
 brew bundle
