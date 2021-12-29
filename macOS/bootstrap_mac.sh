@@ -17,7 +17,8 @@ if [ ! -d "$(xcode-select -p)" ]; then
     xcode-select --install
     sudo xcodebuild -license accept
 fi
-softwareupdate --all --install --force
+sudo softwareupdate --install-rosetta
+sudo softwareupdate --all --install --force
 
 # Homebrew package management
 if test ! $(which brew); then
