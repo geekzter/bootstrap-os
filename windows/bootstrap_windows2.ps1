@@ -177,7 +177,6 @@ if ($All -or $minimal) {
     }
 
     PinTo -Application "Microsoft Edge*" -Taskbar 
-    RemoveFromTaskbar "Internet Explorer*"
 
     # Replace IE
     $defaultBrowser = "Microsoft Edge"
