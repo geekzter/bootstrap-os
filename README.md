@@ -8,7 +8,7 @@ Invoke bootstrap directly from repo:
 ## macOS
 - Install Xcode Developer Tools by running `xcode-select --install`
 - Clone repo: `git clone https://github.com/geekzter/bootstrap-os.git`
-- Invoke bootstrap: `<repo>/macOS/bootsrap_mac.sh`
+- Invoke bootstrap: `<repo>/macOS/bootstrap_mac.sh`
 
 ## Windows
 Invoke bootstrap directly from repo:   
