@@ -3,6 +3,8 @@
 # Installs in $HOME/src/bootstrap-os
 # curl -sk https://raw.githubusercontent.com/geekzter/bootstrap-os/master/linux/bootstrap_linux.sh | bash
 
+echo $(basename $0) "$@"
+
 SCRIPT_PATH=`dirname $0`
 
 if [ "$EUID" = "0" ]; then
