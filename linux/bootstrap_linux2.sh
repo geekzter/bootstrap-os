@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# Process arguments
+INSTALL_PACKAGES='true'
+while [ "$1" != "" ]; do
+    case $1 in
+        --skip-packages)                shift
+                                        INSTALL_PACKAGES='false'
+                                        ;;                                                                                                                
+       * )                              echo "Invalid argument: $1"
+                                        exit 1
+    esac
+    shift
+done
+
 if [ "$EUID" = "0" ]; then
     CANELEVATE='true'
     SUDO=''
@@ -37,80 +50,81 @@ if test $(which lsb_release); then
     lsb_release -ar 2>/dev/null
 fi
 
-#sudo chown -R ${USER}:${USER} ~/.gnupg
-#chmod -R go-rwx ~/.gnupg
-
 # Packages
-if [ $CANELEVATE = "false" ]; then
-    echo $'\nsudo not found, skipping packages'
+if [ $INSTALL_PACKAGES = "false" ]; then
+    echo $'\nSkipping packages'
 else
-    if test ! $(which apt-get); then
-        echo $'\napt-get not found, skipping packages'
+    if [ $CANELEVATE = "false" ]; then
+        echo $'\nsudo not found, skipping packages'
     else
-        # pre-requisites
-        $SUDO apt-get install -y apt-transport-https curl software-properties-common
-        
-        # Kubernetes requirement
-        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | $SUDO apt-key add -
-        cat <<EOF | $SUDO tee /etc/apt/sources.list.d/kubernetes.list
+        if test ! $(which apt-get); then
+            echo $'\napt-get not found, skipping packages'
+        else
+            # pre-requisites
+            $SUDO apt-get install -y apt-transport-https curl software-properties-common
+            
+            # Kubernetes requirement
+            curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | $SUDO apt-key add -
+            cat <<EOF | $SUDO tee /etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
-        # Installs Azure CLI including dependencies
-        curl -sL https://aka.ms/InstallAzureCLIDeb | $SUDO bash 2>/dev/null
+            # Installs Azure CLI including dependencies
+            curl -sL https://aka.ms/InstallAzureCLIDeb | $SUDO bash 2>/dev/null
 
-        # GitHub CLI pre-requisites
-        # https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-        if [[ ! $(apt-key finger --fingerprint C99B11DEB97541F0 2>/dev/null) ]]; then
-            $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-        fi
-        $SUDO apt-add-repository https://cli.github.com/packages
+            # GitHub CLI pre-requisites
+            # https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+            if [[ ! $(apt-key finger --fingerprint C99B11DEB97541F0 2>/dev/null) ]]; then
+                $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+            fi
+            $SUDO apt-add-repository https://cli.github.com/packages
 
-        # Required for Midnight Commander
-        $SUDO add-apt-repository universe
+            # Required for Midnight Commander
+            $SUDO add-apt-repository universe
 
-        # For Ubuntu, this PPA provides the latest stable upstream Git version
-        $SUDO add-apt-repository ppa:git-core/ppa -y
+            # For Ubuntu, this PPA provides the latest stable upstream Git version
+            $SUDO add-apt-repository ppa:git-core/ppa -y
 
-        # Microsoft dependencies
-        # Source: https://github.com/Azure/azure-functions-core-tools
-        curl -s https://packages.microsoft.com/keys/microsoft.asc | $SUDO apt-key add -
-        if [ "$DISTRIB_ID" == "Debian" ]; then
             # Microsoft dependencies
             # Source: https://github.com/Azure/azure-functions-core-tools
-            wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
-            $SUDO mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
-            wget -q https://packages.microsoft.com/config/debian/${DISTRIB_RELEASE_MAJOR}/prod.list
-            $SUDO mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
-            $SUDO chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
-            $SUDO chown root:root /etc/apt/sources.list.d/microsoft-prod.list
-        fi
-        if [ "$DISTRIB_ID" == "Ubuntu" ]; then
-            # Microsoft dependencies
-            # Source: https://github.com/Azure/azure-functions-core-tools
-            curl -s https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | $SUDO tee /etc/apt/sources.list.d/microsoft-prod.list
-            wget -q https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/packages-microsoft-prod.deb
-            $SUDO dpkg -i packages-microsoft-prod.deb
-        fi
+            curl -s https://packages.microsoft.com/keys/microsoft.asc | $SUDO apt-key add -
+            if [ "$DISTRIB_ID" == "Debian" ]; then
+                # Microsoft dependencies
+                # Source: https://github.com/Azure/azure-functions-core-tools
+                wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
+                $SUDO mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
+                wget -q https://packages.microsoft.com/config/debian/${DISTRIB_RELEASE_MAJOR}/prod.list
+                $SUDO mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
+                $SUDO chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+                $SUDO chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+            fi
+            if [ "$DISTRIB_ID" == "Ubuntu" ]; then
+                # Microsoft dependencies
+                # Source: https://github.com/Azure/azure-functions-core-tools
+                curl -s https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/prod.list | $SUDO tee /etc/apt/sources.list.d/microsoft-prod.list
+                wget -q https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/packages-microsoft-prod.deb
+                $SUDO dpkg -i packages-microsoft-prod.deb
+            fi
 
-        echo $'\nUpdating package list...'
-        $SUDO apt-get update
+            echo $'\nUpdating package list...'
+            $SUDO apt-get update
 
-        # FIX: Could not get lock /var/lib/dpkg/lock-frontend - open (11: Resource temporarily unavailable)
-        # Upgrade packages only when not running from cloud-init
-        if [[ $(pstree -pls $$) != *"cloud-init"* ]]; then
-            echo $'\nUpgrading packages...'
-            $SUDOEULA apt-get upgrade -y
+            # FIX: Could not get lock /var/lib/dpkg/lock-frontend - open (11: Resource temporarily unavailable)
+            # Upgrade packages only when not running from cloud-init
+            if [[ $(pstree -pls $$) != *"cloud-init"* ]]; then
+                echo $'\nUpgrading packages...'
+                $SUDOEULA apt-get upgrade -y
+            fi
+
+            echo $'\nInstalling new packages...'
+            INSTALLED_PACKAGES=$(mktemp)
+            NEW_PACKAGES=$(mktemp)
+            dpkg -l | grep ^ii | awk '{print $2}' >$INSTALLED_PACKAGES
+            grep -Fvx -f $INSTALLED_PACKAGES ./apt-packages.txt >$NEW_PACKAGES
+            while read package; do 
+                $SUDOEULA apt-get install -y $package
+            done < $NEW_PACKAGES
+            rm $INSTALLED_PACKAGES $NEW_PACKAGES
         fi
-
-        echo $'\nInstalling new packages...'
-        INSTALLED_PACKAGES=$(mktemp)
-        NEW_PACKAGES=$(mktemp)
-        dpkg -l | grep ^ii | awk '{print $2}' >$INSTALLED_PACKAGES
-        grep -Fvx -f $INSTALLED_PACKAGES ./apt-packages.txt >$NEW_PACKAGES
-        while read package; do 
-            $SUDOEULA apt-get install -y $package
-        done < $NEW_PACKAGES
-        rm $INSTALLED_PACKAGES $NEW_PACKAGES
     fi
 fi
 
