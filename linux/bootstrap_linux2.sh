@@ -13,6 +13,8 @@ while [ "$1" != "" ]; do
     shift
 done
 
+SCRIPT_PATH=`dirname $0`
+
 if [ "$EUID" = "0" ]; then
     CANELEVATE='true'
     SUDO=''
@@ -133,7 +135,7 @@ if test ! $(which pwsh); then
     echo $'\nPowerShell Core (pwsh) not found, skipping setup'
 else
     echo $'\nSetting up PowerShell Core...'
-    pwsh -nop -file ../common/common_setup.ps1
+    pwsh -nop -file $SCRIPT_PATH/../common/common_setup.ps1
 fi
 
 # Set up terraform with tfenv
