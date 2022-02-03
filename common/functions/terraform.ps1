@@ -36,7 +36,7 @@ function Clear-TerraformState(
     # 'terraform state rm' does not remove output (anymore)
     # HACK: Manipulate the state directly instead
     $tfState = terraform state pull | ConvertFrom-Json
-    $terraformSupportedVersions = @("0.12","0.13","0.14","0.15", "1.0")
+    $terraformSupportedVersions = @("0.12","0.13","0.14","0.15", "1.0", "1.1")
     $terraformSupportedVersionRegEx = "^($($terraformSupportedVersions -join "|"))"
     if ($tfState.terraform_version -notmatch $terraformSupportedVersionRegEx) {
         Write-Warning "Terraform state is maintained by version $($tfState.terraform_version), expected $terraformSupportedVersions"
@@ -476,9 +476,53 @@ function Set-TerraformWorkspace (
         }
     }
     Invoke-TerraformCommand "terraform workspace select $Workspace"
+    Set-TerraformWorkspaceEnvironmentVariables -Workspace $Workspace
 }
+Set-Alias ctfw Set-TerraformWorkspace  
+Set-Alias ctf Set-TerraformWorkspace  
 Set-Alias tfws Set-TerraformWorkspace  
-Set-Alias stfw Set-TerraformWorkspace  
+Set-Alias tfw Set-TerraformWorkspace  
+
+function Set-TerraformWorkspaceEnvironmentVariables (
+    [parameter(Mandatory=$false)][string]$Workspace=$env:TF_WORKSPACE
+) {
+    if (!$Workspace) {
+        Write-Warning "No workspace specified, nothing to do"
+    }
+
+    $script:environmentVariableNames = @()
+
+    $regexCallback = {
+        $terraformEnvironmentVariableName = "ARM_$($args[0])".ToUpper()
+        $script:environmentVariableNames += $terraformEnvironmentVariableName
+        "`n`$env:${terraformEnvironmentVariableName}"
+    }
+
+    # $env:TF_WORKSPACE = $Workspace
+    # $script:environmentVariableNames += "TF_WORKSPACE"
+
+    $terraformDirectory = Find-TerraformDirectory
+    if ($terraformDirectory) {
+        $terraformWorkspaceVars = (Join-Path $terraformDirectory "${Workspace}.tfvars")
+        if (Test-Path $terraformWorkspaceVars) {
+            # Match relevant lines first
+            $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars | Select-String "(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)")
+            if ($terraformVarsFileContent) {
+                $envScript = [regex]::replace($terraformVarsFileContent,"(client_id|client_secret|subscription_id|tenant_id)",$regexCallback,[System.Text.RegularExpressions.RegexOptions]::Multiline)
+                if ($envScript) {
+                    Write-Verbose $envScript
+                    Invoke-Expression $envScript
+                    Get-ChildItem -Path Env: -Recurse -Include $script:environmentVariableNames | Sort-Object -Property Name
+                } else {
+                    Write-Warning "[regex]::replace removed all content from script"
+                }
+            } else {
+                Write-Verbose "No matches"
+            }
+        }
+    }    
+}
+Set-Alias tfwe Set-TerraformWorkspaceEnvironmentVariables  
 
 function Taint-TerraformResource (
     [parameter(Mandatory=$true,ValueFromPipeline=$true)][string[]]$Resource
