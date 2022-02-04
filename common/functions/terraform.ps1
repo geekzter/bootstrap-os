@@ -235,10 +235,10 @@ function Find-RepositoryDirectory {
     if (Test-Path LICENSE) {
         return (Get-Location).Path
     } else {
-        $license = Get-ChildItem -Path . -Filter LICENSE -Recurse -Depth $depth | Select-Object -First 1
+        $license = Get-ChildItem -Path . -Filter LICENSE -Recurse -Depth $depth -ErrorAction SilentlyContinue | Select-Object -First 1
         if (!$license) {
             # Go one level below current directory
-            $license = Get-ChildItem -Path .. -Filter LICENSE -Recurse -Depth $depth | Select-Object -First 1
+            $license = Get-ChildItem -Path .. -Filter LICENSE -Recurse -Depth $depth -ErrorAction SilentlyContinue | Select-Object -First 1
         }
         if ($license) {
             return $license.Directory.FullName
@@ -253,10 +253,10 @@ function Find-TerraformDirectory {
     if (Test-Path *.tf) {
         return (Get-Location).Path
     } else {
-        $main = Get-ChildItem -Path . -Filter main.tf -Recurse -Depth $depth | Select-Object -First 1
+        $main = Get-ChildItem -Path . -Filter main.tf -Recurse -Depth $depth -ErrorAction SilentlyContinue | Select-Object -First 1
         if (!$main) {
             # Go one level below current directory
-            $main = Get-ChildItem -Path .. -Filter main.tf -Recurse -Depth $depth | Select-Object -First 1
+            $main = Get-ChildItem -Path .. -Filter main.tf -Recurse -Depth $depth -ErrorAction SilentlyContinue | Select-Object -First 1
         }
         if ($main) {
             return $main.Directory.FullName
