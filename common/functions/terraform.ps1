@@ -506,7 +506,7 @@ function Set-TerraformWorkspaceEnvironmentVariables (
         $terraformWorkspaceVars = (Join-Path $terraformDirectory "${Workspace}.tfvars")
         if (Test-Path $terraformWorkspaceVars) {
             # Match relevant lines first
-            $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars | Select-String "(?m)^[^#]*(client_id|client_secret|subscription_id|tenant_id)")
+            $terraformVarsFileContent = (Get-Content $terraformWorkspaceVars | Select-String "(?m)^[^#\w]*(client_id|client_secret|subscription_id|tenant_id)")
             if ($terraformVarsFileContent) {
                 $envScript = [regex]::replace($terraformVarsFileContent,"(client_id|client_secret|subscription_id|tenant_id)",$regexCallback,[System.Text.RegularExpressions.RegexOptions]::Multiline)
                 if ($envScript) {
