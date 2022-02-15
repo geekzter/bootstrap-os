@@ -6,6 +6,7 @@ while [ "$1" != "" ]; do
     case $1 in
         --skip-packages)                shift
                                         INSTALL_PACKAGES='false'
+                                        COMMON_SETUP_ARGS="-NoPackages"
                                         ;;                                                                                                                
        * )                              echo "Invalid argument: $1"
                                         exit 1
@@ -135,7 +136,7 @@ if test ! $(which pwsh); then
     echo $'\nPowerShell Core (pwsh) not found, skipping setup'
 else
     echo $'\nSetting up PowerShell Core...'
-    pwsh -nop -file $SCRIPT_PATH/../common/common_setup.ps1
+    pwsh -nop -file $SCRIPT_PATH/../common/common_setup.ps1 $COMMON_SETUP_ARGS
 fi
 
 # Set up terraform with tfenv
