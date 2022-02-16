@@ -11,15 +11,14 @@ function global:Prompt {
         $GitPromptSettings.WindowTitle = $null
         if ($env:CODESPACES -ieq "true") {
             $GitPromptSettings.DefaultPromptPrefix = "[${env:GITHUB_USER}@${env:CODESPACE_NAME}]: "
-            $GitPromptSettings.DefaultPromptSuffix = "`n> "
-        } else {
-            if (IsElevated) {
-                $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
-            } else {
-                $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
-            }    
+            $GitPromptSettings.AfterText += "`n"
         }
-        $prompt = (& $GitPromptScriptBlock)
+        if (IsElevated) {
+            $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
+        } else {
+            $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
+        }    
+    $prompt = (& $GitPromptScriptBlock)
     } else {
         $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"
 
