@@ -17,10 +17,14 @@ function global:Prompt {
         $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
         # Don't overwrite the title set in iTerm2/Windows Terminal
         $GitPromptSettings.WindowTitle = $null
-        if (IsElevated) {
-            $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
+        if ($env:CODESPACES -ieq "true") {
+            $GitPromptSettings.DefaultPromptPrefix  = "[${env:GITHUB_REPOSITORY}]: "
         } else {
-            $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
+            if (IsElevated) {
+                $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
+            } else {
+                $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
+            }    
         }
         $prompt = (& $GitPromptScriptBlock)
     } else {
