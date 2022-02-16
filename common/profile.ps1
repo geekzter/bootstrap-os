@@ -18,7 +18,7 @@ function global:Prompt {
         } else {
             $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
         }    
-    $prompt = (& $GitPromptScriptBlock)
+        $prompt = (& $GitPromptScriptBlock)
     } else {
         $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"
 
