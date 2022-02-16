@@ -54,7 +54,7 @@ function global:Prompt {
 }
 
 # Only print when not in a nested shell, tmux session, or Codespace
-$printMessages = (($nestedPromptLevel -eq 0) -and $($env:TERM -notmatch "^screen") -and $($env:TERM -notmatch "^tmux") -and (!($env:CLOUDENV_ENVIRONMENT_ID)))
+$printMessages = (($nestedPromptLevel -eq 0) -and $($env:TERM -notmatch "^screen") -and $($env:TERM -notmatch "^tmux") -and (!($env:CODESPACES -ieq "true")))
 
 if ($host.Name -eq 'ConsoleHost')
 {
