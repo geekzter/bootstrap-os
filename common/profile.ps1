@@ -11,7 +11,7 @@ function global:Prompt {
         $GitPromptSettings.WindowTitle = $null
         if ($env:CODESPACES -ieq "true") {
             $GitPromptSettings.DefaultPromptPrefix = "[${env:GITHUB_USER}@${env:CODESPACE_NAME}]: "
-            $GitPromptSettings.AfterText += "`n"
+            $GitPromptSettings.DefaultPromptBeforeSuffix.Text = '`n'            
         }
         if (IsElevated) {
             $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
