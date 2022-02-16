@@ -10,7 +10,7 @@ function global:Prompt {
         # Don't overwrite the title set in iTerm2/Windows Terminal
         $GitPromptSettings.WindowTitle = $null
         if ($env:CODESPACES -ieq "true") {
-            $GitPromptSettings.DefaultPromptPrefix  = "[$(${env:GITHUB_REPOSITORY}.split('/')[1])]: "
+            $GitPromptSettings.DefaultPromptPrefix  = "[${env:CODESPACE_NAME}]: "
         } else {
             if (IsElevated) {
                 $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
