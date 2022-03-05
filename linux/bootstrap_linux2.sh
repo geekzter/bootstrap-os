@@ -144,12 +144,13 @@ if test $(which unzip); then
     if [ ! -d $HOME/.tfenv ]; then
         echo $'\nInstalling tfenv...'
         git clone -q https://github.com/tfutils/tfenv.git $HOME/.tfenv
+        # ln -s ~/.tfenv/bin/* /usr/local/bin
     else
         echo $'\nUpdating tfenv...'
         git -C $HOME/.tfenv pull
     fi
     TFENV_CURL_OUTPUT=0
-    $HOME/.tfenv/bin/tfenv install latest #2>&1
+    $HOME/.tfenv/bin/tfenv install 2>&1
 else
     echo $'\nunzip not found, skipping tfenv set up'
 fi
