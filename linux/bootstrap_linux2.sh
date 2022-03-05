@@ -69,7 +69,7 @@ else
             # Kubernetes requirement
             curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | $SUDO apt-key add -
             cat <<EOF | $SUDO tee /etc/apt/sources.list.d/kubernetes.list
-deb https://apt.kubernetes.io/ kubernetes-$(lsb_release -cs) main
+deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
             # Installs Azure CLI including dependencies
             curl -sL https://aka.ms/InstallAzureCLIDeb | $SUDO bash 2>/dev/null
