@@ -28,10 +28,12 @@ msodbcsql17
 mssql-tools
 nano
 node-typescript
+packer
 powershell
 sed
 snapd
 telnet
+terraform
 tmux
 traceroute
 tree
