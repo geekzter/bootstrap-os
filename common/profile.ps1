@@ -1,13 +1,5 @@
 #!/usr/bin/env pwsh
 
-# Define Functions
-Write-Verbose "Defining functions..."
-$functionsPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "functions")
-Get-ChildItem $functionsPath -filter "*.ps1" | ForEach-Object {
-    Write-Host "$($_.FullName) : loaded"
-    . $_.FullName
-}
-
 # Define prompt
 Write-Verbose "Defining prompt..."
 function global:Prompt {
@@ -17,11 +9,15 @@ function global:Prompt {
         $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true 
         # Don't overwrite the title set in iTerm2/Windows Terminal
         $GitPromptSettings.WindowTitle = $null
+        if ($env:CODESPACES -ieq "true") {
+            $GitPromptSettings.DefaultPromptPrefix = "[${env:GITHUB_USER}@${env:CODESPACE_NAME}]: "
+            $GitPromptSettings.DefaultPromptBeforeSuffix.Text = '`n'            
+        }
         if (IsElevated) {
             $GitPromptSettings.DefaultPromptSuffix = "`$('#' * (`$nestedPromptLevel + 1)) "
         } else {
             $GitPromptSettings.DefaultPromptSuffix = "`$('>' * (`$nestedPromptLevel + 1)) "
-        }
+        }    
         $prompt = (& $GitPromptScriptBlock)
     } else {
         $host.ui.rawui.WindowTitle = "PowerShell Core $($host.Version.ToString())"
@@ -50,7 +46,17 @@ function global:Prompt {
 }
 
 # Only print when not in a nested shell, tmux session, or Codespace
-$printMessages = (($nestedPromptLevel -eq 0) -and $($env:TERM -notmatch "^screen") -and $($env:TERM -notmatch "^tmux") -and (!($env:CLOUDENV_ENVIRONMENT_ID)))
+$printMessages = (($nestedPromptLevel -eq 0) -and $($env:TERM -notmatch "^screen") -and $($env:TERM -notmatch "^tmux") -and (!($env:CODESPACES -ieq "true")))
+
+# Define Functions
+Write-Verbose "Defining functions..."
+$functionsPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "functions")
+Get-ChildItem $functionsPath -filter "*.ps1" | ForEach-Object {
+    if ($printMessages) {
+        Write-Host "$($_.FullName) : loaded"
+    }
+    . $_.FullName
+}
 
 if ($host.Name -eq 'ConsoleHost')
 {

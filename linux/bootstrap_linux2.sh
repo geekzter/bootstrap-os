@@ -64,7 +64,7 @@ else
             echo $'\napt-get not found, skipping packages'
         else
             # pre-requisites
-            $SUDO apt-get install -y apt-transport-https curl software-properties-common
+            $SUDO apt-get install -y apt-transport-https curl gnupg software-properties-common
             
             # Kubernetes requirement
             curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | $SUDO apt-key add -
@@ -87,6 +87,10 @@ EOF
             # For Ubuntu, this PPA provides the latest stable upstream Git version
             $SUDO add-apt-repository ppa:git-core/ppa -y
 
+            # Hashicorp
+            curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+            sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+
             # Microsoft dependencies
             # Source: https://github.com/Azure/azure-functions-core-tools
             curl -s https://packages.microsoft.com/keys/microsoft.asc | $SUDO apt-key add -
@@ -107,6 +111,7 @@ EOF
                 wget -q https://packages.microsoft.com/config/ubuntu/${DISTRIB_RELEASE}/packages-microsoft-prod.deb
                 $SUDO dpkg -i packages-microsoft-prod.deb
             fi
+
 
             echo $'\nUpdating package list...'
             $SUDO apt-get update
@@ -137,19 +142,4 @@ if test ! $(which pwsh); then
 else
     echo $'\nSetting up PowerShell Core...'
     pwsh -nop -file $SCRIPT_PATH/../common/common_setup.ps1 $COMMON_SETUP_ARGS
-fi
-
-# Set up terraform with tfenv
-if test $(which unzip); then
-    if [ ! -d $HOME/.tfenv ]; then
-        echo $'\nInstalling tfenv...'
-        git clone -q https://github.com/tfutils/tfenv.git $HOME/.tfenv
-    else
-        echo $'\nUpdating tfenv...'
-        git -C $HOME/.tfenv pull
-    fi
-    TFENV_CURL_OUTPUT=0
-    $HOME/.tfenv/bin/tfenv install latest #2>&1
-else
-    echo $'\nunzip not found, skipping tfenv set up'
 fi
