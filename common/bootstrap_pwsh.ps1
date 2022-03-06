@@ -13,7 +13,6 @@ $functionsDirectory = Join-Path $scriptDirectory functions
 if (-not $NoPackages) {
     # Check whether Az modules have been installed
     AddorUpdateModule -ModuleName Az -AllowClobber
-    #AddorUpdateModule AzureADPreview
     #AddorUpdateModule MicrosoftPowerBIMgmt
     #AddorUpdateModule MicrosoftTeams
     AddorUpdateModule Oh-My-Posh
