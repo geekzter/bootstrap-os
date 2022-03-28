@@ -39,6 +39,7 @@ if test ! $(which tfenv); then
     brew link tfenv
 fi
 tfenv install latest
+tfenv use latest
 
 # PATH
 echo "Updating /etc/paths.d..."
