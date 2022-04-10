@@ -115,7 +115,7 @@ function Erase-TerraformAzureResources {
         $TimeoutMinutes=50
     ) 
 
-    Write-Information $MyInvocation.line
+    Write-Verbose $MyInvocation.line
     Write-Debug "`$PSCmdlet.ParameterSetName: $($PSCmdlet.ParameterSetName)"
 
     $tfdirectory = ChangeTo-TerraformDirectory
@@ -147,10 +147,10 @@ function Erase-TerraformAzureResources {
         }
     
         if ($Destroy) {
-            $tagQuery = "[?tags.repository == '${Repository}' && properties.provisioningState != 'Deleting'].id"
+            $baseTagQuery = "[?tags.repository == '${Repository}'].id"
             switch ($PSCmdlet.ParameterSetName) {
                 "DeploymentName" {
-                    $tagQuery = $tagQuery -replace "\]", " && tags.deployment == '${DeploymentName}']"
+                    $baseTagQuery = $baseTagQuery -replace "\]", " && tags.deployment == '${DeploymentName}']"
                 }
                 "Suffix" {
                     $suffixQuery = "("
@@ -161,12 +161,13 @@ function Erase-TerraformAzureResources {
                         $suffixQuery += "tags.suffix == '${suff}'"
                     }
                     $suffixQuery += ")"
-                    $tagQuery = $tagQuery -replace "\]", " && $suffixQuery]"
+                    $baseTagQuery = $baseTagQuery -replace "\]", " && $suffixQuery]"
                 }
                 "Workspace" {
-                    $tagQuery = $tagQuery -replace "\]", " && tags.workspace == '${Workspace}']"
+                    $baseTagQuery = $baseTagQuery -replace "\]", " && tags.workspace == '${Workspace}']"
                 }
             }
+            $tagQuery = $baseTagQuery -replace "\]", " && properties.provisioningState != 'Deleting']"
             Write-Host "Removing resources which match JMESPath `"$tagQuery`"" -ForegroundColor Green
             if (!$Force) {
                 $proceedanswer = $null
@@ -185,13 +186,13 @@ function Erase-TerraformAzureResources {
                 Start-Job -Name "Remove Resource Groups" -ScriptBlock {az resource delete --ids $args} -ArgumentList $resourceGroupIDs | Out-Null
             }
     
-            # # Remove other tagged resources
-            # Write-Host "Removing '${Repository}' resources (async)..."
-            # $resourceIDs = $(az resource list --query "$tagQuery" -o tsv)
-            # if ($resourceIDs -and $resourceIDs.Length -gt 0) {
-            #     Write-Verbose "Starting job 'az resource delete --ids $resourceIDs'"
-            #     Start-Job -Name "Remove Resources" -ScriptBlock {az resource delete --ids $args} -ArgumentList $resourceIDs | Out-Null
-            # }
+            # Remove other tagged resources
+            Write-Host "Removing '${Repository}' resources (async)..."
+            $resourceIDs = $(az resource list --query "$tagQuery" -o tsv)
+            if ($resourceIDs -and $resourceIDs.Length -gt 0) {
+                Write-Verbose "Starting job 'az resource delete --ids $resourceIDs'"
+                Start-Job -Name "Remove Resources" -ScriptBlock {az resource delete --ids $args} -ArgumentList $resourceIDs | Out-Null
+            }
     
             # Remove resources in the NetworkWatcher resource group
             Write-Host "Removing '${Repository}' network watchers from shared resource group 'NetworkWatcherRG' (async)..."
@@ -201,9 +202,9 @@ function Erase-TerraformAzureResources {
                 Start-Job -Name "Remove Resources from NetworkWatcherRG" -ScriptBlock {az resource delete --ids $args} -ArgumentList $resourceIDs | Out-Null
             }
     
-            $metadataQuery = $tagQuery -replace "tags\.","metadata."
-            Write-Information "JMESPath Metadata Query: $metadataQuery"
             # Remove DNS records using tags expressed as record level metadata
+            $metadataQuery = $tagQuery -replace "tags\.","metadata."
+            Write-Verbose "JMESPath Metadata Query: $metadataQuery"
             # Synchronous operation, as records will clash with new deployments
             Write-Host "Removing '${Repository}' records from shared DNS zone (sync)..."
             $dnsZones = $(az network dns zone list | ConvertFrom-Json)
@@ -211,11 +212,27 @@ function Erase-TerraformAzureResources {
                 Write-Verbose "Processing zone '$($dnsZone.name)'..."
                 $dnsResourceIDs = $(az network dns record-set list -g $dnsZone.resourceGroup -z $dnsZone.name --query "$metadataQuery" -o tsv)
                 if ($dnsResourceIDs) {
-                    Write-Information "Removing DNS records from zone '$($dnsZone.name)'..."
+                    Write-Verbose "Removing DNS records from zone '$($dnsZone.name)'..."
                     az resource delete --ids $dnsResourceIDs -o none
                 }
             }
     
+            # Remove policy (set) definitions with tags expressed as metadata
+            $metadataQuery = $baseTagQuery -replace "tags\.","metadata."
+            Write-Verbose "JMESPath Metadata Query: $metadataQuery"
+            Write-Host "Removing '${Repository}' policy set definitions (sync)..."
+            az policy set-definition list --query "${metadataQuery}" -o json | ConvertFrom-Json | Set-Variable policySets
+            foreach ($policySet in $policySets) {
+                Write-Verbose "Deleting policy set '$($policySet.name)'..."
+                az policy set-definition delete --name $policySet.name
+            }
+            Write-Host "Removing '${Repository}' policy definitions (sync)..."
+            az policy definition list --query "${metadataQuery}" -o json | ConvertFrom-Json | Set-Variable policies
+            foreach ($policy in $policies) {
+                Write-Verbose "Deleting policy '$($policy.name)'..."
+                az policy definition delete --name $policy.name
+            }
+
             $jobs = Get-Job -State Running | Where-Object {$_.Command -match "az resource"}
             $jobs | Format-Table -Property Id, Name, Command, State
             if ($Wait -and $jobs) {
@@ -285,7 +302,7 @@ function Get-TerraformInfo {
             }
             $stateFile = Join-Path $directory .terraform terraform.tfstate
             if (Test-Path $stateFile) {
-                Write-Information "Reading Terraform settings from ${stateFile}..."
+                Write-Verbose "Reading Terraform settings from ${stateFile}..."
                 $tfConfig = $(Get-Content $stateFile | ConvertFrom-Json)
                 if ($tfConfig.backend.type -ne "azurerm") {
                     throw "This script only works with azurerm provider"
@@ -298,7 +315,7 @@ function Get-TerraformInfo {
             $data.GetEnumerator() | Sort-Object -Property Name | Format-Table -HideTableHeaders
 
             if (Test-Path $stateFile) {
-                Write-Information "Checking lease status of backend blobs..."
+                Write-Verbose "Checking lease status of backend blobs..."
                 
                 $backendStorageAccountName = $tfConfig.backend.config.storage_account_name
                 $backendStorageContainerName = $tfConfig.backend.config.container_name
@@ -318,7 +335,7 @@ function Get-TerraformInfo {
 
             # Azure resources
             $resourceQuery = "Resources | where tags['provisioner']=='terraform' | summarize ResourceCount=count() by Repository=tostring(tags['repository']), Deployment=tostring(tags['deployment-name']), Environment=tostring(tags['environment']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) | order by Repository asc, Environment asc, Workspace asc, Suffix asc"
-            Write-Information "Executing graph query:`n$resourceQuery"
+            Write-Verbose "Executing graph query:`n$resourceQuery"
             Write-Host "`nAzure resources:`n" -ForegroundColor Green
             az extension add --name resource-graph 2>$null
             az graph query -q $resourceQuery --query "data" -o table
@@ -353,17 +370,17 @@ function Get-Blobs (
     [parameter(Mandatory=$true)][string]$BackendStorageContainerName,
     [parameter(Mandatory=$true)][string]$JmesPath
 ) {
-    Write-Information "Retrieving blobs from https://${BackendStorageAccountName}.blob.core.windows.net/${BackendStorageContainerName}..."
+    Write-Verbose "Retrieving blobs from https://${BackendStorageAccountName}.blob.core.windows.net/${BackendStorageContainerName}..."
     if ($env:ARM_ACCESS_KEY) {
         $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --account-key $env:ARM_ACCESS_KEY --query $JmesPath | ConvertFrom-Json
     } else {
         if ($env:ARM_SAS_TOKEN) {
             $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --sas-token $env:ARM_SAS_TOKEN --query $JmesPath | ConvertFrom-Json
         } else {
-            Write-Information "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
+            Write-Verbose "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
             $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --auth-mode login --query $JmesPath | ConvertFrom-Json
             if (!$blobs) {
-                Write-Information "No access to storage using KEY, SAS or SSO. Trying to obtain key..."
+                Write-Verbose "No access to storage using KEY, SAS or SSO. Trying to obtain key..."
                 $storageKey = az storage account keys list -n $BackendStorageAccountName --query "[?keyName=='key1'].value" -o tsv
                 if ($storageKey) {
                     $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --account-key $storageKey --query $JmesPath | ConvertFrom-Json
@@ -438,7 +455,7 @@ function PopFrom-TerraformDirectory {
         $directoryPath = $directoryStack.Pop()
         $null = Set-Location $directoryPath
     } else {
-        Write-Information "Stack is empty"
+        Write-Verbose "Stack is empty"
     }
 }
 Set-Alias cdtf- PopFrom-TerraformDirectory
@@ -548,7 +565,7 @@ function Unlock-TerraformState (
             }
 
             # Access Terraform (Azure) backend to get leases for each workspace
-            Write-Information "Reading Terraform settings from ${tfdirectory}/.terraform/terraform.tfstate..."
+            Write-Verbose "Reading Terraform settings from ${tfdirectory}/.terraform/terraform.tfstate..."
             $tfConfig = $(Get-Content ${tfdirectory}/.terraform/terraform.tfstate | ConvertFrom-Json)
             if ($tfConfig.backend.type -ine "azurerm") {
                 throw "This script only works with azurerm provider"
@@ -585,10 +602,10 @@ function Unlock-TerraformState (
                     if ($env:ARM_SAS_TOKEN) {
                         $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --sas-token $env:ARM_SAS_TOKEN
                     } else {
-                        Write-Information "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
+                        Write-Verbose "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
                         $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --auth-mode login
                         if (!$ticks) {
-                            Write-Information "No access to storage using KEY, SAS or SSO. Trying to obtain key..."
+                            Write-Verbose "No access to storage using KEY, SAS or SSO. Trying to obtain key..."
                             $storageKey = az storage account keys list -n $BackendStorageAccountName --query "[?keyName=='key1'].value" -o tsv
                             if ($storageKey) {
                                 $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --account-key $storageKey
