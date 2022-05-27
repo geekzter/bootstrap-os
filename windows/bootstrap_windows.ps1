@@ -23,14 +23,17 @@ param (
 
 # Validation
 if ($PSVersionTable.PSEdition -eq "Core") {
-    if ($IsWindows) {
-        Write-Output "Not running on Windows PowerShell"
-        #Write-Output "Running PowerShell Core, invoking Windows PowerShell..."
-        #PowerShell.exe -Command $MyInvocation.Line
-        exit
-    } else {
+    if (!$IsWindows) {
         Write-Output "Not running on Windows"
         exit
+    }
+
+    [System.Version]$windows11AndUp = "10.0.22000"
+    [System.Version]$currentVersion = (Get-ComputerInfo).OsVersion
+    if ($currentVersion -lt $windows11AndUp) {
+        # Windows 10 and below needs Windows PowerShell
+        Write-Output "Not running on Windows PowerShell"
+        exit    
     }
 }    
 if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
