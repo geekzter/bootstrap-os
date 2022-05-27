@@ -36,7 +36,7 @@ function Clear-TerraformState(
     # 'terraform state rm' does not remove output (anymore)
     # HACK: Manipulate the state directly instead
     $tfState = terraform state pull | ConvertFrom-Json
-    $terraformSupportedVersions = @("0.12","0.13","0.14","0.15", "1.0", "1.1")
+    $terraformSupportedVersions = @("0.12","0.13","0.14","0.15", "1")
     $terraformSupportedVersionRegEx = "^($($terraformSupportedVersions -join "|"))"
     if ($tfState.terraform_version -notmatch $terraformSupportedVersionRegEx) {
         Write-Warning "Terraform state is maintained by version $($tfState.terraform_version), expected $terraformSupportedVersions"
