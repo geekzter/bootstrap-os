@@ -109,7 +109,7 @@ if (!(Test-Path $windowsBootstrapDirectory)) {
 
 # Invoke next stage
 $userExecutionPolicy = Get-ExecutionPolicy -Scope CurrentUser
-if (($userExecutionPolicy -ieq "AllSigned") -or ($userExecutionPolicy -ieq "Undefined")) {
+if (($userExecutionPolicy -ieq "AllSigned") -or ($userExecutionPolicy -ieq "Restricted") -or ($userExecutionPolicy -ieq "Undefined")) {
     if ((Get-ExecutionPolicy) -ine "ByPass") {
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
     } 
