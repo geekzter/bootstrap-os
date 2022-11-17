@@ -323,13 +323,14 @@ function LinkDirectory (
     if ($link.Target) {
         Write-Host "$($link.FullName) -> $($link.Target)"
     } else {
-        Write-Host "$($link.FullName) already exists as directory" -ForegroundColor Yellow
+        Write-Warning "$($link.FullName) already exists as directory" 
     }
 } 
 function LinkFile (
     [parameter(Mandatory=$true)][string]$File,
     [parameter(Mandatory=$true)][string]$SourceDirectory,
-    [parameter(Mandatory=$true)][string]$TargetDirectory
+    [parameter(Mandatory=$true)][string]$TargetDirectory,
+    [parameter(Mandatory=$false)][switch]$ReplaceEmptyFile
 ) {
     # Reverse
     $linkSource = $(Join-Path $TargetDirectory $File)
@@ -341,10 +342,16 @@ function LinkFile (
     } else {
         $link = Get-Item $linkSource -Force
     }
+
+    if ($ReplaceEmptyFile -and [String]::IsNullOrWhiteSpace((Get-Content $link.FullName))) {
+        Write-Warning "Replacing empty file $($link.FullName)"
+        Remove-Item $link.FullName -Force
+    }
+
     if ($link.Target) {
         Write-Host "$($link.FullName) -> $($link.Target)"
     } else {
-        Write-Host "$($link.FullName) already exists as file" -ForegroundColor Yellow
+        Write-Warning "$($link.FullName) already exists as file"
     }
 } 
 

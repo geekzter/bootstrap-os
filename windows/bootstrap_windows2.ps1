@@ -250,7 +250,7 @@ if ($All -or $Settings) {
             Set-WinUserLanguageList $config.UserLanguage -Force
         }
     } else {
-        Write-Host "Settings file $settingsFile not found, skipping personalization"
+        Write-Warning "Settings file $settingsFile not found, skipping personalization"
     }
 
     # Disable autostarts
