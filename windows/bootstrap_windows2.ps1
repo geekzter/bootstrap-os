@@ -145,7 +145,7 @@ if ($All -or $minimal) {
         Get-AppxPackage -AllUsers "Microsoft.StorePurchaseApp" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
         Get-AppxPackage -AllUsers "Microsoft.WindowsStore" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
     
-        # Store Apps
+        # Add Store Apps
         # Get-AppxPackage -AllUsers "Microsoft.MicrosoftOfficeHub" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
         Get-AppxPackage -AllUsers "Microsoft.MicrosoftPowerBIForWindows" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
         Get-AppxPackage -AllUsers "Microsoft.MSPaint" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
@@ -156,6 +156,19 @@ if ($All -or $minimal) {
         Get-AppxPackage -AllUsers "Microsoft.RemoteDesktop" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
         Get-AppxPackage -AllUsers "Microsoft.Whiteboard" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
         
+        # Remove bloatware
+        Get-AppxPackage -AllUsers *Amazon*    | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *Bing*      | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *Bytedance* | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *Clipchamp* | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *Disney*    | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *Facebook*  | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *Instagram* | Remove-AppxPackage
+        Get-AppxPackage -AllUsers Microsoft.Advertising* | Remove-AppxPackage
+        Get-AppxPackage -AllUsers Microsoft.GamingApp* | Remove-AppxPackage
+        Get-AppxPackage -AllUsers Microsoft.MicrosoftSolitaireCollection* | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *Zune*      | Remove-AppxPackage
+
         UpdateStoreApps
     }
 
@@ -325,7 +338,7 @@ if ($All -or $Settings) {
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "PromptOnSecureDesktop" -Type DWord -Value 1   
 
         # Configure Touchpad to replicate Mac behavior
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" -Name "RightClickZoneEnabled" -Type DWord -Value 0xffffff
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" -Name "RightClickZoneEnabled" -Type DWord -Value 0
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" -Name "ScrollDirection" -Type DWord -Value 0
     }
 
