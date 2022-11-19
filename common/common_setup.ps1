@@ -57,9 +57,20 @@ if (-not $NoPackages) {
     # Azure CLI extensions
     if (Get-Command az -ErrorAction SilentlyContinue) {
         Write-Host "`nUpdating Azure CLI extensions..."
-        az extension add -n azure-devops   --upgrade -y 2>&1
-        az extension add -n azure-firewall --upgrade -y 2>&1
-        az extension add -n resource-graph --upgrade -y 2>&1
+        az extension list --query "[].name" -o tsv | Set-Variable azExtensions
+        foreach ($azExtension in $azExtensions) {
+            Write-Host "Updating Azure CLI extension '$azExtension'..."
+            az extension update -n $azExtension --only-show-errors
+        }
+
+        Compare-Object -ReferenceObject $azExtensions `
+                       -DifferenceObject @('azure-devops', `
+                                           'azure-firewall', `
+                                           'resource-graph') | Where-Object -Property SideIndicator -eq '=>' `
+                                                             | ForEach-Object {
+            Write-Host "Adding Azure CLI extension '$($_.InputObject)'..."
+            az extension add -n $_.InputObject --only-show-errors --only-show-errors
+        }
     }
 }
 
