@@ -92,7 +92,7 @@ function Clone-GitHubRepositories (
                 Write-Host "Cloning GitHub repositories for user '${User}' into '$repoRoot'..."
                 $printMessage = $false
             }
-            Write-Host "Cloning '$($repo.html_url)' into '$repoDirectory'"
+            Write-Host "`nCloning '$($repo.html_url)' into '$repoDirectory'..."
             git clone https://github.com/${User}/$($repo.name)
         }
     }
