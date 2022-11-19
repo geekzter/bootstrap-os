@@ -52,22 +52,34 @@ function AddorUpdateModule (
 }
 
 function Clone-GitHubRepositories (
-    [parameter(Mandatory=$false)][string]$User
+    [parameter(Mandatory=$false)][string]$User,
+    [parameter(Mandatory=$false)][switch]$OpenFolder
 ) {
-    Write-Host `n 
+    Write-Host ""
     if (!(Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Warning "git not found, no repositories to clone"
         return
     }
-    if (!$User) {
-        $gitUser = ((git config --get remote.origin.url) -replace '^https://(?<host>[\w\.]+)/(?<user>\w+)/([\w\-]+)(\.git)?$' , '${user}')
-        if ($gitUser) {
-            $User = $gitUser
-        } else {
-            Write-Warning "Unable to determine GitHub user name"
-            return
+
+    # Fugure out who the GH user is
+    if (!$User) { # User of the cloned repo
+        $ghUser = ((git config --get remote.origin.url) -replace '^https://(?<host>[\w\.]+)/(?<user>\w+)/([\w\-]+)(\.git)?$' , '${user}')
+        if ($ghUser) {
+            $User = $ghUser
         }
     }
+    if (!$User -and (Get-Command gh -ErrorAction SilentlyContinue)) { # Logged-in GH user
+        gh api user 2>$null | ConvertFrom-Json -AsHashtable | Set-Variable ghUserResponse
+        $ghUser = $ghUserResponse["login"]
+        if ($ghUser) {
+            $User = $ghUser
+        }
+    }
+    if (!$User) {
+        Write-Warning "Unable to determine GitHub user name"
+        return
+    }
+    
     # Set repo root
     if ($IsWindows) {
         $repoRoot = "~\Source\GitHub\${User}"
@@ -100,7 +112,9 @@ function Clone-GitHubRepositories (
     if ($printMessage) {
         Write-Host "Nothing (more) to clone for user '${User}'"
     }
-    Invoke-Item $repoRoot
+    if ($OpenFolder) {
+        Invoke-Item $repoRoot
+    }
 }
 
 function Import-InstalledModule (
