@@ -69,7 +69,7 @@ if (-not $NoPackages) {
                                            'resource-graph') | Where-Object -Property SideIndicator -eq '=>' `
                                                              | ForEach-Object {
             Write-Host "Adding Azure CLI extension '$($_.InputObject)'..."
-            az extension add -n $_.InputObject --only-show-errors --only-show-errors
+            az extension add -n $_.InputObject --only-show-errors
         }
     }
 }

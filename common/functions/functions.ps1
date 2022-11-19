@@ -54,6 +54,7 @@ function AddorUpdateModule (
 function Clone-GitHubRepositories (
     [parameter(Mandatory=$false)][string]$User
 ) {
+    Write-Host `n 
     if (!(Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Warning "git not found, no repositories to clone"
         return
