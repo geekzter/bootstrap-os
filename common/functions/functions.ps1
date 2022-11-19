@@ -50,6 +50,58 @@ function AddorUpdateModule (
         }
     }
 }
+
+function Clone-GitHubRepositories (
+    [parameter(Mandatory=$false)][string]$User
+) {
+    if (!(Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Warning "git not found, no repositories to clone"
+        return
+    }
+    if (!$User) {
+        $gitUser = ((git config --get remote.origin.url) -replace '^https://(?<host>[\w\.]+)/(?<user>\w+)/([\w\-]+)(\.git)?$' , '${user}')
+        if ($gitUser) {
+            $User = $gitUser
+        } else {
+            Write-Warning "Unable to determine GitHub user name"
+            return
+        }
+    }
+    # Set repo root
+    if ($IsWindows) {
+        $repoRoot = "~\Source\GitHub\${User}"
+    } else {
+        $repoRoot = "~/src/github/${User}"
+    }
+    $repoRoot = (Resolve-Path $repoRoot).Path
+    New-Item -ItemType Directory -Force -Path $repoRoot | Out-Null
+    Push-Location $repoRoot
+
+    # Retrieve repositories for user
+    Write-Host "Looking for GitHub repositories for user '${User}'..."
+    Invoke-RestMethod https://api.github.com/users/${User}/repos | Set-Variable repos
+
+    # Clone repositories
+    $printMessage = $true
+    foreach ($repo in $repos) {
+        Join-Path $repoRoot $repo.name | Set-Variable repoDirectory
+        if (Test-Path $repoDirectory) {
+            Write-Verbose "Repo '$($repo.html_url)' already exists locally in '$repoDirectory'"
+        } else {
+            if ($printMessage) {
+                Write-Host "Cloning GitHub repositories for user '${User}' into '$repoRoot'..."
+                $printMessage = $false
+            }
+            Write-Host "Cloning '$($repo.html_url)' into '$repoDirectory'"
+            git clone https://github.com/${User}/$($repo.name)
+        }
+    }
+    if ($printMessage) {
+        Write-Host "Nothing (more) to clone for user '${User}'"
+    }
+    Invoke-Item $repoRoot
+}
+
 function Import-InstalledModule (
     [parameter(Mandatory=$true)][string]$ModuleName
 ) {

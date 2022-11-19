@@ -11,8 +11,13 @@ param (
     [parameter(Mandatory=$false)][switch]$NoPackages=$false
 ) 
 
+$scriptDirectory = (Split-Path -Parent -Path $MyInvocation.MyCommand.Path)
+
+# Load Functions
+. (Join-Path (Join-Path $scriptDirectory functions) functions.ps1)
+
 # Set up PowerShell Core (modules, profile)
-& (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "bootstrap_pwsh.ps1") -NoPackages:$NoPackages
+& (Join-Path $scriptDirectory "bootstrap_pwsh.ps1") -NoPackages:$NoPackages
 
 # Configure PowerShell as default shell on Linux & macOS
 if ($IsLinux -or $IsMacos) {
@@ -28,7 +33,7 @@ if ($IsLinux -or $IsMacos) {
 }
 
 # Set up dotfiles
-& (Join-Path (Split-Path -parent -Path $MyInvocation.MyCommand.Path) "create_dotfiles.ps1")
+& (Join-Path $scriptDirectory "create_dotfiles.ps1")
 
 # Configure Git
 $settingsFile = (Join-Path $PSScriptRoot settings.json)
@@ -57,3 +62,5 @@ if (-not $NoPackages) {
         az extension add -n resource-graph --upgrade -y 2>&1
     }
 }
+
+Clone-GitHubRepositories
