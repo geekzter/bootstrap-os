@@ -15,7 +15,7 @@
 param ( 
     [parameter(Mandatory=$false)][switch]$All=$false,
     [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal", "None")][string[]]$Packages=@("Minimal"),
-    [parameter(Mandatory=$false)][bool]$PowerShell=$false,
+    [parameter(Mandatory=$false)][bool]$PowerShell=$true,
     [parameter(Mandatory=$false)][bool]$Settings=$true,
     [parameter(Mandatory=$false)][string]$Repository="https://github.com/geekzter/bootstrap-os",
     [parameter(Mandatory=$false)][string]$Branch=$(git -C $PSScriptRoot rev-parse --abbrev-ref HEAD 2>$null)
@@ -89,7 +89,8 @@ if ($gitPath) {
 if (!(Test-Path $bootstrapDirectory)) {
     Set-Location $repoDirectory    
     Write-Host "Cloning $Repository into $repoDirectory..."
-    git clone $Repository   
+    git clone $Repository
+    git config --global --add safe.directory $bootstrapDirectory\*
 } else {
     # git update if repo already exists
     Set-Location $bootstrapDirectory
@@ -109,7 +110,7 @@ if (!(Test-Path $windowsBootstrapDirectory)) {
 
 # Invoke next stage
 $userExecutionPolicy = Get-ExecutionPolicy -Scope CurrentUser
-if (($userExecutionPolicy -ieq "AllSigned") -or ($userExecutionPolicy -ieq "Undefined")) {
+if (($userExecutionPolicy -ieq "AllSigned") -or ($userExecutionPolicy -ieq "Restricted") -or ($userExecutionPolicy -ieq "Undefined")) {
     if ((Get-ExecutionPolicy) -ine "ByPass") {
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
     } 

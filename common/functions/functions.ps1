@@ -50,6 +50,73 @@ function AddorUpdateModule (
         }
     }
 }
+
+function Clone-GitHubRepositories (
+    [parameter(Mandatory=$false)][string]$User,
+    [parameter(Mandatory=$false)][switch]$OpenFolder
+) {
+    Write-Host ""
+    if (!(Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Warning "git not found, no repositories to clone"
+        return
+    }
+
+    # Fugure out who the GH user is
+    if (!$User) { # User of the cloned repo
+        $ghUser = ((git config --get remote.origin.url) -replace '^https://(?<host>[\w\.]+)/(?<user>\w+)/([\w\-]+)(\.git)?$' , '${user}')
+        if ($ghUser) {
+            $User = $ghUser
+        }
+    }
+    if (!$User -and (Get-Command gh -ErrorAction SilentlyContinue)) { # Logged-in GH user
+        gh api user 2>$null | ConvertFrom-Json -AsHashtable | Set-Variable ghUserResponse
+        $ghUser = $ghUserResponse["login"]
+        if ($ghUser) {
+            $User = $ghUser
+        }
+    }
+    if (!$User) {
+        Write-Warning "Unable to determine GitHub user name"
+        return
+    }
+    
+    # Set repo root
+    if ($IsWindows) {
+        $repoRoot = "~\Source\GitHub\${User}"
+    } else {
+        $repoRoot = "~/src/github/${User}"
+    }
+    $repoRoot = (Resolve-Path $repoRoot).Path
+    New-Item -ItemType Directory -Force -Path $repoRoot | Out-Null
+    Push-Location $repoRoot
+
+    # Retrieve repositories for user
+    Write-Host "Looking for GitHub repositories for user '${User}'..."
+    Invoke-RestMethod https://api.github.com/users/${User}/repos | Set-Variable repos
+
+    # Clone repositories
+    $printMessage = $true
+    foreach ($repo in $repos) {
+        Join-Path $repoRoot $repo.name | Set-Variable repoDirectory
+        if (Test-Path $repoDirectory) {
+            Write-Verbose "Repo '$($repo.html_url)' already exists locally in '$repoDirectory'"
+        } else {
+            if ($printMessage) {
+                Write-Host "Cloning GitHub repositories for user '${User}' into '$repoRoot'..."
+                $printMessage = $false
+            }
+            Write-Host "`nCloning '$($repo.html_url)' into '$repoDirectory'..."
+            git clone https://github.com/${User}/$($repo.name)
+        }
+    }
+    if ($printMessage) {
+        Write-Host "Nothing (more) to clone for user '${User}'"
+    }
+    if ($OpenFolder) {
+        Invoke-Item $repoRoot
+    }
+}
+
 function Import-InstalledModule (
     [parameter(Mandatory=$true)][string]$ModuleName
 ) {
@@ -323,13 +390,14 @@ function LinkDirectory (
     if ($link.Target) {
         Write-Host "$($link.FullName) -> $($link.Target)"
     } else {
-        Write-Host "$($link.FullName) already exists as directory" -ForegroundColor Yellow
+        Write-Warning "$($link.FullName) already exists as directory" 
     }
 } 
 function LinkFile (
     [parameter(Mandatory=$true)][string]$File,
     [parameter(Mandatory=$true)][string]$SourceDirectory,
-    [parameter(Mandatory=$true)][string]$TargetDirectory
+    [parameter(Mandatory=$true)][string]$TargetDirectory,
+    [parameter(Mandatory=$false)][switch]$ReplaceEmptyFile
 ) {
     # Reverse
     $linkSource = $(Join-Path $TargetDirectory $File)
@@ -341,10 +409,16 @@ function LinkFile (
     } else {
         $link = Get-Item $linkSource -Force
     }
+
+    if ($ReplaceEmptyFile -and [String]::IsNullOrWhiteSpace((Get-Content $link.FullName))) {
+        Write-Warning "Replacing empty file $($link.FullName)"
+        Remove-Item $link.FullName -Force
+    }
+
     if ($link.Target) {
         Write-Host "$($link.FullName) -> $($link.Target)"
     } else {
-        Write-Host "$($link.FullName) already exists as file" -ForegroundColor Yellow
+        Write-Warning "$($link.FullName) already exists as file"
     }
 } 
 
