@@ -19,8 +19,10 @@ function Connect-TmuxSession (
     }
 
     # Set locale as it may be missing and is required for tmux
-    $env:LANG   ??= "en_US.UTF-8"
-    $env:LC_ALL ??= $env:LANG
+    $defaultLocale = "en_US.UTF-8"
+    $env:LANG   ??= $defaultLocale
+    $lcLocale     = (locale -a | Where-Object {$_ -eq $env:LANG})
+    $env:LC_ALL ??= $lcLocale
 
     $prexistingSession = $(tmux ls -F "#S" 2>$null) -match "^${Workspace}$"
     if (!$prexistingSession) {
