@@ -53,14 +53,16 @@ function Clear-TerraformState(
             }
         }
 
+        $tfState.check_results = $null
         $tfState.outputs = New-Object PSObject # Empty output
         $tfState.resources = @() # No resources
         $tfState.serial++
         $tfState | ConvertTo-Json | terraform state push -
         if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Failed to clear Terraform state"
             return
         }
-        Write-Host "Terraform state cleared, it contains now:"
+        Write-Host "Terraform state cleared, it now contains:"
         terraform state pull 
     } else {
         Write-Host "Terraform state not populated" -ForegroundColor Yellow
