@@ -400,7 +400,11 @@ function Invoke-TerraformCommand (
     [parameter(Mandatory=$true)][string]$cmd
 ) {
     $directory = ChangeTo-TerraformDirectory
+    $psNativeCommandArgumentPassingBackup = $PSNativeCommandArgumentPassing
+
     try {
+        $PSNativeCommandArgumentPassing = "Legacy"
+
         if ($directory) {
             Write-Host "${directory} " -ForegroundColor Green -NoNewline
         }
@@ -408,6 +412,7 @@ function Invoke-TerraformCommand (
         Write-Host "$cmd" -ForegroundColor Green 
         Invoke-Expression $cmd
     } finally {
+        $PSNativeCommandArgumentPassing = $psNativeCommandArgumentPassingBackup
         PopFrom-TerraformDirectory 
     }
 }
@@ -437,12 +442,19 @@ Set-Alias tfos Search-TerraformOutput
 function List-TerraformState (
     [parameter(Mandatory=$false)][string]$SearchPattern
 ) {
-    $command = "terraform state list"
-    if ($SearchPattern) {
-        $command += " | Select-String -Pattern $SearchPattern"
+    $psNativeCommandArgumentPassingBackup = $PSNativeCommandArgumentPassing
+    try {
+        $PSNativeCommandArgumentPassing = "Legacy"
+
+        $command = "terraform state list"
+        if ($SearchPattern) {
+            $command += " | Select-String -Pattern $SearchPattern"
+        }
+        $command += " | Sort-Object"
+        Invoke-TerraformCommand $command
+    } finally {
+        $PSNativeCommandArgumentPassing = $psNativeCommandArgumentPassingBackup
     }
-    $command += " | Sort-Object"
-    Invoke-TerraformCommand $command
 }
 Set-Alias tfls List-TerraformState
 
