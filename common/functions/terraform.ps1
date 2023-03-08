@@ -134,7 +134,7 @@ function Erase-TerraformAzureResources {
 
     try {
         # Validate whether non-azurerm resources are present
-        terraform state list | Select-String -Pattern '\.(azuredevops|azuread)_' | Set-Variable aadOrAzdoResources
+        terraform state list | Select-String -Pattern "^((?!data).)*$" | Select-String -Pattern '\.(azuredevops|azuread)_' | Set-Variable aadOrAzdoResources
         if ($aadOrAzdoResources) {
             Write-Warning "The following resources are present in the Terraform state, which are not supported by this function:"
             $aadOrAzdoResources
