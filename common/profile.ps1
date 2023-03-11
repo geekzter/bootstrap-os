@@ -83,14 +83,28 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
 
     # Manage PATH environment variable
     [System.Collections.ArrayList]$pathList = $env:PATH.Split(":")
-    if (!$pathList.Contains("/usr/local/bin")) {
-        $pathList.Insert(1,"/usr/local/bin") | Out-Null
+    [System.Collections.ArrayList]$directories = @(
+        "/usr/local/bin",
+        "~/.dotnet/tools",
+        "/usr/local/share/dotnet"
+    )
+    if ($IsMacOS) {
+        $directories.Add("/usr/local/opt/tmux@2.6/bin")    | Out-Null
+        $directories.Add("/opt/homebrew/opt/tmux@2.6/bin") | Out-Null
     }
-    if ((Test-Path "~/.dotnet/tools") -and (!$pathList.Contains("~/.dotnet/tools"))) {
-        $pathList.Add("~/.dotnet/tools") | Out-Null
+    foreach ($directory in $directories) {
+        if ((Test-Path $directory) -and (!$pathList.Contains($directory))) {
+            $pathList.Add($directory) | Out-Null
+        }
     }
-    if ((Test-Path "/usr/local/share/dotnet") -and (!$pathList.Contains("/usr/local/share/dotnet"))) {
-        $pathList.Add("/usr/local/share/dotnet") | Out-Null
+    $relativeDirectories = @(
+        "./scripts",
+        "../scripts"
+    )
+    foreach ($directory in $relativeDirectories) {
+        if (!$pathList.Contains($directory)) {
+            $pathList.Add($directory) | Out-Null
+        }
     }
     if (Get-Command ruby -ErrorAction SilentlyContinue) {
         $(ruby --version) -match '^ruby *(?<version>[\d\.]+)' | Out-Null
@@ -100,12 +114,6 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
             $pathList.Insert(0,"~/.gem/ruby/${rubyVersionString}/bin") | Out-Null
         }
     }
-    if ($IsMacOS -and (Test-Path "/usr/local/opt/tmux@2.6/bin") -and !$pathList.Contains("/usr/local/opt/tmux@2.6/bin")) {
-        $pathList.Insert(0,"/usr/local/opt/tmux@2.6/bin") | Out-Null
-    }
-    if ($IsMacOS -and (Test-Path "/opt/homebrew/opt/tmux@2.6/bin") -and !$pathList.Contains("/opt/homebrew/opt/tmux@2.6/bin")) {
-        $pathList.Insert(0,"/opt/homebrew/opt/tmux@2.6/bin") | Out-Null
-    }
     if (!($(Get-Command tfenv -ErrorAction SilentlyContinue)) -and (Test-Path ~/.tfenv/bin) -and !$env:PATH.Contains("tfenv/bin")) {
         $pathList.Add("${env:HOME}/.tfenv/bin") | Out-Null
     }
@@ -113,7 +121,7 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
         $scriptRepos = @('azure-active-directory-scripts','azure-boards-scripts','azure-pipeline-scripts','files-sync')
         foreach ($repo in $scriptRepos) {
             $repoPath = (Join-Path $env:SOURCES_DIR github geekzter $repo scripts)
-            if (Test-Path $repoPath) {
+            if ((Test-Path $repoPath) -and (!$pathList.Contains($repoPath))) {
                 $pathList.Add($repoPath) | Out-Null
             }
         }
@@ -134,7 +142,6 @@ if (Test-Path -Path $environmentPath) {
         Write-Host "$environmentPath not found"
     }
 }
-
 
 if ($printMessages) {
 
