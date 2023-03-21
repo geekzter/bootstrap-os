@@ -69,6 +69,7 @@ if ($host.Name -eq 'ConsoleHost')
 }
 
 if ($IsWindows) {
+    $env:HOME ??= "${env:HOMEDRIVE}${env:HOMEPATH}"
     $env:SOURCES_DIR = (Join-Path $env:HOME "Source")
 } else {
     $env:SOURCES_DIR = (Join-Path $env:HOME "src")
