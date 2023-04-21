@@ -58,16 +58,6 @@ Get-ChildItem $functionsPath -filter "*.ps1" | ForEach-Object {
     . $_.FullName
 }
 
-if ($host.Name -eq 'ConsoleHost')
-{
-    Import-InstalledModule posh-git
-    # Import-InstalledModule oh-my-posh
-    # Requires PSReadLine 2.0
-    #Set-Theme Agnoster
-    #Set-Theme Paradox
-    Import-InstalledModule Terminal-Icons
-}
-
 if ($IsWindows) {
     $env:HOME ??= "${env:HOMEDRIVE}${env:HOMEPATH}"
     $env:SOURCES_DIR = (Join-Path $env:HOME "Source")
@@ -85,6 +75,8 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     # Manage PATH environment variable
     [System.Collections.ArrayList]$pathList = $env:PATH.Split(":")
     [System.Collections.ArrayList]$directories = @(
+        "/bin",
+        "/usr/bin",
         "/usr/local/bin",
         "~/.dotnet/tools",
         "/usr/local/share/dotnet"
@@ -142,6 +134,16 @@ if (Test-Path -Path $environmentPath) {
     if ($printMessages -and (!$IsWindows)) {
         Write-Host "$environmentPath not found"
     }
+}
+
+if ($host.Name -eq 'ConsoleHost')
+{
+    Import-InstalledModule posh-git
+    # Import-InstalledModule oh-my-posh
+    # Requires PSReadLine 2.0
+    #Set-Theme Agnoster
+    #Set-Theme Paradox
+    Import-InstalledModule Terminal-Icons
 }
 
 if ($printMessages) {
