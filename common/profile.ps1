@@ -111,7 +111,7 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
         $pathList.Add("${env:HOME}/.tfenv/bin") | Out-Null
     }
     if ($env:SOURCES_DIR) {
-        $scriptRepos = @('azure-active-directory-scripts','azure-boards-scripts','azure-pipeline-scripts','files-sync')
+        $scriptRepos = @('azure-identity-scripts','azure-devops-scripts','files-sync')
         foreach ($repo in $scriptRepos) {
             $repoPath = (Join-Path $env:SOURCES_DIR github geekzter $repo scripts)
             if ((Test-Path $repoPath) -and (!$pathList.Contains($repoPath))) {
