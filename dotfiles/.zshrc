@@ -101,3 +101,5 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 ZSH_THEME="agnoster"
+
+# export DOCKER_HOST="unix:///${HOME}/.local/share/containers/podman/machine/qemu/podman.sock"
