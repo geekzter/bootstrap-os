@@ -168,6 +168,9 @@ if ($All -or $minimal) {
         Get-AppxPackage -AllUsers Microsoft.Advertising* | Remove-AppxPackage
         Get-AppxPackage -AllUsers Microsoft.GamingApp* | Remove-AppxPackage
         Get-AppxPackage -AllUsers Microsoft.MicrosoftSolitaireCollection* | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *MicrosoftTeams* | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *WhatsApp*  | Remove-AppxPackage
+        Get-AppxPackage -AllUsers *XBox*      | Remove-AppxPackage
         Get-AppxPackage -AllUsers *Zune*      | Remove-AppxPackage
 
         UpdateStoreApps
