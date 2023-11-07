@@ -4,7 +4,7 @@
 #>
 param ( 
     [parameter(Mandatory=$false)][switch]$All=$false,
-    [parameter(Mandatory=$false)][ValidateSet("Desktop", "Developer", "Minimal", "None")][string[]]$Packages=@("Minimal"),
+    [parameter(Mandatory=$false)][ValidateSet("Desktop", "DevBox", "Developer", "Minimal", "None")][string[]]$Packages=@("Minimal"),
     [parameter(Mandatory=$false)][bool]$PowerShell=$true,
     [parameter(Mandatory=$false)][bool]$Settings=$true
 ) 
@@ -117,7 +117,7 @@ try {
     $metadataContent = $null
 }
 
-$minimal = ($Packages.Contains("Desktop") -or $Packages.Contains("Developer") -or $Packages.Contains("Minimal"))
+$minimal = ($Packages.Contains("Desktop") -or $Packages.Contains("DevBox")  -or $Packages.Contains("Developer") -or $Packages.Contains("Minimal"))
 if ($All -or $minimal) {
     # Install Chocolatey packages
 
@@ -172,6 +172,9 @@ if ($All -or $minimal) {
         UpdateStoreApps
     }
 
+    if ($All -or $Packages.Contains("DevBox")) {
+        choco install chocolatey-devbox.config -r -y
+    }
     if ($All -or $Packages.Contains("Developer")) {
         choco install chocolatey-developer.config -r -y
 
