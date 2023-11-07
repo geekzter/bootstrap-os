@@ -13,8 +13,9 @@ $functionsDirectory = Join-Path $scriptDirectory functions
 if (-not $NoPackages) {
     # Check whether Az modules have been installed
     AddorUpdateModule -ModuleName Az -AllowClobber
+    AddorUpdateModule Microsoft.Graph
     #AddorUpdateModule MicrosoftPowerBIMgmt
-    #AddorUpdateModule MicrosoftTeams
+    #AddorUpdateModule MicrosoftTeams    
     AddorUpdateModule Oh-My-Posh
     AddorUpdateModule Posh-Git
     # # https://docs.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-72?view=powershell-7.2#separating-dsc-from-powershell-7-to-enable-future-improvements

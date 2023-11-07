@@ -118,6 +118,7 @@ try {
 }
 
 $minimal = ($Packages.Contains("Desktop") -or $Packages.Contains("DevBox")  -or $Packages.Contains("Developer") -or $Packages.Contains("Minimal"))
+$devBox = ($Packages.Contains("DevBox") -or ${env:DEVBOX_REVISION})
 if ($All -or $minimal) {
     # Install Chocolatey packages
 
@@ -172,10 +173,9 @@ if ($All -or $minimal) {
         UpdateStoreApps
     }
 
-    if ($All -or $Packages.Contains("DevBox")) {
+    if ($devBox) {
         choco install chocolatey-devbox.config -r -y
-    }
-    if ($All -or $Packages.Contains("Developer")) {
+    } elseif ($All -or $Packages.Contains("Developer")) {
         choco install chocolatey-developer.config -r -y
 
         PinToQuickAccess "$env:HOME\Source"
@@ -409,9 +409,7 @@ if ($All -or $Powershell) {
     $null = Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ForceBootstrap
     AddorUpdateModule PowerShellGet  
     #AddorUpdateModule Az
-    AddorUpdateModule AzureAD
-    #AddorUpdateModule AzureADPreview
-    #AddorUpdateModule AzureRM
+    #AddorUpdateModule Microsoft.Graph
     #AddorUpdateModule MicrosoftPowerBIMgmt
     #AddorUpdateModule MicrosoftTeams
     #AddorUpdateModule MSOnline
