@@ -26,3 +26,6 @@ killall Finder
 
 # Show desktop icons
 defaults write com.apple.finder CreateDesktop -bool true; killall -HUP Finder
+
+# Lighing
+litra-off
