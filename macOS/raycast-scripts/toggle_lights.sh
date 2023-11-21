@@ -3,7 +3,7 @@
 # Required parameters:
 # @raycast.schemaVersion 1
 # @raycast.title Toggle Litra
-# @raycast.mode compact
+# @raycast.mode silent
 
 # Optional parameters:
 # @raycast.needsConfirmation false
