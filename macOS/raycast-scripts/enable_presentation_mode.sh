@@ -32,5 +32,7 @@ killall Finder
 # Hide desktop icons
 defaults write com.apple.finder CreateDesktop -bool false; killall -HUP Finder
 
-# Lighing
+# Lighting
+litra-temperature-k 6500
+litra-brightness-lm 20
 litra-on

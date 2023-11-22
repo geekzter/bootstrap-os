@@ -15,4 +15,6 @@
 # @raycast.authorURL https://github.com/ericvan
 
 # Lighting
+litra-temperature-k 6500
+litra-brightness-lm 20
 litra-toggle
