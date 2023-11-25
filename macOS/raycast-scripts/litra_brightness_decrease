@@ -1,0 +1,28 @@
+#!/usr/bin/env pwsh
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Decrease Litra brightness
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.needsConfirmation false
+
+# Documentation:
+# @raycast.description Decrease Litra brightness
+# @raycast.icon images/logi-options.icns
+# @raycast.author Eric van Wijk
+# @raycast.authorURL https://github.com/ericvan
+
+# Lighting
+litra-devices --json | ConvertFrom-Json `
+                     | Select-Object -First 1 `
+                     | Set-Variable litra
+
+if ($litra.brightness_in_lumen -le 20) {
+    litra-off
+    exit
+} else {
+    litra-on
+    litra-brightness-lm ([math]::max($litra.brightness_in_lumen - 20,20))    
+}
