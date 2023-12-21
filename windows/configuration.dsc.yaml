@@ -36,6 +36,14 @@ properties:
         id: Microsoft.AzureCLI
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azd
+      directives:
+        description: Install Azure Developer CLI
+        allowPrerelease: true
+      settings:
+        id: Microsoft.Azd
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: azCopy
       directives:
         description: Install Azure Data Studio Insiders
@@ -140,6 +148,14 @@ properties:
         id: Kubernetes.kubectl
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: graphviz
+      directives:
+        description: Install Graphviz
+        allowPrerelease: true
+      settings:
+        id: Graphviz.Graphviz
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: kubelogin
       directives:
         description: Install kubelogin
@@ -170,6 +186,14 @@ properties:
         allowPrerelease: true
       settings:
         id: Microsoft.PowerShell
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: posh
+      directives:
+        description: Install OhMyPosh
+        allowPrerelease: true
+      settings:
+        id: JanDeDobbeleer.OhMyPosh
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: putty
@@ -210,6 +234,14 @@ properties:
         allowPrerelease: true
       settings:
         id: Microsoft.VisualStudioCode
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: terminal
+      directives:
+        description: Instal Windows Terminal
+        allowPrerelease: true
+      settings:
+        id: Microsoft.WindowsTerminal
         source: winget
 
     # Tools
