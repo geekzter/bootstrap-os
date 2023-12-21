@@ -18,7 +18,8 @@ if ($PSVersionTable.PSEdition -eq "Core") {
     }
 }    
 if (!(New-Object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
-    Write-Warning "Not running as Administrator"
+    Write-Warning "Not running as Administrator, exiting..."
+    exit 1
 }
 if (!(Get-Command Add-AppxPackage -ErrorAction SilentlyContinue)) {
     Write-Warning "Install the App Installer before running this script: https://apps.microsoft.com/detail/9NBLGGH4NNS1"
@@ -36,9 +37,7 @@ if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
 $wingetConfig = (Join-Path $PSScriptRoot configuration.dsc.yaml)
 Write-Host "Applying winget configuration '${wingetConfig}'..."
 if ($Force) {
-    # $wingetArgs = "--accept-configuration-agreements --disable-interactivity"
     $wingetArgs = "--accept-configuration-agreements"
-    # $wingetArgs = "--disable-interactivity "
 }
 winget configure -f $wingetConfig $wingetArgs
 

@@ -43,22 +43,22 @@ properties:
       settings:
         id: Microsoft.Azure.AZCopy.10
         source: winget
-    # - resource: Microsoft.WinGet.DSC/WinGetPackage
-    #   id: azureFunctionsCoreTools
-    #   directives:
-    #     description: Install Azure Functions Core Tools
-    #     allowPrerelease: true
-    #   settings:
-    #     id: Microsoft.Azure.FunctionsCoreTools
-    #     source: winget
-    # - resource: Microsoft.WinGet.DSC/WinGetPackage
-    #   id: azureStorageExplorer
-    #   directives:
-    #     description: Install Azure Storage Explorer
-    #     allowPrerelease: true
-    #   settings:
-    #     id: Microsoft.Azure.StorageExplorer
-    #     source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azureFunctionsCoreTools
+      directives:
+        description: Install Azure Functions Core Tools
+        allowPrerelease: true
+      settings:
+        id: Microsoft.Azure.FunctionsCoreTools
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azureStorageExplorer
+      directives:
+        description: Install Azure Storage Explorer
+        allowPrerelease: true
+      settings:
+        id: Microsoft.Azure.StorageExplorer
+        source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: azureDataStudio
       directives:
@@ -99,14 +99,14 @@ properties:
       settings:
         id: Git.Git
         source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: gitCredManager
-      directives:
-        description: Install Git Credential Manager
-        allowPrerelease: true
-      settings:
-        id: Microsoft.GitCredentialManagerCore
-        source: winget
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: gitCredManager
+    #   directives:
+    #     description: Install Git Credential Manager
+    #     allowPrerelease: true
+    #   settings:
+    #     id: Microsoft.GitCredentialManagerCore
+    #     source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: gh
       directives:
@@ -229,14 +229,14 @@ properties:
       settings:
         id: cURL.cURL
         source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: jq
-      directives:
-        description: Install jq
-        allowPrerelease: true
-      settings:
-        id: stedolan.jq
-        source: winget
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: jq
+    #   directives:
+    #     description: Install jq
+    #     allowPrerelease: true
+    #   settings:
+    #     id: stedolan.jq
+    #     source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: keePass
       directives:
@@ -245,13 +245,37 @@ properties:
       settings:
         id: KeePassXCTeam.KeePassXC
         source: winget
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: sysInternals
+    #   directives:
+    #     description: Install Sysinternals
+    #     allowPrerelease: true
+    #   settings:
+    #     id: Microsoft.Sysinternals
+    #     source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: sysInternals
+      id: autoruns
       directives:
-        description: Install Sysinternals
+        description: Install Sysinternals Autoruns
         allowPrerelease: true
       settings:
-        id: Microsoft.Sysinternals
+        id: Microsoft.Sysinternals.Autoruns
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: bgInfo
+      directives:
+        description: Install Sysinternals BGInfo
+        allowPrerelease: true
+      settings:
+        id: Microsoft.Sysinternals.BGInfo
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: processMonitor
+      directives:
+        description: Install Sysinternals ProcessMonitor
+        allowPrerelease: true
+      settings:
+        id: Microsoft.Sysinternals.ProcessMonitor
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: wget
