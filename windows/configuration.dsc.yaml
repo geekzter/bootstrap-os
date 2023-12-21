@@ -1,0 +1,266 @@
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+properties:
+  assertions:
+    - resource: Microsoft.Windows.Developer/OsVersion
+      directives:
+        description: Verify min OS version requirement
+        allowPrerelease: true
+      settings:
+        MinVersion: '10.0.22000'
+  resources:
+    # Fonts
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: hackFont
+      directives:
+        description: Install Hack fonts
+        allowPrerelease: true
+      settings:
+        id: SourceFoundry.HackFonts
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: macType
+      directives:
+        description: Install MacType
+        allowPrerelease: true
+      settings:
+        id: MacType.MacType
+        source: winget
+
+    # Azure tools
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azureCLI
+      directives:
+        description: Install Azure CLI
+        allowPrerelease: true
+      settings:
+        id: Microsoft.AzureCLI
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azCopy
+      directives:
+        description: Install Azure Data Studio Insiders
+        allowPrerelease: true
+      settings:
+        id: Microsoft.Azure.AZCopy.10
+        source: winget
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: azureFunctionsCoreTools
+    #   directives:
+    #     description: Install Azure Functions Core Tools
+    #     allowPrerelease: true
+    #   settings:
+    #     id: Microsoft.Azure.FunctionsCoreTools
+    #     source: winget
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: azureStorageExplorer
+    #   directives:
+    #     description: Install Azure Storage Explorer
+    #     allowPrerelease: true
+    #   settings:
+    #     id: Microsoft.Azure.StorageExplorer
+    #     source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azureDataStudio
+      directives:
+        description: Install Azure Data Studio
+        allowPrerelease: true
+      settings:
+        id: Microsoft.AzureDataStudio
+        source: winget
+
+    # Developer tools
+    - resource: Microsoft.Windows.Developer/DeveloperMode
+      directives:
+        description: Enable Developer Mode
+        allowPrerelease: true
+      settings:
+        Ensure: Present
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: beyondCompare
+      directives:
+        description: Install Beyond Compare
+        allowPrerelease: true
+      settings:
+        id: ScooterSoftware.BeyondCompare4
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: docker
+      directives:
+        description: Install Docker Desktop
+        allowPrerelease: true
+      settings:
+        id: Docker.DockerDesktop
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: git
+      directives:
+        description: Install Git
+        allowPrerelease: true
+      settings:
+        id: Git.Git
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: gitCredManager
+      directives:
+        description: Install Git Credential Manager
+        allowPrerelease: true
+      settings:
+        id: Microsoft.GitCredentialManagerCore
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: gh
+      directives:
+        description: Install GitHub CLI
+        allowPrerelease: true
+      settings:
+        id: GitHub.cli
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: github
+      directives:
+        description: Install GitHub Desktop
+        allowPrerelease: true
+      settings:
+        id: GitHub.GitHubDesktop
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: gitKraken
+      directives:
+        description: Install GitKraken
+        allowPrerelease: true
+      settings:
+        id: Axosoft.GitKraken
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: kubectl
+      directives:
+        description: Install kubectl
+        allowPrerelease: true
+      settings:
+        id: Kubernetes.kubectl
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: kubelogin
+      directives:
+        description: Install kubelogin
+        allowPrerelease: true
+      settings:
+        id: Microsoft.Azure.Kubelogin
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: podman
+      directives:
+        description: Install Podman Desktop
+        allowPrerelease: true
+      settings:
+        id: RedHat.Podman-Desktop
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: postman
+      directives:
+        description: Install Postman
+        allowPrerelease: true
+      settings:
+        id: Postman.Postman
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: powerShell
+      directives:
+        description: Install PowerShell Core
+        allowPrerelease: true
+      settings:
+        id: Microsoft.PowerShell
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: putty
+      directives:
+        description: Install PuTTY
+        allowPrerelease: true
+      settings:
+        id: PuTTY.PuTTY
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: ssms
+      directives:
+        description: Install SQL Server Management Studio
+        allowPrerelease: true
+      settings:
+        id: Microsoft.SQLServerManagementStudio
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: terraform
+      directives:
+        description: Install Terraform
+        allowPrerelease: true
+      settings:
+        id: Hashicorp.Terraform
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: tflint
+      directives:
+        description: Install TFLint
+        allowPrerelease: true
+      settings:
+        id: TerraformLinters.tflint
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: vscode
+      directives:
+        description: Install Visual Studio Code
+        allowPrerelease: true
+      settings:
+        id: Microsoft.VisualStudioCode
+        source: winget
+
+    # Tools
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: 7zip
+      directives:
+        description: Install 7-Zip
+        allowPrerelease: true
+      settings:
+        id: mcmilk.7zip-zstd
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: curl
+      directives:
+        description: Install cURL
+        allowPrerelease: true
+      settings:
+        id: cURL.cURL
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: jq
+      directives:
+        description: Install jq
+        allowPrerelease: true
+      settings:
+        id: stedolan.jq
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: keePass
+      directives:
+        description: Install KeePassXC
+        allowPrerelease: true
+      settings:
+        id: KeePassXCTeam.KeePassXC
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: sysInternals
+      directives:
+        description: Install Sysinternals
+        allowPrerelease: true
+      settings:
+        id: Microsoft.Sysinternals
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: wget
+      directives:
+        description: Install Wget
+        allowPrerelease: true
+      settings:
+        id: JernejSimoncic.Wget
+        source: winget
+
+
+  configurationVersion: 0.2.0
