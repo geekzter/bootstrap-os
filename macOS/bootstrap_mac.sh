@@ -23,8 +23,8 @@ sudo softwareupdate --all --install --force
 # Homebrew package management
 if test ! $(which brew); then
     echo "Installing homebrew..."
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/eric/.profile
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.bash_profile
     eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 brew update
@@ -35,11 +35,11 @@ brew upgrade
 dotnet tool update --global dotnet-ef
 
 # Terraform
-if test ! $(which tfenv); then
-    brew link tfenv
-fi
-tfenv install latest
-tfenv use latest
+# if test ! $(which tfenv); then
+#     brew link tfenv
+# fi
+# tfenv install latest
+# tfenv use latest
 
 # PATH
 echo "Updating /etc/paths.d..."
