@@ -3,7 +3,7 @@
 # Required parameters:
 # @raycast.schemaVersion 1
 # @raycast.title Enable Presentation mode
-# @raycast.mode compact
+# @raycast.mode silent
 
 # Optional parameters:
 # @raycast.needsConfirmation false
@@ -31,3 +31,8 @@ killall Finder
 
 # Hide desktop icons
 defaults write com.apple.finder CreateDesktop -bool false; killall -HUP Finder
+
+# Lighting
+litra-temperature-k 6500
+litra-brightness-lm 20
+litra-on
