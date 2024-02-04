@@ -80,6 +80,9 @@ EOF
                 $SUDO apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
             fi
             $SUDO apt-add-repository https://cli.github.com/packages
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | $SUDO dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+            && $SUDO chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+            && $SUDO "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
 
             # Required for Midnight Commander
             $SUDO add-apt-repository universe
