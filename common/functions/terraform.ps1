@@ -391,13 +391,16 @@ function Get-Blobs (
             Write-Verbose "Environment variable ARM_ACCESS_KEY or ARM_SAS_TOKEN not set, trying az auth"
             $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --auth-mode login --query $JmesPath | ConvertFrom-Json
             if (!$blobs) {
-                Write-Verbose "No access to storage using KEY, SAS or SSO. Trying to obtain key..."
-                $storageKey = az storage account keys list -n $BackendStorageAccountName --query "[?keyName=='key1'].value" -o tsv
-                if ($storageKey) {
+                az storage account show -n $BackendStorageAccountName --query allowSharedKeyAccess -o json | ConvertFrom-Json | Set-Variable allowSharedKeyAccess
+                Write-Verbose "No access to storage using KEY or SAS"
+                if ($allowSharedKeyAccess) {
+                    Write-Verbose "Trying to obtain key..."
+                    $storageKey = az storage account keys list -n $BackendStorageAccountName --query "[?keyName=='key1'].value" -o tsv
                     $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --account-key $storageKey --query $JmesPath | ConvertFrom-Json
                 } else {
-                    Write-Error "Insufficient permissions (set environment variable ARM_SAS_TOKEN or ARM_ACCESS_KEY)"
-                    return
+                    Write-Verbose "Trying with Azure RBAC permission..."
+                    Write-Debug "az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --query $JmesPath"
+                    $blobs = az storage blob list -c $BackendStorageContainerName --account-name $BackendStorageAccountName --auth-mode login --query $JmesPath | ConvertFrom-Json
                 }
             }
         }
@@ -630,6 +633,7 @@ function Unlock-TerraformState (
                         if (!$ticks) {
                             Write-Verbose "No access to storage using KEY, SAS or SSO. Trying to obtain key..."
                             $storageKey = az storage account keys list -n $BackendStorageAccountName --query "[?keyName=='key1'].value" -o tsv
+                            Write-Debug "Storage Key: $storageKey"
                             if ($storageKey) {
                                 $ticks = az storage blob lease break -b $blobName -c $backendStorageContainerName --account-name $BackendStorageAccountName --account-key $storageKey
                             } else {
