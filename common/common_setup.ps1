@@ -62,7 +62,7 @@ if (-not $NoPackages) {
             Write-Host "Updating Azure CLI extension '$azExtension'..."
             az extension update -n $azExtension --only-show-errors
         }
-
+        $azExtensions ??= @()
         Compare-Object -ReferenceObject $azExtensions `
                        -DifferenceObject @('azure-devops', `
                                            'azure-firewall', `
