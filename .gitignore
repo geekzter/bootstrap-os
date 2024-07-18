@@ -6,3 +6,5 @@ settings.json
 
 # Ignore generated files
 data/**
+*.lock.*
+*.lock
