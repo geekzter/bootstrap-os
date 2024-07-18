@@ -124,17 +124,21 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
     $env:PATH = $pathList -Join ":"
 }
 
-# Source environment variables from ~/.config/powershell/environment.ps1
-Write-Verbose "Sourcing environment.ps1..."
-$environmentPath = (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1")
-if (Test-Path -Path $environmentPath) {
-    . $environmentPath
-    if ($printMessages) {
-        Write-Host "${environmentPath}: sourced"
-    }
-} else {
-    if ($printMessages -and (!$IsWindows)) {
-        Write-Host "$environmentPath not found"
+$scriptsToRun = @(
+    (Join-Path (Split-Path $MyInvocation.MyCommand.Path –Parent) "environment.ps1"),
+    "~/Library/Mobile Documents/com~apple~CloudDocs/Data/Config/config.ps1"
+)
+foreach ($script in $scriptsToRun) {
+    if (Test-Path -Path $script) {
+        Write-Verbose "Sourcing ${script}..."
+        . $script
+        if ($printMessages) {
+            Write-Host "${script}: sourced"
+        }
+    } else {
+        if ($printMessages) {
+            Write-Verbose "$script not found"
+        }
     }
 }
 
