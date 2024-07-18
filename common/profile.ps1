@@ -82,6 +82,8 @@ if ($PSVersionTable.PSEdition -and ($PSVersionTable.PSEdition -eq "Core") -and (
         "/usr/local/share/dotnet"
     )
     if ($IsMacOS) {
+        $directories.Add("/opt/homebrew/bin")              | Out-Null
+        $directories.Add("/opt/homebrew/sbin")             | Out-Null
         $directories.Add("/usr/local/opt/tmux@2.6/bin")    | Out-Null
         $directories.Add("/opt/homebrew/opt/tmux@2.6/bin") | Out-Null
     }
