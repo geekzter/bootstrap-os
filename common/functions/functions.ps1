@@ -86,7 +86,6 @@ function Clone-GitHubRepositories (
     } else {
         $repoRoot = "~/src/github/${User}"
     }
-    $repoRoot = (Resolve-Path $repoRoot).Path
     New-Item -ItemType Directory -Force -Path $repoRoot | Out-Null
     Push-Location $repoRoot
 
