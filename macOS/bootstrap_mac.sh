@@ -34,6 +34,8 @@ brew update
 brew bundle
 brew upgrade
 
+npm install -g litra
+
 # .NET tools
 dotnet tool update --global dotnet-ef
 
