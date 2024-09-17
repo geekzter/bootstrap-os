@@ -66,4 +66,7 @@ else
     pwsh -nop -file ../common/common_setup.ps1
 fi
 
+# Settings
+defaults write com.apple.dock autohide-time-modifier -float 0.5
+
 popd
