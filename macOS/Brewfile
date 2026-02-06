@@ -45,6 +45,7 @@ cask "minecraft"
 #cask "mono-mdk" # Required for Xamarin -> Visual Studio
 cask "mono-mdk-for-visual-studio"
 cask "multimc"
+cask "obs"
 cask "owasp-zap"
 cask "podman-desktop"
 cask "postman"
