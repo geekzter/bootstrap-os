@@ -52,6 +52,7 @@ if [ ! -f /etc/paths.d/localbin ]; then
     sudo mkdir -p /etc/paths.d
     # This should include brew packages in the PATH for all shells
     echo /usr/local/bin | sudo tee /etc/paths.d/localbin
+    echo /opt/homebrew/opt/python/libexec/bin | sudo tee /etc/paths.d/homebrew-python
 fi
 if [[ ! "$(launchctl getenv PATH)" == *"/usr/local/bin"* ]]; then
     echo "Launch Control PATH does not contain /usr/local/bin, updating..."
