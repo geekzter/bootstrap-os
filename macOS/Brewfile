@@ -74,6 +74,7 @@ brew "bash" # macOS bash version is outdated
 brew "coreutils"
 brew "defaultbrowser"
 brew "dos2unix"
+brew "dockutil"
 # brew "draft"
 brew "findutils"
 brew "gh"
