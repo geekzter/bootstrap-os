@@ -68,6 +68,7 @@ else
 fi
 
 # Settings
+az config set core.enable_broker_on_mac=true
 defaults write com.apple.dock autohide-time-modifier -float 0.5
 
 popd
